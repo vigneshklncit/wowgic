@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#wowgic_tweet_test
 
-import tweepy
-import json 
+import json
 import pymongo
+import falcon
+import tweepy
 from tweepy import OAuthHandler
 
 connection = pymongo.MongoClient("localhost", 27017)
@@ -24,38 +25,24 @@ api=tweepy.API(auth)
 #for status in tweepy.Cursor(api.home_timeline).items(10):
 #   print (status)
 #   #db.tweets.insert(json.loads(str(status)))
-#   db.tweets.insert(status)
 
 
-class CustomStreamListener(tweepy.StreamListener):
-    """
-    tweepy.StreamListener is a class provided by tweepy used to access the Twitter 
-    Streaming API. It allows us to retrieve tweets in real time.
-    """
-    def __init__(self, api):
-        self.api = api
-        super(tweepy.StreamListener, self).__init__()
-        
-        # Connecting to MongoDB and use the database twitter.
-        self.db = pymongo.MongoClient().twitter
- 
-    def on_data(self, tweet):
-        '''
-        This will be called each time we receive stream data and store the tweets 
-        into the datascience collection.
-        '''
-        self.db.datascience.insert(json.loads(tweet))
- 
-    def on_error(self, status_code):
-        # This is called when an error occurs
-        print >> sys.stderr, 'Encountered error with status code:', status_code
-        return True # Don't kill the stream
- 
-    def on_timeout(self):
-        # This is called if there is a timeout
-        print >> sys.stderr, 'Timeout.....'
-        return True # Don't kill the stream
+class ThingsResource:
+    def on_get(self, req, resp):
+        """Handles GET requests"""
+        tweets = api.user_timeline(count = 1)
+        resp.status = falcon.HTTP_200  # This is the default status
+        for tweet in tweets:
+            print "\n\n tweet._json\n\n"
+            tweet = json.dumps(tweet._json)
+            db.sample_feeds.insert(json.loads(tweet))
+            resp.body = tweet
 
 
-sapi = tweepy.streaming.Stream(auth, CustomStreamListener(api))
-sapi.filter(track=["is"])
+
+# falcon.API instances are callable WSGI apps
+app = falcon.API()
+
+tweets = ThingsResource()
+# things will handle all requests to the '/things' URL path
+app.add_route('/wowgic_tweet_test', tweets)
