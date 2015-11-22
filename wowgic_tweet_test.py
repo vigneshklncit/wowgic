@@ -30,7 +30,7 @@ api=tweepy.API(auth)
 class ThingsResource:
     def on_get(self, req, resp):
         """Handles GET requests"""
-        tweets = api.user_timeline(count = 1)
+        tweets = api.user_timeline(count = 10)
         resp.status = falcon.HTTP_200  # This is the default status
         for tweet in tweets:
             print "\n\n tweet._json\n\n"

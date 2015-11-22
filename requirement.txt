@@ -1,2 +1,0 @@
-python
-tweety==3.5.0
