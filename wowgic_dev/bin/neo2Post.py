@@ -65,7 +65,7 @@ def categoryMaterialize(text):
         for area in dic.get('Areas'):
             area=area.lower()
             q = 'MATCH (h:aHelper{area_place:\''+area+'\'})-[:PROVIDES]->(b{name:\''+cate+'\'})<-[:seeker]-(s:Seeker{area_place:\''+area+'\'}) return h,s,b'
-            #print q
+            print q
             # Send Cypher query.
             n = gdb.query(q,data_contents=True)
             if len(n):
@@ -104,9 +104,9 @@ def categoryMaterialize(text):
                         #print "satheeshElSE"
                     fp_tweetId.flush()
                     q1 = 'Match (n{id:'+tmpStr+'})-[r]-() Delete r,n'
-                    #print q
-                    # Send Cypher query.
                     n = gdb.query(q1,data_contents=True)
+                    q2 = 'Match (n{id:'+tStr+'})-[r]-() Delete r,n'
+                    n = gdb.query(q2,data_contents=True)
 
 categoryMaterialize('satheesh')
 fp_tweetId.close()
