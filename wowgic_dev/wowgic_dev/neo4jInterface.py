@@ -20,9 +20,10 @@ class neo4jInterface:
     logger.debug('who invoked me ? hey u - %s',__name__)
     #REST server credentials
     #default Remember to change these credentials User/Pass.
-    userName = 'wowgic'
-    passWord = 'QL6bCufogOGZdWc2IJOl'
+    userName = 'Wowgic'
+    passWord = 'GcpXosEMPJV5pLR0QJQ3'
     #Rest server uri
+    #connectUri='neo-graciela-stracke-cornsilk-564c5f886175e.do-stories.graphstory.com:7473'
     connectUri='wowgic.sb02.stations.graphenedb.com:24789/db/data/'
 
 
@@ -40,12 +41,9 @@ class neo4jInterface:
         identified by the base URI of the graph database'''
         #secure_graph frame the credentials
         secureUri = 'http://'+u+':'+p+'@'+c
+        #secureUri = u+'/db/data/'
         logger.debug('who invoked me ? hey u - %s',secureUri)
+        #return Graph(secureUri)
         return Graph(secureUri)
 
 ################################################################################
-
-
-
-
-

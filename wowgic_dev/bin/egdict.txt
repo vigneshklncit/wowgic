@@ -1,4 +1,4 @@
->>bSeeker
+>>Seeker
 around.*now.*\?
 now.*around.*\?
 now.*around
@@ -84,16 +84,16 @@ Pallikaranai
 Ramapuram
 kotturpuram
 villivakkam
-Loyola college
-AshokNagar
-Kasi theater
-Kasi theatre
+loyola college
+ashokNagar
+kasi theater
+kasi theatre
 guindy
-Mudichur
+mudichur
 anna salai
-British council
+british council
 kodambakkam
-AGS Villivakkam
+villivakkam
 tamparam
 LIC Nagar
 vyasarpadi
@@ -101,31 +101,30 @@ saidai
 Ramapuram
 Maduravayal
 Porur
-Valasaravakkam
-West Mambalam
+valasaravakkam
+west mambalam
 tnagar
 t-nagar
 saidpet
-Royapuram
+royapuram
 virugambakkam
-Puzhuthivakkam
-SOWCARPET
-AGS colony
-Egmore
+puzhuthivakkam
+sowcarpet
+egmore
 madras school
-Adambakkam
-Adyar
-Alandur
-Alwarpet
-Alwarthirunagar
-Ambattur
-Aminjikarai
-Anakaputhur
-Anna Nagar
-Annanur
-Arumbakkam
-Ashok Nagar
-Avadi
+adambakkam
+adyar
+alandur
+alwarpet
+alwarthirunagar
+ambattur
+aminjikarai
+anakaputhur
+anna Nagar
+annanur
+arumbakkam
+ashok Nagar
+avadi
 Ayanavaram
 Besant Nagar
 Basin Bridge
@@ -270,5 +269,4 @@ Virugambakkam
 Vyasarpadi
 Washermanpet
 West Mambalam
-
-
+openarea

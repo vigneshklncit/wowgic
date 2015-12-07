@@ -59,73 +59,109 @@ def creatCategoryNode():
         labels=['category']
         print dic.get('cCategory')
         for pattern in dic.get('cCategory'):
-            print("pattern:",pattern)
+            #print("pattern:",pattern)
             create_node_query = """
             WITH {pattern} AS p
-            CREATE (n:category{name:p})     RETURN n   """
+            Merge (n:category{name:p})     RETURN n   """
             # Send Cypher query.
-            n=graphDB.cypher.execute(create_node_query,pattern=pattern)
+            try:
+                n=graphDB.cypher.execute(create_node_query,pattern=pattern.lower())
+            except:
+                pass
+
+def creatPlaceNode():
+        #print dic.get('Areas')
+        for pattern in dic.get('Areas'):
+            #print("pattern:",pattern)
+            create_node_query = """
+            WITH {pattern} AS p
+            Merge (n:area{name:p})     RETURN n   """
+            # Send Cypher query.
+            try:
+                n=graphDB.cypher.execute(create_node_query,pattern=pattern.lower())
+            except:
+                pass
 #create category node
 creatCategoryNode()
+#create category place
+creatPlaceNode()
 
 class listener(StreamListener):
     def categoryMaterialize(self,text):
         material =[]
         for pattern in dic.get('cCategory'):
             if re.search(pattern,text,re.I|re.L):
-               material.append(pattern)
+               material.append(pattern.lower())
         if len(material) <=0:
-            material =['Volunteer']
+            material =['volunteer']
         return tuple(material)
+        #return material
 
     def locationAreas(self,text):
         for pattern in dic.get('Areas'):
         #print ("pattern :%s",pattern)
             if re.search(pattern,text,re.I|re.L):
-                return pattern
+                return pattern.lower()
+            else:
+                return "openarea"
 
-    def creatNode(self,data_json):
-        labels=['users']
-        print "satheesh1"
+    def creatNode(self,data_json,lbl):
+        labels=[]
+        labels.append(lbl)
         add_tweet_query = """
         WITH {data_json} AS data
         UNWIND data AS t
-        MERGE (u:users {id:t.id})
+        MERGE (u {id:t.id})
             ON CREATE SET
              """+   (('u:'+',u:'.join(labels)+",") if labels else '') +"""
                 u.typesh=t.typesh,
                 u.screen_name=t.user.screen_name,
                 u.id=t.id,
-                u.created_at=t.user.created_at,
+                u.created_at=t.created_at,
                 u.text=t.text,
                 u.category=t.category,
                 u.area_place=t.area_place,
                 u.location=t.location,
-                u.time_zone=t.time_zone,
-                u.utc_offset=t.utc_offset,
+                u.time_local=t.localTime,
                 u.profile_image_url=t.profile_image_url,
-                u.geo_enabled=t.geo_enabled,
-                u.verified=t.verified,
-                u.notifications=t.notifications
+                u.geo_enabled=t.geo_enabled
             """ +   (("ON MATCH SET\n  u:"+',u:'.join(labels)) if labels else '') +"""
             RETURN u
         """
         # Send Cypher query.
-        n=graphDB.cypher.execute(add_tweet_query,data_json=data_json)
+        graphDB.cypher.execute(add_tweet_query,data_json=data_json)
 
         relation_query = """
-        MATCH (a:Person),(b:Person)
-        WHERE a.name = 'Node A' AND b.name = 'Node B'
-        CREATE (a)-[r:RELTYPE]->(b)
-        RETURN r
-        """
-        return n
+        with {category} as rc
+        MATCH (h:aHelper {category:filter(x IN h.category WHERE rc in h.category)}), (c:category {name:rc}) MERGE (h)-[:PROVIDES]->(c);"""
+        # Send Cypher query.
+        for pattern in dic.get('cCategory'):
+            graphDB.cypher.execute(relation_query,category=pattern.lower())
+
+        relation_query2 = """
+        with {category} as rc
+        MATCH (h:Seeker {category:filter(x IN h.category WHERE rc in h.category)}), (c:category {name:rc}) MERGE (h)-[:seeker]->(c);"""
+        # Send Cypher query.
+        for pattern in dic.get('cCategory'):
+            graphDB.cypher.execute(relation_query2,category=pattern.lower())
+
+        relation_query3 = """
+        with {category} as ar
+        MATCH (h {area_place:ar}), (l:area {name:ar}) MERGE (h)-[:LOCATED_AT]->(l);"""
+        # Send Cypher query.
+        print"trigger area relationship"
+        for pattern in dic.get('Areas'):
+            graphDB.cypher.execute(relation_query3,category=pattern.lower())
 
     def on_data(self, data):
         data = json.loads(data)
-        #print(data['text'])
-        if data['retweeted']:
-            return fail
+        if 'RT @' in data['text'] or data['retweeted']:
+            #print('Skip: retweeted is', data['retweeted'])
+            #return 0
+            dummy = 0
+        else:
+            inputTweetCount = 1
+            print('through: retweeted is', data['retweeted'])
         text = data['text']
         text = text.encode('utf-8') # lowercase the text
         #print dic
@@ -142,10 +178,11 @@ class listener(StreamListener):
                    area_place= self.locationAreas(text)
                    print (catList,area_place)
                    data[unicode('category')]=catList
+                   data[unicode('localTime')]=time.time()
                    data[unicode('area_place')]=area_place
-                   print "satheesh"
-                   self.creatNode(data)
-                   #print data
+                   #print "satheesh"
+                   self.creatNode(data,key)
+                   #print(json.dumps(data))
                    return 0
 
 
