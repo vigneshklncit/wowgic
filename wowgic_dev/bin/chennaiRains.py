@@ -20,6 +20,8 @@ access_secret = 'pRx5MNKkmxyImwuhUFMNVOr1NrAWcRmOGUgGTLVYFAjsJ';
 dictDb = {}
 #connect our DB
 neo4jInt = neo4jInterface.neo4jInterface()
+#graph_db = neo4j.GraphDatabaseService("https://564c60239913d:D5B3YxJFXqH9FttuIQWIpUn9HWpSQpZCfXi0HyXi@neo-graciela-stracke-cornsilk-564c5f886175e.do-stories.graphstory.com:7473/db/data/")
+
 #graphDB=neo4jInt.connect('localhost:7474/db/data/','neo4j','admin')
 graphDB=neo4jInt.connect()
 
@@ -157,7 +159,7 @@ class listener(StreamListener):
         data = json.loads(data)
         if 'RT @' in data['text'] or data['retweeted']:
             #print('Skip: retweeted is', data['retweeted'])
-            #return 0
+            return 0
             dummy = 0
         else:
             inputTweetCount = 1

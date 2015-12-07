@@ -71,6 +71,7 @@ oxygen cylinder
 oxygen
 
 >>Areas
+openarea
 velachery
 tambaram
 kothari
@@ -208,7 +209,7 @@ Pallavaram
 Pallikaranai
 Pammal
 Park Town
-Parry's Corner
+Parrys Corner
 Pattabiram
 Pattaravakkam
 Pazhavanthangal
@@ -269,4 +270,3 @@ Virugambakkam
 Vyasarpadi
 Washermanpet
 West Mambalam
-openarea
