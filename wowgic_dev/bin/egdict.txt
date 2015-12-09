@@ -35,6 +35,8 @@ volunteers.*\?
 needed\?
 need.*\?
 available
+give
+
 
 >>cCategory
 medicine
@@ -71,7 +73,6 @@ oxygen cylinder
 oxygen
 
 >>Areas
-openarea
 velachery
 tambaram
 kothari
@@ -86,11 +87,14 @@ Ramapuram
 kotturpuram
 villivakkam
 loyola college
+ashok Nagar
 ashokNagar
+iyappanthangal
 kasi theater
 kasi theatre
 guindy
 mudichur
+Vettuvankeni
 anna salai
 british council
 kodambakkam
@@ -247,6 +251,7 @@ Teynampet
 Tharamani
 T. Nagar
 Thirumangalam
+annanagar
 Thirumullaivoyal
 Thiruneermalai
 Thiruninravur
@@ -269,4 +274,6 @@ Villivakkam
 Virugambakkam
 Vyasarpadi
 Washermanpet
+Kummidipondi
 West Mambalam
+openarea

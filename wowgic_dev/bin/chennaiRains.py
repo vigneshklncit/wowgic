@@ -100,12 +100,14 @@ class listener(StreamListener):
         #return material
 
     def locationAreas(self,text):
+        area='openarea'
+        print text
         for pattern in dic.get('Areas'):
-        #print ("pattern :%s",pattern)
-            if re.search(pattern,text,re.I|re.L):
-                return pattern.lower()
-            else:
-                return "openarea"
+            if re.search(pattern,text,re.I):
+                area= pattern.lower()
+                print("pattern IF",text)
+                break
+        return area
 
     def creatNode(self,data_json,lbl):
         labels=[]
@@ -151,7 +153,7 @@ class listener(StreamListener):
         with {category} as ar
         MATCH (h {area_place:ar}), (l:area {name:ar}) MERGE (h)-[:LOCATED_AT]->(l);"""
         # Send Cypher query.
-        print"trigger area relationship"
+        #print"trigger area relationship"
         for pattern in dic.get('Areas'):
             graphDB.cypher.execute(relation_query3,category=pattern.lower())
 
@@ -163,26 +165,27 @@ class listener(StreamListener):
             dummy = 0
         else:
             inputTweetCount = 1
-            print('through: retweeted is', data['retweeted'])
+            #print('through: retweeted is', data['retweeted'])
         text = data['text']
         text = text.encode('utf-8') # lowercase the text
         #print dic
         for key in dic.keys():
-            if key=='cCategory':
+            if key=='cCategory' or key =='Areas':
                 break
             for pattern in dic.get(key):
                 #print ("pattern :%s",pattern)
                 if re.search(pattern,text,re.I|re.L):
+                   #print "satheesh"
                    data[unicode('typesh')]=key
                    #print text
                    #print key
                    catList= self.categoryMaterialize(text)
                    area_place= self.locationAreas(text)
+                   #print "satheesh2"
                    print (catList,area_place)
                    data[unicode('category')]=catList
                    data[unicode('localTime')]=time.time()
                    data[unicode('area_place')]=area_place
-                   #print "satheesh"
                    self.creatNode(data,key)
                    #print(json.dumps(data))
                    return 0

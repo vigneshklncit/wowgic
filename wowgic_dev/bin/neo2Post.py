@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import json
+import re
 import sys
 import tweepy
 import mmap
@@ -65,7 +66,7 @@ def categoryMaterialize(text):
         for area in dic.get('Areas'):
             area=area.lower()
             q = 'MATCH (h:aHelper{area_place:\''+area+'\'})-[:PROVIDES]->(b{name:\''+cate+'\'})<-[:seeker]-(s:Seeker{area_place:\''+area+'\'}) return h,s,b'
-            print q
+            #print q
             # Send Cypher query.
             n = gdb.query(q,data_contents=True)
             if len(n):
@@ -76,8 +77,9 @@ def categoryMaterialize(text):
                     c=i[2]
                     #print t['id'],t['screen_name'],h['screen_name']
                     #tweetStatus = 0
-                    tweetStatus='@'+t['screen_name']+' for '+ c['name']+' contact @'+h['screen_name']
-                    s = mmap.mmap(fp_tweetId.fileno(), 0, access=mmap.ACCESS_WRITE )
+                    print i
+                    tweetStatus='@'+t['screen_name']+' for '+ c['name']+'in location'+h['area_place']+ 'try contacting @'+h['screen_name']
+                    s = mmap.mmap(fp_tweetId.fileno(), 0, access=mmap.ACCESS_READ )
                     tmpStr=str(t['id'])
                     tStr = str(h['id'])
                     #print tmpStr
@@ -85,9 +87,8 @@ def categoryMaterialize(text):
                         try:
                             #print "satheeshIF"
                             print tweetStatus
-                            if t['screen_name'] != tmpScrName:
-                                tmpScrName =t['screen_name']
-                                st = api.update_status(tweetStatus,in_reply_to_status_id=tmpStr)
+                            if re.search(tmpScrName,tweetStatus,re.I|re.L) == None:
+                                #st = api.update_status(tweetStatus,in_reply_to_status_id=tmpStr)
                                 #print st
                                 tmpStr = tmpStr+'\n'
                                 fp_tweetId.write(tmpStr)
@@ -95,6 +96,8 @@ def categoryMaterialize(text):
                                 fp_tweetId.write(tStr)
                                 fp_tweetId.flush()
                                 #return 0
+                            else:
+                                print 'screenB'
                         except tweepy.TweepError,E:
                             print "not tweeted"
                             print E
@@ -107,6 +110,7 @@ def categoryMaterialize(text):
                     n = gdb.query(q1,data_contents=True)
                     q2 = 'Match (n{id:'+tStr+'})-[r]-() Delete r,n'
                     n = gdb.query(q2,data_contents=True)
+                    tmpScrName =t['screen_name']
 
 categoryMaterialize('satheesh')
 fp_tweetId.close()
