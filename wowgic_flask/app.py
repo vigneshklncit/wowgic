@@ -147,9 +147,9 @@ if 'debug' in args.logLevel:
     app.debug = True
 
 if __name__ == '__main__':
-    # Get the environment information we need to start the server
-    #ip = os.environ['OPENSHIFT_PYTHON_IP']
-    #port = int(os.environ['OPENSHIFT_PYTHON_PORT'])
-    #host_name = os.environ['OPENSHIFT_GEAR_DNS']
-    #app.run(host=ip,port=port)
-    app.run()
+    #Get the environment information we need to start the server
+    ip = os.environ['OPENSHIFT_PYTHON_IP']
+    port = int(os.environ['OPENSHIFT_PYTHON_PORT'])
+    host_name = os.environ['OPENSHIFT_GEAR_DNS']
+    app.run(host=ip,port=port)
+    #app.run()
