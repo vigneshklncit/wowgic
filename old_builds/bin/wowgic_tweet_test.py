@@ -1,5 +1,4 @@
 #wowgic_tweet_test
-
 import json
 import pymongo
 import falcon

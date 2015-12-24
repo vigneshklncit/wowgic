@@ -17,7 +17,10 @@ import globalS
 import generic
 import loggerRecord
 import neo4jInterface
-
+####
+# Get tweepy set up
+import tweepy
+from tweepy import Cursor
 
 #parse the run-time args passed
 parser = argparse.ArgumentParser(description='  To get the mra.log,rc.log,\
@@ -55,6 +58,17 @@ logFileName  = "/tmp/" + sufFileName + ".log"
 logger       = loggerRecord.loggerInit(logFileName,args.logLevel)
 logger.debug('Log file# %s & TestBed file ',logFileName)
 
+#keys from twitter is stored here temp will be removed once we access the user credentials
+#chella's credentials
+consumer_key= 'HwvpHtsPt3LmOZocZXwtn72Zv';
+consumer_secret = 'afVEAR0Ri3ZluVItqbDi0kfm7BHSxjwRXbpw9m9kFhXGjnzHKh';
+access_token = '419412786-cpS2hDmR6cuIf8BD2kSSri0BAWAmXBA3pzcB56Pw';
+access_secret = 'pRx5MNKkmxyImwuhUFMNVOr1NrAWcRmOGUgGTLVYFAjsJ';
+
+#authenticate twitter app
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_secret)
+api = tweepy.API(auth)
 
 neo4jInt = neo4jInterface.neo4jInterface()
 graphDB=neo4jInt.connect()
