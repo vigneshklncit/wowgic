@@ -21,8 +21,8 @@ import globalS
 import generic
 import loggerRecord
 import intercom
-
 import json
+
 #from bson import ObjectId
 #
 #class JSONEncoder(json.JSONEncoder):
@@ -193,12 +193,13 @@ def facebook_authorized(resp):
     session['facebook_token'] = (resp['access_token'], '')
     me = facebook.get('/6449932074?fields= location,about, description,general_info,photos')
     return 'Logged in as id=%s name=%s redirect=%s' % \
-        (me.data['id'], me.data, request.args.get('next'))
+        (me.data['id'], me.data['name'], request.args.get('next'))
 
 
 @facebook.tokengetter
 def get_facebook_oauth_token():
-    return session.get('facebook_token')
+    globalS.dictDb['fbToken'] = session.get('facebook_token')
+    return globalS.dictDb['fbToken']
 
 if 'debug' in args.logLevel:
     app.debug = True
