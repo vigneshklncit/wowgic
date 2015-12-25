@@ -127,17 +127,18 @@ def hello():
 
 client_id = '081ccf9e86164090af417c8ce91cc2e4'
 client_secret = '5b623638585b46cd9d35a203e84114e0'
-redirect_uri = ('http://'+globalS.dictDb['HOST_NAME'] + url_for('handle_instagram_authorization'))
 
 @app.route('/instagram_login')
 def instagram_login():
 
+    redirect_uri = ('http://'+globalS.dictDb['HOST_NAME'] + url_for('handle_instagram_authorization'))
     instagram_client = client.InstagramAPI(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
     return redirect(instagram_client.get_authorize_url(scope=['basic']))
 
 @app.route('/handle_instagram_authorization')
 def handle_instagram_authorization():
 
+    redirect_uri = ('http://'+globalS.dictDb['HOST_NAME'] + url_for('handle_instagram_authorization'))
     code = request.values.get('code')
     if not code:
         return error_response('Missing code')
@@ -146,13 +147,14 @@ def handle_instagram_authorization():
         access_token, instagram_user = instagram_client.exchange_code_for_access_token(code)
         if not access_token:
             return 'Could not get access token'
-        globalS.dictDb['instagram_userid'] = instagram_user['id']
-        globalS.dictDb['instagram_auth']   = access_token
+        #globalS.dictDb['instagram_userid'] = instagram_user['id']
+        #globalS.dictDb['instagram_auth']   = access_token
         #deferred.defer(fetch_instagram_for_user, g.user.get_id(), count=20, _queue='instagram')
     except Exception, e:
         return ('Error while handle_instagram_authorization')
     #return redirect(url_for('settings_data') + '?after_instagram_auth=True')
-    return globalS.dictDb
+    #return globalS.dictDb
+    return "instagram success"
 
 #-------------------------------------------------------------------------------
 # facebook authentication
