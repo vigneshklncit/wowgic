@@ -189,9 +189,9 @@ def facebook_authorized(resp):
             request.args['error_reason'],
             request.args['error_description']
         )
-    session['logged_in'] = True
+        session['logged_in'] = True
     session['facebook_token'] = (resp['access_token'], '')
-    me = facebook.get('/6449932074?fields= location,about, description,general_info,photos')
+    me = facebook.get('/me')
     return 'Logged in as id=%s name=%s redirect=%s' % \
         (me.data['id'], me.data['name'], request.args.get('next'))
 
