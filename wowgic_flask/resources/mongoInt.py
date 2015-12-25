@@ -26,8 +26,10 @@ class mongoInt():
         '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
         identified by the base URI of the graph database'''
         try:
+            DB_HOST = os.environ.get('OPENSHIFT_MONGODB_DB_HOST','localhost')
+            MONGODB_PORT = int(os.environ.get('OPENSHIFT_MONGODB_DB_PORT',27017))
             #uri = "mongodb://wowgic:wowgic@ds043714.mongolab.com:43714/wogicdb&ssl=true"
-            uri = "mongodb://admin:8ygFBXZHeIW6@$OPENSHIFT_MONGODB_DB_HOST:$OPENSHIFT_MONGODB_DB_PORT/wowgicflaskapp"
+            uri = 'mongodb://admin:8ygFBXZHeIW6@'+DB_HOST+':'+MONGODB_PORT+'/wowgicflaskapp'
             self.conn = pymongo.MongoClient(uri)
             #self.conn = pymongo.MongoClient() #local mongoDB running
             #self.conn = pymongo.MongoClient('mongodb://admin:3Xfk5q16Nkbl@python-wowgic.rhcloud.com:27017')
