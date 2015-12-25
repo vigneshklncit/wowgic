@@ -1,2 +1,5 @@
-python
-tweety==3.5.0
+tweepy==2.3.0
+flask_restfull
+flask
+py2neo
+pymongo
