@@ -7,10 +7,11 @@
 # Description    : pymongo
 #
 #===============================================================================
-import loggerRecord
+import sys
+sys.path.append('common')
+import loggerRecord,globalS
 logger =  loggerRecord.get_logger()
 import pymongo
-import os
 
 
 class mongoInt():
@@ -27,14 +28,19 @@ class mongoInt():
         '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
         identified by the base URI of the graph database'''
         try:
-            DB_HOST = os.environ.get('OPENSHIFT_MONGODB_DB_HOST','localhost')
-            MONGODB_PORT = os.environ.get('OPENSHIFT_MONGODB_DB_PORT','27017')
+            #DB_HOST = os.environ.get('OPENSHIFT_MONGODB_DB_HOST','localhost')
+            #MONGODB_PORT = os.environ.get('OPENSHIFT_MONGODB_DB_PORT','27017')
             #uri = "mongodb://wowgic:wowgic@ds043714.mongolab.com:43714/wogicdb&ssl=true"
-            uri = 'mongodb://admin:8ygFBXZHeIW6@'+DB_HOST+':'+MONGODB_PORT+'/wowgicflaskapp'
-            self.conn = pymongo.MongoClient(uri)
-            #self.conn = pymongo.MongoClient() #local mongoDB running
+            #uri = 'mongodb://'+globalS.dictDb['MONGODB_USERNAME']+':'+globalS.dictDb['MONGODB_PASSWORD']+'@'+globalS.dictDb['MONGODB_HOST']+':'+globalS.dictDb['MONGODB_PORT']+'/wowgicflaskapp'
+            uri = 'mongodb://'+globalS.dictDb['MONGODB_USERNAME']+':'+globalS.dictDb['MONGODB_PASSWORD']+'@'+globalS.dictDb['MONGODB_HOST']+':'+globalS.dictDb['MONGODB_PORT']
+            try:
+                self.conn = pymongo.MongoClient(uri)
+                logger.debug("mongdb connected to openshift")
+            except:
+                self.conn = pymongo.MongoClient() #local mongoDB running
+                logger.debug("mongdb connected to localhost")
             #self.conn = pymongo.MongoClient('mongodb://admin:3Xfk5q16Nkbl@python-wowgic.rhcloud.com:27017')
-        except pymongo.errors.ConnectionFailure, e:
+        except Exception as e:
             logger.error("Could not connect to MongoDB: %s", e)
         return self.conn
 
@@ -47,7 +53,7 @@ class mongoInt():
     def close(self):
         '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
         identified by the base URI of the graph database'''
-        self.conn.Close()
+        self.conn.close()
     ############################################################################
     #Function Name  : connect                                                  #
     #Input          : IP -> IP of the machine to connect                       #
@@ -143,7 +149,7 @@ class mongoInt():
         ''' basicall call methods like closing the ssh connection exiting the
         sql etc while python cleanup. In case if python encounters KILLSIG this
         method gets invoked and gracefully closes the ssh connection'''
-        self.close()
+        #self.close()
 
 
 ## to print the list of databases

@@ -43,8 +43,8 @@ def index():
 def hello():
     return 'Hello World!'
 
-@app.route('/login')
-def login():
+@app.route('/facebook_login')
+def facebook_login():
     return facebook.authorize(callback=url_for('facebook_authorized',
         next=request.args.get('next') or request.referrer or None,
         _external=True))
@@ -58,6 +58,7 @@ def facebook_authorized(resp):
             request.args['error_reason'],
             request.args['error_description']
         )
+    session['logged_in'] = True
     session['oauth_token'] = (resp['access_token'], '')
     me = facebook.get('/6449932074?fields= location,about, description,general_info,photos')
     return 'Logged in as id=%s name=%s redirect=%s' % \

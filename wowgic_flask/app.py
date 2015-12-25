@@ -9,7 +9,8 @@
 #                :twit_test.py -h
 #===============================================================================
 from flask_restful import fields, marshal_with, reqparse, Resource, Api
-from flask import Flask
+from flask_oauth import OAuth
+from flask import url_for, request, session, redirect, Flask
 import time
 import sys
 import os
@@ -69,6 +70,7 @@ def compileFileName():
 ############################################################################
 
 globalS.init()#intialize the global variables
+globalS.dictDb = app.config
 generic      = generic.generic()
 
 #==============================================================================#
@@ -78,6 +80,8 @@ sufFileName = compileFileName()
 logFileName  = "/tmp/" + sufFileName + ".log"
 logger       = loggerRecord.loggerInit(logFileName,args.logLevel)
 logger.debug('Log file# %s & TestBed file',logFileName)
+logger.debug('global dictDB file# %s',globalS.dictDb['MONGODB_PASSWORD'])
+#logger.debug('global app file# %s',app.config)
 
 
 intercom=intercom.intercom()
@@ -151,6 +155,51 @@ def handle_instagram_authorization():
         return error_response('Error')
     return redirect(url_for('settings_data') + '?after_instagram_auth=True')
 
+#-------------------------------------------------------------------------------
+# facebook authentication
+#-------------------------------------------------------------------------------
+
+FACEBOOK_APP_ID = '575443062564498'
+FACEBOOK_APP_SECRET = '3112a499e27dcd991b9869a5dd5524c0'
+
+oauth = OAuth()
+
+facebook = oauth.remote_app('facebook',
+    base_url='https://graph.facebook.com/',
+    request_token_url=None,
+    access_token_url='/oauth/access_token',
+    authorize_url='https://www.facebook.com/dialog/oauth',
+    consumer_key=FACEBOOK_APP_ID,
+    consumer_secret=FACEBOOK_APP_SECRET,
+    request_token_params={'scope': 'email'}
+)
+
+@app.route('/facebook_login')
+def facebook_login():
+    return facebook.authorize(callback=url_for('facebook_authorized',
+        next=request.args.get('next') or request.referrer or None,
+        _external=True))
+
+
+@app.route('/login/authorized')
+@facebook.authorized_handler
+def facebook_authorized(resp):
+    if resp is None:
+        return 'Access denied: reason=%s error=%s' % (
+            request.args['error_reason'],
+            request.args['error_description']
+        )
+    session['logged_in'] = True
+    session['facebook_token'] = (resp['access_token'], '')
+    me = facebook.get('/6449932074?fields= location,about, description,general_info,photos')
+    return 'Logged in as id=%s name=%s redirect=%s' % \
+        (me.data['id'], me.data, request.args.get('next'))
+
+
+@facebook.tokengetter
+def get_facebook_oauth_token():
+    return session.get('facebook_token')
+
 if 'debug' in args.logLevel:
     app.debug = True
 
@@ -159,5 +208,6 @@ if __name__ == '__main__':
     #ip = os.environ['OPENSHIFT_PYTHON_IP']
     #port = int(os.environ['OPENSHIFT_PYTHON_PORT'])
     #host_name = os.environ['OPENSHIFT_GEAR_DNS']
-    app.run(host=app.config.get('IP'),port=app.config.get('PORT'))
+    #app.run(host=app.config.get('IP'),port=app.config.get('PORT'))
+    app.run(host=globalS.dictDb['IP'],port=app.config.get('PORT'))
     #app.run()
