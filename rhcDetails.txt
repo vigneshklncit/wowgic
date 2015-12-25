@@ -1,0 +1,41 @@
+sathishsms@gmail.com
+rhc app create wowgicFlaskApp python-2.7 --from-code=https://github.com/chelladurai89/wowgic.git
+
+
+ateps to complete your configuration:
+    1. Clone your git repo
+      $ rhc git-clone wowgicflaskapp
+
+  If you continue to experience problems after completing these steps,
+  you can try destroying and recreating the application:
+
+    $ rhc app delete wowgicflaskapp --confirm
+
+  Please contact us if you are unable to successfully create your
+  application:
+
+    Support - https://www.openshift.com/support
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+Your application 'wowgicflaskapp' is now available.
+
+  URL:        http://wowgicflaskapp-wowgic.rhcloud.com/
+  SSH to:     567cc1842d52712f2000013a@wowgicflaskapp-wowgic.rhcloud.com
+  Git remote: ssh://567cc1842d52712f2000013a@wowgicflaskapp-wowgic.rhcloud.com/~/git/wowgicflaskapp.git/
+
+git remote add ssh://567cc1842d52712f2000013a@wowgicflaskapp-wowgic.rhcloud.com/~/git/wowgicflaskapp.git/
+
+
+Run 'rhc show-app wowgicFlaskApp' for more details about your app.
+
+git fetch --all
+git reset --hard origin/master
+
+ Root User:     admin
+   Root Password: 8ygFBXZHeIW6
+   Database Name: wowgicflaskapp
+
+Connection URL: mongodb://$OPENSHIFT_MONGODB_DB_HOST:$OPENSHIFT_MONGODB_DB_PORT/
