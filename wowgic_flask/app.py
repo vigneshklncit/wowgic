@@ -45,9 +45,17 @@ parser.add_argument('-v', '--version', action='version', version='%(prog)s 1.3')
 parser.add_argument("-l", "--logLevel",default='error',help="Enable standard output verbosity")
 args = parser.parse_args()
 #create a flask app
-app = Flask(__name__)
-FlaskRestApi = Api(app) #creating a flask-restfull api
+app = Flask(__name__,instance_relative_config=True)
+# Load the default configuration
+app.config.from_object('config.default')
 
+# Load the configuration from the instance folder
+app.config.from_pyfile('config.py')
+
+# Load the file specified by the APP_CONFIG_FILE environment variable
+# Variables defined here will override those in the default configuration
+app.config.from_envvar('APP_CONFIG_FILE')
+FlaskRestApi = Api(app) #creating a flask-restfull api
 
 ############################################################################
 #Function Name  : compileFileName                                          #
@@ -69,7 +77,7 @@ generic      = generic.generic()
 sufFileName = compileFileName()
 logFileName  = "/tmp/" + sufFileName + ".log"
 logger       = loggerRecord.loggerInit(logFileName,args.logLevel)
-logger.debug('Log file# %s & TestBed file ',logFileName)
+logger.debug('Log file# %s & TestBed file',logFileName)
 
 
 intercom=intercom.intercom()
@@ -147,9 +155,9 @@ if 'debug' in args.logLevel:
     app.debug = True
 
 if __name__ == '__main__':
-    #Get the environment information we need to start the server
-    ip = os.environ['OPENSHIFT_PYTHON_IP']
-    port = int(os.environ['OPENSHIFT_PYTHON_PORT'])
-    host_name = os.environ['OPENSHIFT_GEAR_DNS']
-    app.run(host=ip,port=port)
+    # Get the environment information we need to start the server
+    #ip = os.environ['OPENSHIFT_PYTHON_IP']
+    #port = int(os.environ['OPENSHIFT_PYTHON_PORT'])
+    #host_name = os.environ['OPENSHIFT_GEAR_DNS']
+    app.run(host=app.config.get('IP'),port=app.config.get('PORT'))
     #app.run()
