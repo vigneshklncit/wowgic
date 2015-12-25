@@ -60,7 +60,7 @@ class mongoInt():
 
         self.connect()
         # Connect to the databases
-        db = self.conn['userData']
+        db = self.conn['wowgicflaskapp']
         #
         coll=db['FBLoginData']
         self.createConstraint(coll)

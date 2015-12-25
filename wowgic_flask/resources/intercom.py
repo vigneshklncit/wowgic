@@ -24,8 +24,8 @@ import twitterInt
 
 twitterInt = twitterInt.twitterInt()
 neo4jInt = neo4jInterface.neo4jInterface()
-#graphDB=neo4jInt.connect()
-graphDB=neo4jInt.connect('localhost:7474/db/data/','neo4j','admin')
+graphDB=neo4jInt.connect()
+#graphDB=neo4jInt.connect('localhost:7474/db/data/','neo4j','admin')
 ####
 # End of boilerplate, interesting code starts here:
 neo4jInt.createConstraint(graphDB)
