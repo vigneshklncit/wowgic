@@ -147,6 +147,7 @@ def handle_instagram_authorization():
         access_token, instagram_user = instagram_client.exchange_code_for_access_token(code)
         if not access_token:
             return 'Could not get access token'
+        logger.debug('access_token#%s, instagram_user#%s',access_token, instagram_user)
         #globalS.dictDb['instagram_userid'] = instagram_user['id']
         #globalS.dictDb['instagram_auth']   = access_token
         #deferred.defer(fetch_instagram_for_user, g.user.get_id(), count=20, _queue='instagram')
