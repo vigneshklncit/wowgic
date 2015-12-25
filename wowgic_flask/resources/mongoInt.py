@@ -10,6 +10,7 @@
 import loggerRecord
 logger =  loggerRecord.get_logger()
 import pymongo
+import os
 
 
 class mongoInt():
@@ -27,7 +28,7 @@ class mongoInt():
         identified by the base URI of the graph database'''
         try:
             DB_HOST = os.environ.get('OPENSHIFT_MONGODB_DB_HOST','localhost')
-            MONGODB_PORT = int(os.environ.get('OPENSHIFT_MONGODB_DB_PORT',27017))
+            MONGODB_PORT = os.environ.get('OPENSHIFT_MONGODB_DB_PORT','27017')
             #uri = "mongodb://wowgic:wowgic@ds043714.mongolab.com:43714/wogicdb&ssl=true"
             uri = 'mongodb://admin:8ygFBXZHeIW6@'+DB_HOST+':'+MONGODB_PORT+'/wowgicflaskapp'
             self.conn = pymongo.MongoClient(uri)
