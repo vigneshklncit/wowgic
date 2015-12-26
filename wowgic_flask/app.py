@@ -9,9 +9,7 @@
 #                :twit_test.py -h
 #===============================================================================
 from flask_restful import fields, marshal_with, reqparse, Resource, Api
-from flask_oauth import OAuth
-from flask import url_for, request, session, redirect, Flask
-from instagram import client
+from flask import url_for, request, session, redirect, Flask , flash
 import time
 import sys
 import os
@@ -79,13 +77,15 @@ generic      = generic.generic()
 #==============================================================================#
 sufFileName = compileFileName()
 logFileName  = "/tmp/" + sufFileName + ".log"
-logger       = loggerRecord.loggerInit(logFileName,args.logLevel)
+logger,fhandler       = loggerRecord.loggerInit(logFileName,args.logLevel)
 logger.debug('Log file# %s & TestBed file',logFileName)
 logger.debug('global dictDB file# %s',globalS.dictDb['MONGODB_PASSWORD'])
 #logger.debug('global app file# %s',app.config)
 
-
+app.logger.addHandler(fhandler) #associate the app logger with general logger
+app.logger_name = loggerRecord.get_logger() #associate the app logger with general logger
 intercom=intercom.intercom()
+#FbUserDetails is for testing the app
 class FbUserDetails(Resource):
     def get(self):
         #facbook tmp input given by chella ltr retrive from app and give as inpu to this variable
@@ -116,93 +116,41 @@ class Departmental_Salary(Resource):
         #We can have PUT,DELETE,POST here. But in our API GET implementation is sufficient
 
 FlaskRestApi.add_resource(Departmental_Salary, '/dept/<string:department_name>')
-FlaskRestApi.add_resource(FbUserDetails, '/facebook')
+#FlaskRestApi.add_resource(FbUserDetails, '/facebook')
 #FlaskRestApi.add_resource(Foo, '/Foo', '/Foo/<str:id>')
 #FlaskRestApi.add_resource(Bar, '/Bar', '/Bar/<str:id>')
 #FlaskRestApi.add_resource(Baz, '/Baz', '/Baz/<str:id>')
 
 @app.route('/')
 def hello():
+    flash('data + play + magic = WOwgic')
     return 'Hello Wowgic!'
 
-client_id = '081ccf9e86164090af417c8ce91cc2e4'
-client_secret = '5b623638585b46cd9d35a203e84114e0'
+#------------------------------------------------------------------------------#
+#                   instagram authentication                                   #
+#------------------------------------------------------------------------------#
 
 @app.route('/instagram_login')
 def instagram_login():
-
-    redirect_uri = ('http://'+globalS.dictDb['HOST_NAME'] + url_for('handle_instagram_authorization'))
-    instagram_client = client.InstagramAPI(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
-    return redirect(instagram_client.get_authorize_url(scope=['basic']))
+    return intercom.instagram_login()
 
 @app.route('/handle_instagram_authorization')
 def handle_instagram_authorization():
-
-    redirect_uri = ('http://'+globalS.dictDb['HOST_NAME'] + url_for('handle_instagram_authorization'))
-    code = request.values.get('code')
-    if not code:
-        return error_response('Missing code')
-    try:
-        instagram_client = client.InstagramAPI(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
-        access_token, instagram_user = instagram_client.exchange_code_for_access_token(code)
-        if not access_token:
-            return 'Could not get access token'
-        logger.debug('access_token#%s, instagram_user#%s',access_token, instagram_user)
-        #globalS.dictDb['instagram_userid'] = instagram_user['id']
-        #globalS.dictDb['instagram_auth']   = access_token
-        #deferred.defer(fetch_instagram_for_user, g.user.get_id(), count=20, _queue='instagram')
-    except Exception, e:
-        return ('Error while handle_instagram_authorization')
-    #return redirect(url_for('settings_data') + '?after_instagram_auth=True')
-    #return globalS.dictDb
-    return "instagram success"
-
+    flash('You were successfully logged in via INSTAGRAM')
+    return intercom.handle_instagram_authorization()
 #-------------------------------------------------------------------------------
 # facebook authentication
 #-------------------------------------------------------------------------------
 
-FACEBOOK_APP_ID = '575443062564498'
-FACEBOOK_APP_SECRET = '3112a499e27dcd991b9869a5dd5524c0'
-
-oauth = OAuth()
-
-facebook = oauth.remote_app('facebook',
-    base_url='https://graph.facebook.com/',
-    request_token_url=None,
-    access_token_url='/oauth/access_token',
-    authorize_url='https://www.facebook.com/dialog/oauth',
-    consumer_key=FACEBOOK_APP_ID,
-    consumer_secret=FACEBOOK_APP_SECRET,
-    request_token_params={'scope': 'email'}
-)
-
 @app.route('/facebook_login')
 def facebook_login():
-    return facebook.authorize(callback=url_for('facebook_authorized',
-        next=request.args.get('next') or request.referrer or None,
-        _external=True))
-
+    return intercom.facebook_login()
 
 @app.route('/login/authorized')
-@facebook.authorized_handler
+#@facebook.authorized_handler
 def facebook_authorized(resp):
-    if resp is None:
-        return 'Access denied: reason=%s error=%s' % (
-            request.args['error_reason'],
-            request.args['error_description']
-        )
-        session['logged_in'] = True
-    session['facebook_token'] = (resp['access_token'], '')
-    me = facebook.get('/me')
-    feeds = intercom.createUserNode(me.data)
-    return 'Logged in as id=%s name=%s redirect=%s' % \
-        (me.data['id'], me.data['name'], request.args.get('next'))
-
-
-@facebook.tokengetter
-def get_facebook_oauth_token():
-    globalS.dictDb['fbToken'] = session.get('facebook_token')
-    return globalS.dictDb['fbToken']
+    flash('You were successfully logged in via INSTAGRAM')
+    return intercom.facebook_authorized()
 
 if 'debug' in args.logLevel:
     app.debug = True

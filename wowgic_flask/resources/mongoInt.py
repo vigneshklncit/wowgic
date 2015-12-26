@@ -64,11 +64,10 @@ class mongoInt():
         '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
         identified by the base URI of the graph database'''
 
-        self.connect()
         # Connect to the databases
         db = self.conn['wowgicflaskapp']
         #
-        coll=db['FBLoginData']
+        coll=db['FBLoginUserData']
         self.createConstraint(coll)
         #instead of updating we can find_one initialyy and then do update operation
         WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
@@ -87,11 +86,10 @@ class mongoInt():
         '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
         identified by the base URI of the graph database'''
 
-        self.connect()
         # Connect to the databases
         db = self.conn['userData']
         #
-        coll=db['TwitterLoginData']
+        coll=db['TwitterLoginUserData']
         self.createConstraint(coll)
         #instead of updating we can find_one initialyy and then do update operation
         WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
@@ -110,11 +108,10 @@ class mongoInt():
         '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
         identified by the base URI of the graph database'''
 
-        self.connect()
         # Connect to the databases
         db = self.conn['userData']
         #
-        coll=db['TwitterLoginData']
+        coll=db['InstagramLoginUserData']
         self.createConstraint(coll)
         #instead of updating we can find_one initialyy and then do update operation
         WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)

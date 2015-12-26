@@ -7,21 +7,15 @@
 # Description    : This file just interfaces to neo4J and brings you the handle so that multiple files can
 #
 #===============================================================================
-from flask import Flask, redirect, url_for, session, request
 from flask_oauth import OAuth
-import os
-app = Flask(__name__)
+from flask import url_for, request
+import sys
+sys.path.append('../common')
+import loggerRecord, globalS
 
-
-SECRET_KEY = 'development key'
-DEBUG = True
 FACEBOOK_APP_ID = '575443062564498'
 FACEBOOK_APP_SECRET = '3112a499e27dcd991b9869a5dd5524c0'
 
-
-app = Flask(__name__)
-app.debug = DEBUG
-app.secret_key = SECRET_KEY
 oauth = OAuth()
 
 facebook = oauth.remote_app('facebook',
@@ -34,51 +28,26 @@ facebook = oauth.remote_app('facebook',
     request_token_params={'scope': 'email'}
 )
 
+class facebookInt:
+    ''' bla bla
+    '''
+    def facebook_login(self):
+        return facebook.authorize(callback=url_for('facebook_authorized',
+            next=request.args.get('next') or request.referrer or None,
+            _external=True))
 
-@app.route('/')
-def index():
-    return redirect(url_for('login'))
+    def facebook_authorized(self,resp):
+        if resp is None:
+            return 'Access denied: reason=%s error=%s' % (
+                request.args['error_reason'],
+                request.args['error_description']
+            )
+        globalS.dictDb['logged_in'] = True
+        globalS.dictDb['facebook_access_token'] = (resp['access_token'], '')
+        #globalS.dictDb['facebook_access_token'] = session['facebook_token']
+        me = facebook.get('/me')
+        return me
 
-@app.route('/hello')
-def hello():
-    return 'Hello World!'
-
-@app.route('/facebook_login')
-def facebook_login():
-    return facebook.authorize(callback=url_for('facebook_authorized',
-        next=request.args.get('next') or request.referrer or None,
-        _external=True))
-
-
-@app.route('/login/authorized')
-@facebook.authorized_handler
-def facebook_authorized(resp):
-    if resp is None:
-        return 'Access denied: reason=%s error=%s' % (
-            request.args['error_reason'],
-            request.args['error_description']
-        )
-    session['logged_in'] = True
-    session['oauth_token'] = (resp['access_token'], '')
-    me = facebook.get('/6449932074?fields= location,about, description,general_info,photos')
-    return 'Logged in as id=%s name=%s redirect=%s' % \
-        (me.data['id'], me.data, request.args.get('next'))
-
-
-@facebook.tokengetter
-def get_facebook_oauth_token():
-    return session.get('oauth_token')
-
-
-ip = os.environ['OPENSHIFT_PYTHON_IP']
-port = int(os.environ['OPENSHIFT_PYTHON_PORT'])
-host_name = os.environ['OPENSHIFT_GEAR_DNS']
-
-
-ip = os.environ['OPENSHIFT_PYTHON_IP']
-port = int(os.environ['OPENSHIFT_PYTHON_PORT'])
-host_name = os.environ['OPENSHIFT_GEAR_DNS']
-
-
-if __name__ == '__main__':
-    app.run(host=ip,port=port,debug=True)
+    def get_facebook_oauth_token(self):
+        globalS.dictDb['fbToken'] = session.get('facebook_token')
+        return globalS.dictDb['fbToken']

@@ -38,7 +38,7 @@ def loggerInit(logFileName,lvl='error'):
     logger.addHandler(fh)
     #logger.addHandler(ch)
     #print logger
-    return logger
+    return logger,fh
 
 def get_logger():
     ''' logger for wowgic is returned here a global method to do that as of now we are going to use single file to write

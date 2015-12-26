@@ -181,4 +181,5 @@ class neo4jInterface:
             execCnt += self.execCreateRelQuery(graphDB,params,ht)
         return execCnt
 
+
 ################################################################################

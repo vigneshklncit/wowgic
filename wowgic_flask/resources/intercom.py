@@ -20,9 +20,13 @@ import loggerRecord
 import neo4jInterface
 import mongoInt
 import twitterInt
+import instagramInt
+import facebookInt
 
 
 twitterInt = twitterInt.twitterInt()
+instagramInt = instagramInt.instagramInt()
+facebookInt = facebookInt.facebookInt()
 neo4jInt = neo4jInterface.neo4jInterface()
 graphDB=neo4jInt.connect()
 #graphDB=neo4jInt.connect('localhost:7474/db/data/','neo4j','admin')
@@ -31,6 +35,7 @@ graphDB=neo4jInt.connect()
 neo4jInt.createConstraint(graphDB)
 
 mongoInt=mongoInt.mongoInt()
+mconnect = mongoInt.connect()
 class intercom:
     ''' this file act as a intercaller /router / flow chart whaterver you call. T o& fro
     calling functions interworking between verious interfaces like twitter, Instagram,
@@ -61,3 +66,27 @@ class intercom:
         logger.debug('retrieve tweets')
         #page_sanitized = json_util.dumps(twits)
         return twits
+
+    def instagram_login(self):
+        '''
+        '''
+        return instagramInt.instagram_login()
+
+    def handle_instagram_authorization(self):
+        '''
+        '''
+        user=instagramInt.handle_instagram_authorization()
+        mongoInt.insertInstagramUserLoginData(user)
+        return "Thanks buddy ! Instagram is authorized"
+    def facebook_login(self):
+        '''
+        '''
+        return facebookInt.facebook_login()
+
+    def facebook_authorized(self):
+        '''
+        '''
+        me = facebookInt.facebook_authorized()
+        feeds = intercom.createUserNode(me.data)
+        return'Logged in as id=%s name=%s redirect=%s' % \
+            (me.data['id'], me.data['name'], request.args.get('next'))
