@@ -150,7 +150,7 @@ def facebook_login():
 #@facebook.authorized_handler
 def facebook_authorized(resp):
     flash('You were successfully logged in via INSTAGRAM')
-    return intercom.facebook_authorized()
+    return intercom.facebook_authorized(resp)
 
 if 'debug' in args.logLevel:
     app.debug = True

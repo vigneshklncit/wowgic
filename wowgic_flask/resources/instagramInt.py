@@ -8,7 +8,7 @@
 #
 #===============================================================================
 from instagram import client
-from flask import url_for, redirect
+from flask import url_for, redirect, request
 import sys
 sys.path.append('../common')
 import loggerRecord, globalS

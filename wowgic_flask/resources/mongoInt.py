@@ -65,7 +65,7 @@ class mongoInt():
         identified by the base URI of the graph database'''
 
         # Connect to the databases
-        db = self.conn['wowgicflaskapp']
+        db = self.conn['userData']
         #
         coll=db['FBLoginUserData']
         self.createConstraint(coll)
