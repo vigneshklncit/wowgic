@@ -12,6 +12,7 @@ from flask import url_for, request
 import sys
 sys.path.append('../common')
 import loggerRecord, globalS
+logger =  loggerRecord.get_logger()
 
 FACEBOOK_APP_ID = '575443062564498'
 FACEBOOK_APP_SECRET = '3112a499e27dcd991b9869a5dd5524c0'
