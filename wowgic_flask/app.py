@@ -10,6 +10,7 @@
 #===============================================================================
 from flask_restful import fields, marshal_with, reqparse, Resource, Api
 from flask import url_for, request, session, redirect, Flask , flash
+from flask_oauth import OAuth
 import time
 import sys
 import os
@@ -141,17 +142,46 @@ def handle_instagram_authorization():
 #-------------------------------------------------------------------------------
 # facebook authentication
 #-------------------------------------------------------------------------------
+# To get an access token to consume the API on behalf of a user, use a suitable OAuth library for your platform
+FACEBOOK_APP_ID = '575443062564498'
+FACEBOOK_APP_SECRET = '3112a499e27dcd991b9869a5dd5524c0'
+oauth = OAuth()
+
+facebook = oauth.remote_app('facebook',
+    base_url='https://graph.facebook.com/',
+    request_token_url=None,
+    access_token_url='/oauth/access_token',
+    authorize_url='https://www.facebook.com/dialog/oauth',
+    consumer_key=FACEBOOK_APP_ID,
+    consumer_secret=FACEBOOK_APP_SECRET,
+    request_token_params={'scope': 'email'}
+)
 
 @app.route('/facebook_login')
 def facebook_login():
-    return intercom.facebook_login()
+    return facebook.authorize(callback=url_for('facebook_authorized',
+            next=request.args.get('next') or request.referrer or None,
+            _external=True))
 
 @app.route('/login/authorized')
-#@facebook.authorized_handler
-def facebook_authorized(resp):
-    logger.debug("fb rcvd Response url %s",resp)
-    flash('You were successfully logged in via facebook')
-    return intercom.facebook_authorized(resp)
+@facebook.authorized_handler
+def facebook_authorized(self,resp):
+        logger.debug("fb rcvd Response url %s",resp)
+        if resp is None:
+            return 'Access denied: reason=%s error=%s' % (
+                request.args['error_reason'],
+                request.args['error_description']
+            )
+        globalS.dictDb['logged_in'] = True
+        globalS.dictDb['facebook_access_token'] = (resp['access_token'], '')
+        #globalS.dictDb['facebook_access_token'] = session['facebook_token']
+        me = facebook.get('/me')
+        return me
+
+@facebook.tokengetter
+def get_facebook_oauth_token():
+    return session.get('oauth_token')
+
 
 if 'debug' in args.logLevel:
     app.debug = True

@@ -8,20 +8,19 @@
 # How to run     :twit_test.py -l info
 #                :twit_test.py -h
 #===============================================================================
-import loggerRecord
-logger =  loggerRecord.get_logger()
 import sys
 sys.path.append('common')
 sys.path.append('resources')
 import globalS
 import json
 import generic
-import loggerRecord
 import neo4jInterface
 import mongoInt
 import twitterInt
 import instagramInt
 import facebookInt
+import loggerRecord
+logger =  loggerRecord.get_logger()
 
 
 twitterInt = twitterInt.twitterInt()
@@ -81,12 +80,12 @@ class intercom:
     def facebook_login(self):
         '''
         '''
-        return facebookInt.facebook_login()
+        #return facebookInt.facebook_login()
 
     def facebook_authorized(self,resp):
         '''
         '''
-        me = facebookInt.facebook_authorized(resp)
-        feeds = intercom.createUserNode(me.data)
-        return'Logged in as id=%s name=%s redirect=%s' % \
-            (me.data['id'], me.data['name'], request.args.get('next'))
+        #me = facebookInt.facebook_authorized(resp)
+        #feeds = intercom.createUserNode(me.data)
+        #return'Logged in as id=%s name=%s redirect=%s' % \
+        #    (me.data['id'], me.data['name'], request.args.get('next'))
