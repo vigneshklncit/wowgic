@@ -34,10 +34,12 @@ class mongoInt():
             #uri = "mongodb://wowgic:wowgic@ds043714.mongolab.com:43714/wogicdb&ssl=true"
             #uri = 'mongodb://'+globalS.dictDb['MONGODB_USERNAME']+':'+globalS.dictDb['MONGODB_PASSWORD']+'@'+globalS.dictDb['MONGODB_HOST']+':'+globalS.dictDb['MONGODB_PORT']+'/wowgicflaskapp'
             uri = 'mongodb://'+globalS.dictDb['MONGODB_USERNAME']+':'+globalS.dictDb['MONGODB_PASSWORD']+'@'+globalS.dictDb['MONGODB_HOST']+':'+globalS.dictDb['MONGODB_PORT']
+            logger.debug('mongoDb URI#%s',uri)
             try:
                 self.conn = pymongo.MongoClient(uri)
                 logger.debug("mongdb connected to openshift")
-            except:
+            except Exception as e:
+                logger.debug('Exception raised in starting mongoDB:%s',e)
                 self.conn = pymongo.MongoClient() #local mongoDB running
                 logger.debug("mongdb connected to localhost")
             #self.conn = pymongo.MongoClient('mongodb://admin:3Xfk5q16Nkbl@python-wowgic.rhcloud.com:27017')
