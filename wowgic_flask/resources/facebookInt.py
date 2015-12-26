@@ -32,11 +32,17 @@ class facebookInt:
     ''' bla bla
     '''
     def facebook_login(self):
+        fbCallback= facebook.authorize(callback=url_for('facebook_authorized',
+            next=request.args.get('next') or request.referrer or None,
+            _external=True))
+        logger.debug("fb callback url %s",fbCallback)
         return facebook.authorize(callback=url_for('facebook_authorized',
             next=request.args.get('next') or request.referrer or None,
             _external=True))
 
+    @facebook.authorized_handler
     def facebook_authorized(self,resp):
+        logger.debug("fb rcvd Response url %s",resp)
         if resp is None:
             return 'Access denied: reason=%s error=%s' % (
                 request.args['error_reason'],

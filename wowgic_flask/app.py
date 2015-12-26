@@ -149,7 +149,8 @@ def facebook_login():
 @app.route('/login/authorized')
 #@facebook.authorized_handler
 def facebook_authorized(resp):
-    flash('You were successfully logged in via INSTAGRAM')
+    logger.debug("fb rcvd Response url %s",resp)
+    flash('You were successfully logged in via facebook')
     return intercom.facebook_authorized(resp)
 
 if 'debug' in args.logLevel:
