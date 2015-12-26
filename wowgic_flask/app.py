@@ -165,18 +165,16 @@ def facebook_login():
 
 @app.route('/login/authorized')
 @facebook.authorized_handler
-def facebook_authorized(self,resp):
-        logger.debug("fb rcvd Response url %s",resp)
-        if resp is None:
-            return 'Access denied: reason=%s error=%s' % (
-                request.args['error_reason'],
-                request.args['error_description']
-            )
-        globalS.dictDb['logged_in'] = True
-        globalS.dictDb['facebook_access_token'] = (resp['access_token'], '')
-        #globalS.dictDb['facebook_access_token'] = session['facebook_token']
-        me = facebook.get('/me')
-        return me
+def facebook_authorized(resp):
+    if resp is None:
+        return 'Access denied: reason=%s error=%s' % (
+            request.args['error_reason'],
+            request.args['error_description']
+        )
+    session['oauth_token'] = (resp['access_token'], '')
+    me = facebook.get('/me')
+    return 'Logged in as id=%s name=%s redirect=%s' % \
+        (me.data['id'], me.data['name'], request.args.get('next'))
 
 @facebook.tokengetter
 def get_facebook_oauth_token():

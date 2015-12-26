@@ -13,7 +13,7 @@ import loggerRecord,globalS
 logger =  loggerRecord.get_logger()
 import pymongo
 
-
+db=None
 class mongoInt():
     ''' mongoDB is our priliminary interface which will store users facebook, Instagram,
     twitter datas etc'''
@@ -27,6 +27,7 @@ class mongoInt():
     def connect(self):
         '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
         identified by the base URI of the graph database'''
+
         try:
             #DB_HOST = os.environ.get('OPENSHIFT_MONGODB_DB_HOST','localhost')
             #MONGODB_PORT = os.environ.get('OPENSHIFT_MONGODB_DB_PORT','27017')
@@ -42,6 +43,7 @@ class mongoInt():
             #self.conn = pymongo.MongoClient('mongodb://admin:3Xfk5q16Nkbl@python-wowgic.rhcloud.com:27017')
         except Exception as e:
             logger.error("Could not connect to MongoDB: %s", e)
+        db=self.conn['wowgicflaskapp']
         return self.conn
 
     ############################################################################
@@ -65,7 +67,7 @@ class mongoInt():
         identified by the base URI of the graph database'''
 
         # Connect to the databases
-        db = self.conn['userData']
+        #db = self.conn['userData']
         #
         coll=db['FBLoginUserData']
         self.createConstraint(coll)
@@ -87,7 +89,7 @@ class mongoInt():
         identified by the base URI of the graph database'''
 
         # Connect to the databases
-        db = self.conn['userData']
+        #db = self.conn['userData']
         #
         coll=db['TwitterLoginUserData']
         self.createConstraint(coll)
@@ -109,7 +111,7 @@ class mongoInt():
         identified by the base URI of the graph database'''
 
         # Connect to the databases
-        db = self.conn['userData']
+        #db = self.conn['userData']
         #
         coll=db['InstagramLoginUserData']
         self.createConstraint(coll)

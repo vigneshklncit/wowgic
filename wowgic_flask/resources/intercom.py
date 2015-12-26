@@ -77,15 +77,3 @@ class intercom:
         user=instagramInt.handle_instagram_authorization()
         mongoInt.insertInstagramUserLoginData(user)
         return "Thanks buddy ! Instagram is authorized"
-    def facebook_login(self):
-        '''
-        '''
-        #return facebookInt.facebook_login()
-
-    def facebook_authorized(self,resp):
-        '''
-        '''
-        #me = facebookInt.facebook_authorized(resp)
-        #feeds = intercom.createUserNode(me.data)
-        #return'Logged in as id=%s name=%s redirect=%s' % \
-        #    (me.data['id'], me.data['name'], request.args.get('next'))
