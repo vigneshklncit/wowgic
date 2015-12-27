@@ -39,3 +39,7 @@ git reset --hard origin/master
    Database Name: wowgicflaskapp
 
 Connection URL: mongodb://$OPENSHIFT_MONGODB_DB_HOST:$OPENSHIFT_MONGODB_DB_PORT/
+mongoDb mongodb://admin:8ygFBXZHeIW6@wowgicflaskapp-wowgic.rhcloud.com/:27017
+
+mongo wowgicflaskapp-wowgic.rhcloud.com:27017/wowgicflaskapp -u admin -p 8ygFBXZHeIW6
+mongodb://wowgic:wowgic@ds043714.mongolab.com:43714/wogicdb

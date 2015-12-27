@@ -35,6 +35,6 @@ class twitterInt:
         feeds =[]
         cricTweets = tweepy.Cursor(self.api.search, q='#madurai').items(1)
         for tweet in cricTweets:
-            feeds.append(tweet)
-            #logger.info("feed from twitter is %s", tweet)
+            feeds.append(tweet._json)
+            logger.info("feed from twitter is %s", feeds)
         return feeds

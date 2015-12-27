@@ -7,7 +7,6 @@
 # Description    : This file just interfaces to neo4J and brings you the handle so that multiple files can
 #
 #===============================================================================
-from flask import url_for, request
 import sys
 sys.path.append('../common')
 import loggerRecord, globalS

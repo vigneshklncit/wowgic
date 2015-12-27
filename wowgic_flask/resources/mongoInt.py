@@ -13,11 +13,12 @@ import loggerRecord,globalS
 logger =  loggerRecord.get_logger()
 import pymongo
 
-db=None
+
 class mongoInt():
     ''' mongoDB is our priliminary interface which will store users facebook, Instagram,
     twitter datas etc'''
     conn={}
+    db=None
     ############################################################################
     #Function Name  : connect                                                  #
     #Input          : IP -> IP of the machine to connect                       #
@@ -45,7 +46,7 @@ class mongoInt():
             #self.conn = pymongo.MongoClient('mongodb://admin:3Xfk5q16Nkbl@python-wowgic.rhcloud.com:27017')
         except Exception as e:
             logger.error("Could not connect to MongoDB: %s", e)
-        db=self.conn['wowgicflaskapp']
+        self.db=self.conn['wowgicflaskapp']
         return self.conn
 
     ############################################################################
@@ -71,7 +72,7 @@ class mongoInt():
         # Connect to the databases
         #db = self.conn['userData']
         #
-        coll=db['FBLoginUserData']
+        coll=self.db['FBLoginUserData']
         self.createConstraint(coll)
         #instead of updating we can find_one initialyy and then do update operation
         WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
@@ -93,7 +94,7 @@ class mongoInt():
         # Connect to the databases
         #db = self.conn['userData']
         #
-        coll=db['TwitterLoginUserData']
+        coll=self.db['TwitterLoginUserData']
         self.createConstraint(coll)
         #instead of updating we can find_one initialyy and then do update operation
         WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
@@ -115,7 +116,7 @@ class mongoInt():
         # Connect to the databases
         #db = self.conn['userData']
         #
-        coll=db['InstagramLoginUserData']
+        coll=self.db['InstagramLoginUserData']
         self.createConstraint(coll)
         #instead of updating we can find_one initialyy and then do update operation
         WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
@@ -151,34 +152,3 @@ class mongoInt():
         sql etc while python cleanup. In case if python encounters KILLSIG this
         method gets invoked and gracefully closes the ssh connection'''
         #self.close()
-
-
-## to print the list of databases
-#print conn.database_names()
-#
-## to print the list of collections in database
-#print db.collection_names()
-#
-#result = db.restaurants.insert_one(
-#    {
-#
-#    }
-#result.inserted_id
-## Access the Document from the collections
-## Document Counts
-#print ?Total Documents?, coll_friends.count()
-#
-## display the first document
-#print coll_friends.find_one()
-#
-## Comparison example
-#print ?\n Comparison example \n?
-#cur = coll_friends.find({?current_location.city?:
-#{?$in?: [?Singapore?]}},
-#{?username?: 1, ?_id?: 0})
-#
-## print the documents through for loop
-#for doc in cur:
-#print doc
-#
-#print ?\n?

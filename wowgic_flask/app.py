@@ -9,7 +9,7 @@
 #                :twit_test.py -h
 #===============================================================================
 from flask_restful import fields, marshal_with, reqparse, Resource, Api
-from flask import url_for, request, session, redirect, Flask , flash
+from flask import url_for, request, session, redirect, Flask , flash, jsonify
 from flask_oauth import OAuth
 import time
 import sys
@@ -83,7 +83,7 @@ logger.debug('Log file# %s & TestBed file',logFileName)
 logger.debug('global dictDB file# %s',globalS.dictDb['MONGODB_PASSWORD'])
 #logger.debug('global app file# %s',app.config)
 
-app.logger.addHandler(fhandler) #associate the app logger with general logger
+#app.logger.addHandler(fhandler) #associate the app logger with general logger
 app.logger_name = loggerRecord.get_logger() #associate the app logger with general logger
 intercom=intercom.intercom()
 #FbUserDetails is for testing the app
@@ -97,15 +97,17 @@ class FbUserDetails(Resource):
         #Vivek Su
         #jsonFBInput ='{"id":"858104450925382","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
         feeds = intercom.createUserNode(jsonFBInput)
-
+        feeds.append(intercom.retrieveMediaBasedTags())
         #feeds=json.dumps(dict(feeds))
         #logger.debug('feed is %s',feeds)
         #return JSONEncoder().encode(feeds)
-        for feed in feeds:
+        #for feed in feeds:
             #feed=json.loads(json.dumps(feed))
-            logger.debug('feed twitter text is#%s',feed.text)
-            return feed
-        #return "type error"
+            #logger.debug('feed twitter text is#%s',feed.text)
+            #return jsonify(json.dumps(feed))
+        flash('just for testing')
+        return feeds
+
 
 class Departmental_Salary(Resource):
     def get(self, department_name):
@@ -117,7 +119,7 @@ class Departmental_Salary(Resource):
         #We can have PUT,DELETE,POST here. But in our API GET implementation is sufficient
 
 FlaskRestApi.add_resource(Departmental_Salary, '/dept/<string:department_name>')
-#FlaskRestApi.add_resource(FbUserDetails, '/facebook')
+FlaskRestApi.add_resource(FbUserDetails, '/facebook')
 #FlaskRestApi.add_resource(Foo, '/Foo', '/Foo/<str:id>')
 #FlaskRestApi.add_resource(Bar, '/Bar', '/Bar/<str:id>')
 #FlaskRestApi.add_resource(Baz, '/Baz', '/Baz/<str:id>')

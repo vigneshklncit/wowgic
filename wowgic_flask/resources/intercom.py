@@ -32,9 +32,8 @@ graphDB=neo4jInt.connect()
 ####
 # End of boilerplate, interesting code starts here:
 neo4jInt.createConstraint(graphDB)
-
 mongoInt=mongoInt.mongoInt()
-#mconnect = mongoInt.connect()
+
 class intercom:
     ''' this file act as a intercaller /router / flow chart whaterver you call. T o& fro
     calling functions interworking between verious interfaces like twitter, Instagram,
@@ -42,6 +41,7 @@ class intercom:
     '''
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
+        mconnect = mongoInt.connect()
         #authenticate twitter app
 
 
@@ -71,10 +71,15 @@ class intercom:
         '''
         return instagramInt.instagram_login()
 
+    def retrieveMediaBasedTags(self):
+        '''
+        '''
+        return instagramInt.retrieveMediaBasedTags()
+
+
     def handle_instagram_authorization(self):
         '''
         '''
-        mconnect = mongoInt.connect()
         user=instagramInt.handle_instagram_authorization()
         mongoInt.insertInstagramUserLoginData(user)
         return "Thanks buddy ! Instagram is authorized"
