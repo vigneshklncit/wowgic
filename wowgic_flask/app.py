@@ -89,6 +89,7 @@ intercom=intercom.intercom()
 #FbUserDetails is for testing the app
 class FbUserDetails(Resource):
     def get(self):
+        feedList =[]
         #facbook tmp input given by chella ltr retrive from app and give as inpu to this variable
         ####
         #Satheesh
@@ -96,8 +97,8 @@ class FbUserDetails(Resource):
         ####
         #Vivek Su
         #jsonFBInput ='{"id":"858104450925382","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
-        feeds = intercom.createUserNode(jsonFBInput)
-        feeds.append(intercom.retrieveMediaBasedTags())
+        feedList.append(intercom.facebook_authorized(jsonFBInput))
+        feedList.append(intercom.retrieveMediaBasedTags())
         #feeds=json.dumps(dict(feeds))
         #logger.debug('feed is %s',feeds)
         #return JSONEncoder().encode(feeds)
@@ -106,7 +107,7 @@ class FbUserDetails(Resource):
             #logger.debug('feed twitter text is#%s',feed.text)
             #return jsonify(json.dumps(feed))
         flash('just for testing')
-        return feeds
+        return feedList
 
 
 class Departmental_Salary(Resource):
@@ -166,17 +167,18 @@ def facebook_login():
             _external=True))
 
 @app.route('/login/authorized')
-@facebook.authorized_handler
+@facebook.authorized_handler #this decorator passes the req as response below
 def facebook_authorized(resp):
     if resp is None:
         return 'Access denied: reason=%s error=%s' % (
             request.args['error_reason'],
             request.args['error_description']
         )
-    session['oauth_token'] = (resp['access_token'], '')
     me = facebook.get('/me')
-    return 'Logged in as id=%s name=%s redirect=%s' % \
-        (me.data['id'], me.data['name'], request.args.get('next'))
+    me.data['fb_oauth_token'] = (resp['access_token'], '')
+    intercom.facebook_authorized(me.data)
+    return 'Logged in as me=%s me.data=%s redirect=%s' % \
+        (me, me.data, request.args.get('next'))
 
 @facebook.tokengetter
 def get_facebook_oauth_token():

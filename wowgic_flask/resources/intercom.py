@@ -45,8 +45,10 @@ class intercom:
         #authenticate twitter app
 
 
-    def createUserNode(self,jsonFBInput):
-        decodedFBJson=json.loads(jsonFBInput)
+    def createUserNode(self,decodedFBJson):
+        '''
+        '''
+        #decodedFBJson=json.loads(decodedFBJson)
         if mongoInt.insertFBUserLoginData(decodedFBJson):
             neo4jInt.createUserNode(graphDB,decodedFBJson,'user')
             interestList = ['hometown','location','work','education']
@@ -55,31 +57,49 @@ class intercom:
         else:
             logger.debug('user already exists hence skipping the neo4J creation of nodes & interest')
         #once the nodes are created lets fetch the feeds
-        return self.retrieveTweets()
+        return 1
 
     def retrieveTweets(self):
         '''retrieveTweetsBasedHashtag
         '''
+        passCnt = 0
         neo4jInt.showInterestNode(graphDB)
         twits = twitterInt.retrieveTweetsBasedHashtag()
+        passCnt += mongoInt.insertFeedData(twits)
         logger.debug('retrieve tweets')
         #page_sanitized = json_util.dumps(twits)
         return twits
 
     def instagram_login(self):
-        '''
+        ''' bypasser for instagram login
         '''
         return instagramInt.instagram_login()
 
     def retrieveMediaBasedTags(self):
         '''
         '''
-        return instagramInt.retrieveMediaBasedTags()
+        passCnt = 0
+        feedJson = instagramInt.retrieveMediaBasedTags()
+        #feedJson = json.loads(feedJson)
+        passCnt += mongoInt.insertFeedData(feedJson)
+        return feedJson
 
 
     def handle_instagram_authorization(self):
         '''
         '''
+        passCnt = 0
         user=instagramInt.handle_instagram_authorization()
-        mongoInt.insertInstagramUserLoginData(user)
+        passCnt += mongoInt.insertInstagramUserLoginData(user)
         return "Thanks buddy ! Instagram is authorized"
+
+    def facebook_authorized(self,userJson):
+        '''
+        '''
+        passCnt = 0
+        #store the user data along with access_token
+        #logger.debug('userJson:%s',userJson)
+        userJson=json.loads(userJson)
+        passCnt += mongoInt.insertFBUserLoginData(userJson)
+        self.createUserNode(userJson)
+        return self.retrieveTweets()

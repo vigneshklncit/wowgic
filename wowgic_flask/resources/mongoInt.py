@@ -19,6 +19,9 @@ class mongoInt():
     twitter datas etc'''
     conn={}
     db=None
+    def __init__(self):
+        logger.debug('who invoked me ? hey u - %s',__name__)
+        #authenticate twitter app
     ############################################################################
     #Function Name  : connect                                                  #
     #Input          : IP -> IP of the machine to connect                       #
@@ -32,7 +35,7 @@ class mongoInt():
         try:
             #DB_HOST = os.environ.get('OPENSHIFT_MONGODB_DB_HOST','localhost')
             #MONGODB_PORT = os.environ.get('OPENSHIFT_MONGODB_DB_PORT','27017')
-            #uri = "mongodb://wowgic:wowgic@ds043714.mongolab.com:43714/wogicdb&ssl=true"
+            #uri = "mongodb://admin:wowgic@ds043714-a.mongolab.com:43714/wogicdb"
             #uri = 'mongodb://'+globalS.dictDb['MONGODB_USERNAME']+':'+globalS.dictDb['MONGODB_PASSWORD']+'@'+globalS.dictDb['MONGODB_HOST']+':'+globalS.dictDb['MONGODB_PORT']+'/wowgicflaskapp'
             uri = 'mongodb://'+globalS.dictDb['MONGODB_USERNAME']+':'+globalS.dictDb['MONGODB_PASSWORD']+'@'+globalS.dictDb['MONGODB_HOST']+':'+globalS.dictDb['MONGODB_PORT']
             logger.debug('mongoDb URI#%s',uri)
@@ -46,7 +49,7 @@ class mongoInt():
             #self.conn = pymongo.MongoClient('mongodb://admin:3Xfk5q16Nkbl@python-wowgic.rhcloud.com:27017')
         except Exception as e:
             logger.error("Could not connect to MongoDB: %s", e)
-        self.db=self.conn['wowgicflaskapp']
+        self.db=self.conn['wowgicflaskapp'] #our global database
         return self.conn
 
     ############################################################################
@@ -138,8 +141,10 @@ class mongoInt():
         idxDict = coll.index_information()
         logger.debug('the index dict is %s',idxDict)
         if not idxDict:
-            result = coll.create_index('id')
+            result = coll.create_index('id') #create & ensure i dont know which is perfect
+            logger.debug('constraint create result %s',result)
             result = coll.ensure_index('id')
+            logger.debug('constraint ensure result %s',result)
         else:
             logger.debug('already index exists on collection %s',coll)
     ############################################################################
@@ -152,3 +157,29 @@ class mongoInt():
         sql etc while python cleanup. In case if python encounters KILLSIG this
         method gets invoked and gracefully closes the ssh connection'''
         #self.close()
+    ############################################################################
+    #Function Name  :  #
+    #Input          :  #
+    #Return Value   :  #
+    ############################################################################
+    def insertFeedData(self,feedData):
+        '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
+        identified by the base URI of the graph database'''
+
+        # Connect to the databases
+        #db = self.conn['userData']
+        #
+        updateCnt = 0
+        coll=self.db['feeds']
+        for feed in feedData:
+            #instead of updating we can find_one initialyy and then do update operation
+            WriteResult =coll.update({'id':feed['id']},feed,True)
+            if WriteResult['updatedExisting']:
+                logger.warn('mongoDB update feed result#%s',WriteResult)
+            else:
+                logger.debug('USer already exists in DB')
+                updateCnt  += updateCnt
+        if updateCnt:
+            return 1
+        else:
+            return 0
