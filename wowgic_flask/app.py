@@ -9,10 +9,11 @@
 #                :twit_test.py -h
 #===============================================================================
 from flask_restful import fields, marshal_with, reqparse, Resource, Api
-from flask import url_for, request, session, redirect, Flask , flash
+from flask import url_for, request, session, redirect, Flask , flash, jsonify
 from flask_oauth import OAuth
 import time
 import sys
+import json
 import argparse
 sys.path.append('common')
 sys.path.append('resources')
@@ -77,7 +78,7 @@ app.logger_name = loggerRecord.get_logger() #associate the app logger with gener
 intercom=intercom.intercom()
 #FbUserDetails is for testing the app
 class FbUserDetails(Resource):
-    def get(self):
+    def post(self):
         feedList =[]
         #facbook tmp input given by chella ltr retrive from app and give as inpu to this variable
         ####
@@ -119,6 +120,20 @@ def hello():
     flash('data + play + magic = WOwgic')
     return 'Hello Wowgic!'
 
+@app.route('/testing',methods=['GET', 'POST'])
+def testing():
+    feedList =[]
+    #facbook tmp input given by chella ltr retrive from app and give as inpu to this variable
+    ####
+    #Satheesh
+    jsonFBInput = '{"id":"1240560189303114","name":"Mari Satheesh","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106377336067638","name":"Bangalore, India"},"education":[{"school":{"id":"135521326484377","name":"Cathy Matriculationn Higher Secondary School"},"type":"High School"},{"school":{"id":"131854716845812","name":"KLN College of Engineering"},"type":"College"},{"school":{"id":"112188602140934","name":"kln"},"type":"College"}],"work":[{"employer":{"id":"114041451939962","name":"Sonus Networks"}}]}'
+    ####
+    #Vivek Su
+    #jsonFBInput ='{"id":"858104450925382","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
+    feedList.append(intercom.facebook_authorized(jsonFBInput))
+    feedList.append(intercom.retrieveMediaBasedTags())
+    flash('just for testing')
+    return json.dumps(feedList)
 #------------------------------------------------------------------------------#
 #                   instagram authentication                                   #
 #------------------------------------------------------------------------------#
