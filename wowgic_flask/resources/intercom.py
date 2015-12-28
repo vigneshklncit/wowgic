@@ -99,7 +99,10 @@ class intercom:
         passCnt = 0
         #store the user data along with access_token
         #logger.debug('userJson:%s',userJson)
-        userJson=json.loads(userJson)
+        try:
+            userJson=json.loads(userJson)
+        except:
+            pass #while passing json directly this is not reqd in production remove this
         passCnt += mongoInt.insertFBUserLoginData(userJson)
         self.createUserNode(userJson)
         return self.retrieveTweets()

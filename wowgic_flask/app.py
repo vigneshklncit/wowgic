@@ -9,11 +9,10 @@
 #                :twit_test.py -h
 #===============================================================================
 from flask_restful import fields, marshal_with, reqparse, Resource, Api
-from flask import url_for, request, session, redirect, Flask , flash, jsonify
+from flask import url_for, request, session, redirect, Flask , flash
 from flask_oauth import OAuth
 import time
 import sys
-import os
 import argparse
 sys.path.append('common')
 sys.path.append('resources')
@@ -21,16 +20,6 @@ import globalS
 import generic
 import loggerRecord
 import intercom
-import json
-
-#from bson import ObjectId
-#
-#class JSONEncoder(json.JSONEncoder):
-#    def default(self, o):
-#        if isinstance(o, ObjectId):
-#            return str(o)
-#        return json.JSONEncoder.default(self, o)
-
 
 #parse the run-time args passed
 parser = argparse.ArgumentParser(description='  To get the mra.log,rc.log,\
