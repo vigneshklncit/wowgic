@@ -63,11 +63,10 @@ class instagramInt:
         tag_recent_media returns 2 variables, the media ID in an array and the next
         url for the next page'''
         api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
-        media_ids,next = api.tag_recent_media(tag_name='madurai', count=1,return_json=True)
+        media_ids,next = api.tag_recent_media(tag_name='madurai', count=10,return_json=True)
         for mid in media_ids:
             pass
             #mediaF=api.media(mid.id,return_json=True)
             #logger.debug('INstagram mediaIds:%s full_media:%s',mid,media_ids)
         #logger.debug('jsonify error:\n %s', mid)
         return media_ids
-

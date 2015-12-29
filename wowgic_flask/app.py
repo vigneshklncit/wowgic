@@ -130,6 +130,8 @@ def testing():
     ####
     #Vivek Su
     #jsonFBInput ='{"id":"858104450925382","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
+    data = request.data
+    jsonFBInput = json.loads(data)
     feedList.append(intercom.facebook_authorized(jsonFBInput))
     feedList.append(intercom.retrieveMediaBasedTags())
     flash('just for testing')
@@ -178,8 +180,9 @@ def facebook_authorized(resp):
             request.args['error_reason'],
             request.args['error_description']
         )
+    session['oauth_token'] = (resp['access_token'], '')
     me = facebook.get('/me')
-    me.data['fb_oauth_token'] = (resp['access_token'], '')
+    me.data['fb_oauth_token'] = session['oauth_token']
     intercom.facebook_authorized(me.data)
     return 'Logged in as me=%s me.data=%s redirect=%s' % \
         (me, me.data, request.args.get('next'))
