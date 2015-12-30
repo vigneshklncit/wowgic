@@ -103,6 +103,6 @@ class intercom:
             userJson=json.loads(userJson)
         except:
             pass #while passing json directly this is not reqd in production remove this
-        passCnt += mongoInt.insertFBUserLoginData(userJson)
+        #passCnt += mongoInt.insertFBUserLoginData(userJson)
         self.createUserNode(userJson)
         return self.retrieveTweets()
