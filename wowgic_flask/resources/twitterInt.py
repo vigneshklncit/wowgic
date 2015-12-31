@@ -38,3 +38,14 @@ class twitterInt:
             feeds.append(tweet._json)
             logger.info("feed from twitter is %s", feeds)
         return feeds
+
+    def retrieveTweetBasedLocation(self,geoCode):
+        feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
+        geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])
+        logger.debug('geoCode#%s',geoCode)
+        logger.info('geoCode#%s',geoCode)
+        tweets = tweepy.Cursor(self.api.search, q='#happy',geocode=geoCode).items(1)
+        for tweet in tweets:
+            feeds.append(tweet._json)
+            logger.info("location feed from twitter is %s", feeds)
+        return feeds

@@ -25,6 +25,7 @@ api=''
 class instagramInt:
     ''' bla bla
     '''
+    api=''
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
         #authenticate twitter app
@@ -62,7 +63,7 @@ class instagramInt:
         '''get recent media ids with the tag "instadogs", only get the most recent 80
         tag_recent_media returns 2 variables, the media ID in an array and the next
         url for the next page'''
-        api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
+        self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
         media_ids,next = api.tag_recent_media(tag_name='madurai', count=10,return_json=True)
         for mid in media_ids:
             pass
@@ -70,3 +71,15 @@ class instagramInt:
             #logger.debug('INstagram mediaIds:%s full_media:%s',mid,media_ids)
         #logger.debug('jsonify error:\n %s', mid)
         return media_ids
+
+    def getLocationSearch(self,geoCode):
+        ''' check whether it gets recent media objects based on location or returns
+        location id '''
+        mediaList=[]
+        self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
+        location_search = self.api.location_search(lat=geoCode['lat'],lng=geoCode['lng'],distance=geoCode['distance'])
+        for loc in  location_search:
+            media_ids,next = self.api.location_recent_media(location_id=loc.id,return_json=True)
+            mediaList.append(media_ids)
+            logger.info('instagram api location_search %s',media_ids)
+        return mediaList

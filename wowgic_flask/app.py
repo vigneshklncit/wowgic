@@ -117,6 +117,7 @@ FlaskRestApi.add_resource(FbUserDetails, '/facebook')
 
 @app.route('/')
 def hello():
+    ''' this is just to check the index url is working '''
     flash('data + play + magic = WOwgic')
     return 'Hello Wowgic!'
 
@@ -137,6 +138,17 @@ def testing():
     feedList.append(intercom.facebook_authorized(jsonFBInput))
     feedList.append(intercom.retrieveMediaBasedTags())
     flash('just for testing')
+    return json.dumps(feedList)
+
+@app.route('/locationFeeds',methods=['POST'])
+def locationFeeds():
+    ''' Based on location and user provided radius lets retrive the tweets
+    '''
+    geoData = request.data
+    geoDict = json.loads(geoData)
+    logger.debug('geoData posted:%s',geoDict)
+    feedList =[]
+    feedList.append(intercom.retrieveLocationBasedTags(geoDict))
     return json.dumps(feedList)
 #------------------------------------------------------------------------------#
 #                   instagram authentication                                   #

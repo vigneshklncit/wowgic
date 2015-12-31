@@ -106,3 +106,13 @@ class intercom:
         #passCnt += mongoInt.insertFBUserLoginData(userJson)
         self.createUserNode(userJson)
         return self.retrieveTweets()
+
+    def retrieveLocationBasedTags(self,geoCode):
+        '''
+        '''
+        passCnt = 0
+        feedList=[]
+        feedList.append(twitterInt.retrieveTweetBasedLocation(geoCode))
+        feedList.append(instagramInt.getLocationSearch(geoCode))
+        #passCnt += mongoInt.insertInstagramUserLoginData(user)
+        return feedList
