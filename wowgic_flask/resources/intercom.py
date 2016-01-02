@@ -12,14 +12,15 @@ import sys
 sys.path.append('common')
 sys.path.append('resources')
 import globalS
-import json
 import generic
+import json
 import neo4jInterface
 import mongoInt
 import twitterInt
 import instagramInt
 import facebookInt
 import loggerRecord
+import random
 logger =  loggerRecord.get_logger()
 
 
@@ -44,15 +45,35 @@ class intercom:
         mconnect = mongoInt.connect()
         #authenticate twitter app
 
-
     def createUserNode(self,decodedFBJson):
         '''
         '''
         #decodedFBJson=json.loads(decodedFBJson)
-        if mongoInt.insertFBUserLoginData(decodedFBJson):
+        #remove the or True just to enable the loop added this
+        if mongoInt.insertFBUserLoginData(decodedFBJson) or True:
             neo4jInt.createUserNode(graphDB,decodedFBJson,'user')
             interestList = ['hometown','location','work','education']
             for int in interestList:
+                if 'work' in int:
+                    keyIs='employer'
+                elif 'education' in int:
+                    keyIs='school'
+                if isinstance(decodedFBJson[int],list):
+                    for itm in decodedFBJson[int]:
+                        if itm.get('type') == None:
+                                itm['type'] = keyIs
+                        data = facebookInt.getIdLocation(itm[keyIs]['id'])
+                        if 'location' in data:
+                            itm[keyIs].update(data['location'])
+                        else:
+                            tmp = {'city':'null','country':'null'}
+                            itm[keyIs].update(tmp)
+                        #decodedFBJson[int].update(itm[keyIs])
+
+                else:
+                    data = facebookInt.getIdLocation(decodedFBJson[int]['id'])
+                    decodedFBJson[int].update(data['location'])
+                logger.debug('dataFb decodedFBJson:%s',decodedFBJson)
                 neo4jInt.createInterestNode(graphDB,decodedFBJson,int)
         else:
             logger.debug('user already exists hence skipping the neo4J creation of nodes & interest')
@@ -63,7 +84,7 @@ class intercom:
         '''retrieveTweetsBasedHashtag
         '''
         passCnt = 0
-        neo4jInt.showInterestNode(graphDB)
+        #neo4jInt.showInterestNode(graphDB)
         twits = twitterInt.retrieveTweetsBasedHashtag()
         passCnt += mongoInt.insertFeedData(twits)
         logger.debug('retrieve tweets')
@@ -75,6 +96,11 @@ class intercom:
         '''
         return instagramInt.instagram_login()
 
+    def getMydata(self):
+        ''' bypasser for instagram login
+        '''
+        return facebookInt.getMydata()
+
     def retrieveMediaBasedTags(self):
         '''
         '''
@@ -83,7 +109,6 @@ class intercom:
         #feedJson = json.loads(feedJson)
         passCnt += mongoInt.insertFeedData(feedJson)
         return feedJson
-
 
     def handle_instagram_authorization(self):
         '''
@@ -112,7 +137,8 @@ class intercom:
         '''
         passCnt = 0
         feedList=[]
-        feedList.append(twitterInt.retrieveTweetBasedLocation(geoCode))
-        feedList.append(instagramInt.getLocationSearch(geoCode))
+        feedList.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
+        feedList.extend(instagramInt.getLocationSearch(geoCode))
         #passCnt += mongoInt.insertInstagramUserLoginData(user)
+        random.shuffle(feedList)
         return feedList

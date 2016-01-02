@@ -50,7 +50,7 @@ class instagramInt:
             #update access_token to the instagram_user
             instagram_user['access_token'] = access_token
             globalS.dictDb['instagram_userid'] = instagram_user['id']
-            globalS.dictDb['instagram_access_token']   = access_token
+            globalS.dictDb['instagram_access_token'] = access_token
             logger.debug('access_token#%s, instagram_user#%s',access_token, instagram_user)
             #deferred.defer(fetch_instagram_for_user, g.user.get_id(), count=20, _queue='instagram')
         except Exception, e:
@@ -64,7 +64,7 @@ class instagramInt:
         tag_recent_media returns 2 variables, the media ID in an array and the next
         url for the next page'''
         self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
-        media_ids,next = api.tag_recent_media(tag_name='madurai', count=10,return_json=True)
+        media_ids,next = self.api.tag_recent_media(tag_name='madurai', count=10,return_json=True)
         for mid in media_ids:
             pass
             #mediaF=api.media(mid.id,return_json=True)

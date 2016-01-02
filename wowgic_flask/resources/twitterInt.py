@@ -7,7 +7,7 @@
 # Description    : This file just interfaces to neo4J and brings you the handle so that multiple files can
 #
 #===============================================================================
-import loggerRecord
+import loggerRecord,globalS
 logger =  loggerRecord.get_logger()
 ####
 # Get tweepy set up
@@ -24,6 +24,7 @@ access_secret = 'pRx5MNKkmxyImwuhUFMNVOr1NrAWcRmOGUgGTLVYFAjsJ';
 class twitterInt:
     ''' bla bla
     '''
+    api=''
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
         #authenticate twitter app
@@ -33,19 +34,26 @@ class twitterInt:
 
     def retrieveTweetsBasedHashtag(self):
         feeds =[]
-        cricTweets = tweepy.Cursor(self.api.search, q='#madurai').items(10)
+        cricTweets = tweepy.Cursor(self.api.search, q='#madurai').items(1)
         for tweet in cricTweets:
             feeds.append(tweet._json)
-            logger.info("feed from twitter is %s", feeds)
+            #logger.debug("feed from twitter is %s", feeds)
         return feeds
+
 
     def retrieveTweetBasedLocation(self,geoCode):
         feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
-        geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])
+        #userObj = self.api.verify_credentials()
+        #if userObj:
+        #    logger.debug('twitter is it authenticated:%s',userObj.name)
+        #else:
+        #    logger.debug( 'Invalid Authentication')
+        geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
         logger.debug('geoCode#%s',geoCode)
-        logger.info('geoCode#%s',geoCode)
-        tweets = tweepy.Cursor(self.api.search, q='#happy',geocode=geoCode).items(1)
+        #tweets = tweepy.Cursor(self.api.search,q='a', geocode="-22.9122,-43.2302,1km").items(1)
+        tweets = tweepy.Cursor(self.api.search,q='a',geocode=geoCode,rpp=15).items(15)
+        #logger.info("location feed from twitter is %s", dir(tweets))
         for tweet in tweets:
             feeds.append(tweet._json)
-            logger.info("location feed from twitter is %s", feeds)
+        logger.debug("location feed from twitter is %s",feeds)
         return feeds

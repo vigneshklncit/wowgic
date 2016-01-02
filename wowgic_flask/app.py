@@ -20,7 +20,6 @@ sys.path.append('resources')
 import globalS
 import generic
 import loggerRecord
-import intercom
 
 #parse the run-time args passed
 parser = argparse.ArgumentParser(description='  To get the mra.log,rc.log,\
@@ -75,6 +74,7 @@ logger.debug('global dictDB file# %s',globalS.dictDb['MONGODB_PASSWORD'])
 
 #app.logger.addHandler(fhandler) #associate the app logger with general logger
 app.logger_name = loggerRecord.get_logger() #associate the app logger with general logger
+import intercom
 intercom=intercom.intercom()
 #FbUserDetails is for testing the app
 class FbUserDetails(Resource):
@@ -87,8 +87,8 @@ class FbUserDetails(Resource):
         ####
         #Vivek Su
         #jsonFBInput ='{"id":"858104450925382","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
-        feedList.append(intercom.facebook_authorized(jsonFBInput))
-        feedList.append(intercom.retrieveMediaBasedTags())
+        #feedList.append(intercom.facebook_authorized(jsonFBInput))
+        #feedList.append(intercom.retrieveMediaBasedTags())
         #feeds=json.dumps(dict(feeds))
         #logger.debug('feed is %s',feeds)
         #return JSONEncoder().encode(feeds)
@@ -127,16 +127,18 @@ def testing():
     #facbook tmp input given by chella ltr retrive from app and give as inpu to this variable
     ####
     #Vivek Su
-    #jsonFBInput ='{"id":"858104450925382","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
+    jsonFBInput = '{"id":"1240560189303114","name":"Mari Satheesh","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106377336067638","name":"Bangalore, India"},"education":[{"school":{"id":"135521326484377","name":"Cathy Matriculationn Higher Secondary School"},"type":"High School"},{"school":{"id":"131854716845812","name":"KLN College of Engineering"},"type":"College"},{"school":{"id":"112188602140934","name":"kln"},"type":"College"}],"work":[{"employer":{"id":"114041451939962","name":"Sonus Networks"}}]}'
+    #jsonFBInput ='{"id":"858104450925558","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
     data = request.data
     try:
         jsonFBInput = json.loads(data)
     except:
         ####
         #Satheesh
-        jsonFBInput = '{"id":"1240560189303114","name":"Mari Satheesh","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106377336067638","name":"Bangalore, India"},"education":[{"school":{"id":"135521326484377","name":"Cathy Matriculationn Higher Secondary School"},"type":"High School"},{"school":{"id":"131854716845812","name":"KLN College of Engineering"},"type":"College"},{"school":{"id":"112188602140934","name":"kln"},"type":"College"}],"work":[{"employer":{"id":"114041451939962","name":"Sonus Networks"}}]}'
+        jsonFBInput = json.loads(jsonFBInput)
     feedList.append(intercom.facebook_authorized(jsonFBInput))
-    feedList.append(intercom.retrieveMediaBasedTags())
+    #intercom.getMydata()
+    #feedList.append(intercom.retrieveMediaBasedTags())
     flash('just for testing')
     return json.dumps(feedList)
 
@@ -148,7 +150,7 @@ def locationFeeds():
     geoDict = json.loads(geoData)
     logger.debug('geoData posted:%s',geoDict)
     feedList =[]
-    feedList.append(intercom.retrieveLocationBasedTags(geoDict))
+    feedList.extend(intercom.retrieveLocationBasedTags(geoDict))
     return json.dumps(feedList)
 #------------------------------------------------------------------------------#
 #                   instagram authentication                                   #
@@ -166,8 +168,8 @@ def handle_instagram_authorization():
 # facebook authentication
 #-------------------------------------------------------------------------------
 # To get an access token to consume the API on behalf of a user, use a suitable OAuth library for your platform
-FACEBOOK_APP_ID = '575443062564498'
-FACEBOOK_APP_SECRET = '3112a499e27dcd991b9869a5dd5524c0'
+globalS.dictDb['FACEBOOK_APP_ID'] = '575443062564498'
+globalS.dictDb['FACEBOOK_APP_SECRET'] = '3112a499e27dcd991b9869a5dd5524c0'
 oauth = OAuth()
 
 facebook = oauth.remote_app('facebook',
@@ -175,8 +177,8 @@ facebook = oauth.remote_app('facebook',
     request_token_url=None,
     access_token_url='/oauth/access_token',
     authorize_url='https://www.facebook.com/dialog/oauth',
-    consumer_key=FACEBOOK_APP_ID,
-    consumer_secret=FACEBOOK_APP_SECRET,
+    consumer_key=globalS.dictDb['FACEBOOK_APP_ID'],
+    consumer_secret=globalS.dictDb['FACEBOOK_APP_SECRET'],
     request_token_params={'scope': 'email'}
 )
 
@@ -197,6 +199,7 @@ def facebook_authorized(resp):
     session['oauth_token'] = (resp['access_token'], '')
     me = facebook.get('/me')
     me.data['fb_oauth_token'] = session['oauth_token']
+    globalS.dictDb['fb_oauth_token'] = session['oauth_token']
     intercom.facebook_authorized(me.data)
     return 'Logged in as me=%s me.data=%s redirect=%s' % \
         (me, me.data, request.args.get('next'))
@@ -205,6 +208,62 @@ def facebook_authorized(resp):
 def get_facebook_oauth_token():
     return session.get('oauth_token')
 
+#-------------------------------------------------------------------------------
+# twitter authentication
+#-------------------------------------------------------------------------------
+# Use Twitter as example remote application
+twitter = oauth.remote_app('twitter',
+    # unless absolute urls are used to make requests, this will be added
+    # before all URLs.  This is also true for request_token_url and others.
+    base_url='https://api.twitter.com/1.1/',
+    # where flask should look for new request tokens
+    request_token_url='https://api.twitter.com/oauth/request_token',
+    # where flask should exchange the token with the remote application
+    access_token_url='https://api.twitter.com/oauth/access_token',
+    # twitter knows two authorizatiom URLs.  /authorize and /authenticate.
+    # they mostly work the same, but for sign on /authenticate is
+    # expected because this will give the user a slightly different
+    # user interface on the twitter side.
+    authorize_url='https://api.twitter.com/oauth/authenticate',
+    # the consumer keys from the twitter application registry.
+    consumer_key= 'HwvpHtsPt3LmOZocZXwtn72Zv',
+    consumer_secret = 'afVEAR0Ri3ZluVItqbDi0kfm7BHSxjwRXbpw9m9kFhXGjnzHKh'
+)
+
+@twitter.tokengetter
+def get_twitter_token(token=None):
+    return session.get('twitter_token')
+
+@app.route('/twitLoginCheck')
+def twitLoginCheck():
+    access_token = session.get('access_token')
+    if access_token is None:
+        return redirect(url_for('twitterLogin'))
+    access_token = access_token[0]
+    #return render_template('index.html')
+    return 0
+
+@app.route('/twitterLogin')
+def twitterLogin():
+    return twitter.authorize(callback=url_for('twitOauthAuthorized',
+        next=request.args.get('next') or request.referrer or None))
+
+@app.route('/twitterLogout')
+def twitterLogout():
+    session.pop('screen_name', None)
+    flash('You were signed out')
+    return redirect(request.referrer or url_for('twitLoginCheck'))
+
+@app.route('/twitOauthAuthorized')
+@twitter.authorized_handler
+def twitOauthAuthorized(resp):
+    #resp = twitter.authorized_response()
+    logger.debug('twitter resp:%s',resp)
+    if resp is None:
+        flash('You denied the request to sign in.')
+    else:
+        session['twitter_oauth'] = resp
+    return 'twitter authorized'
 
 if 'debug' in args.logLevel:
     app.debug = True

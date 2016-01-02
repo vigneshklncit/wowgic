@@ -78,6 +78,7 @@ class mongoInt():
         coll=self.db['FBLoginUserData']
         self.createConstraint(coll)
         #instead of updating we can find_one initialyy and then do update operation
+        logger.debug('FBJsonUserLoginData interest:%s',FBJsonUserLoginData['id'])
         WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
         if WriteResult['updatedExisting']:
             logger.warn('mongoDB update method result#%s',WriteResult)

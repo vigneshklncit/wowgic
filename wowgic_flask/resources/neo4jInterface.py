@@ -131,7 +131,7 @@ class neo4jInterface:
 
         query = """ MERGE (i {id:{k}}) ON CREATE SET
             """+(('i:'+',i:'.join(labels)+",") if labels else '')+"""
-            i.id={k}, i.name={v}
+            i.id={k}, i.name={v},i.city={c},i.country={cc}
             """ +   (("ON MATCH SET\n  i:"+',i:'.join(labels)) if labels else '') +"""
             return i"""
         n=graphDB.cypher.execute(query,params)
@@ -167,15 +167,19 @@ class neo4jInterface:
                     'd' : decodedFBJson['id'],
                     'k' : itm[keyIs]['id'],
                     'v' : itm[keyIs]['name'],
+                    'c' : itm[keyIs]['city'],
+                    'cc' : itm[keyIs]['country'],
                     'type' : itm['type']
                 }
                 logger.info ("params:%s",params)
                 execCnt += self.execCreateRelQuery(graphDB,params,ht)
         else:
             params = {
-                'd': decodedFBJson['id'],
+                'd' : decodedFBJson['id'],
                 'k' : decodedFBJson[ht]['id'],
                 'v' : decodedFBJson[ht]['name'],
+                'c' : decodedFBJson[ht]['city'],
+                'cc' : decodedFBJson[ht]['country'],
                 'type' : ht
             }
             execCnt += self.execCreateRelQuery(graphDB,params,ht)

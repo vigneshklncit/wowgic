@@ -17,17 +17,35 @@ logger =  loggerRecord.get_logger()
 class facebookInt:
     ''' bla bla
     '''
+    fbGraph = None
     def get_facebook_oauth_token(self):
-        globalS.dictDb['fbToken'] = session.get('facebook_token')
+        fbaccessToken = 'CAAILXMdVJpIBACemPU8JxUpZASm8xJHE1OB6MNCQcAEqUQpDCguPnf17O8tjCcLAGCgYTxzd1FhnpXkO3aWksnqvtCkXNZCQyBnGwqZCrtnY1SZB7ikZC5t6auOBkjVJVEt9KzbFEYjH1SZAajDNjT4ApeBxNZB3NZAOzCBydTxVYpmHySdIpEAjMvFW38BjZC9RsYY1snWZBBJwZDZD'
+        #globalS.dictDb['fbToken'] = session.get('facebook_token')
+        globalS.dictDb['fbToken'] = fbaccessToken
         return globalS.dictDb['fbToken']
 
-    #connect to the API
-#graph = GraphAPI(extended_token)
-#https://lookup-id.com/
-#group_id = str(286829698078211)
-#data = graph.get(group_id + "/feed", page=False, retry=3, limit=5)
-#comments = graph.get(post['id'] + '/comments', page=False, retry=3, limit=1)
-#this just generates an extended access token so that it lasts 60 days
-## retrive the access_token from mongoDb
-#Returns a tuple with a string describing the extended access token and a datetime instance describing when it expires.
-#extended_oauth_token = utils.get_extended_access_token(oauth_token[0],FACEBOOK_APP_ID,FACEBOOK_APP_SECRET)
+    def initializeGraph(self):
+        #connect to the API
+        if self.fbGraph is None:
+            logger.debug('fbgraph is intialised')
+            self.fbGraph = GraphAPI(self.get_facebook_oauth_token())
+
+    def getIdLocation(self,id):
+        #https://lookup-id.com/
+        self.initializeGraph()
+        path = str(id)+'?fields=location'
+        data = self.fbGraph.get(path)
+        #logger.debug('my data from facebook:%s',data)
+        # retrive the access_token from mongoDb
+        return data
+
+    def extendOauthToken(self):
+        '''this just generates an extended access token so that it lasts 60 days
+        '''
+        #Returns a tuple with a string describing the extended access token and a datetime instance describing when it expires.
+        extended_oauth_token = utils.get_extended_access_token(oauth_token[0],globalS.dictDb['FACEBOOK_APP_ID'],globalS.dictDb['FACEBOOK_APP_SECRET'])
+        logger.debug('extended_oauth_token:%s',extended_oauth_token)
+        return
+
+
+
