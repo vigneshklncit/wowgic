@@ -137,7 +137,7 @@ class intercom:
         '''
         passCnt = 0
         feedList=[]
-        #feedList.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
+        feedList.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
         feedList.extend(instagramInt.getLocationSearch(geoCode))
         #passCnt += mongoInt.insertInstagramUserLoginData(user)
         random.shuffle(feedList)
