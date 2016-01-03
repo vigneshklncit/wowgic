@@ -51,7 +51,7 @@ class twitterInt:
         geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
         logger.debug('geoCode#%s',geoCode)
         #tweets = tweepy.Cursor(self.api.search,q='a', geocode="-22.9122,-43.2302,1km").items(1)
-        tweets = tweepy.Cursor(self.api.search,q='a',geocode=geoCode,rpp=15).items(15)
+        tweets = tweepy.Cursor(self.api.search,q='a',geocode=geoCode,rpp=10).items(10)
         #logger.info("location feed from twitter is %s", dir(tweets))
         for tweet in tweets:
             feeds.append(tweet._json)
