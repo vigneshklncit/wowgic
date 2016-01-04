@@ -77,9 +77,10 @@ class instagramInt:
         location id '''
         mediaList=[]
         self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
-        location_search = self.api.location_search(lat=geoCode['lat'],lng=geoCode['lng'],distance=(geoCode['distance']*1000))
-        for loc in  location_search:
-            media_ids,next = self.api.location_recent_media(location_id=loc.id,return_json=True)
-            mediaList.extend(media_ids)
-            logger.info('instagram api location_search %s',media_ids)
+        #location_search = self.api.location_search(lat=geoCode['lat'],lng=geoCode['lng'],distance=(geoCode['distance']*1000))
+        #for loc in  location_search:
+        #    media_ids,next = self.api.location_recent_media(location_id=loc.id,return_json=True)
+        #    mediaList.extend(media_ids)
+        #    logger.info('instagram api location_search %s',media_ids)
+        mediaList = self.api.media_search(lat=geoCode['lat'],lng=geoCode['lng'],distance=(geoCode['distance']*1000))
         return mediaList
