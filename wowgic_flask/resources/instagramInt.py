@@ -82,5 +82,5 @@ class instagramInt:
         #    media_ids,next = self.api.location_recent_media(location_id=loc.id,return_json=True)
         #    mediaList.extend(media_ids)
         #    logger.info('instagram api location_search %s',media_ids)
-        mediaList = self.api.media_search(lat=geoCode['lat'],lng=geoCode['lng'],distance=(geoCode['distance']*1000))
+        mediaList = self.api.media_search(lat=geoCode['lat'],lng=geoCode['lng'],distance=(geoCode['distance']*1000),return_json=True)
         return mediaList

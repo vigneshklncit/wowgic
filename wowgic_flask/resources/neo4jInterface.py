@@ -168,6 +168,8 @@ class neo4jInterface:
                     'k' : itm[keyIs]['id'],
                     'v' : itm[keyIs]['name'],
                     'c' : itm[keyIs]['city'],
+                    #'lat' : itm[keyIs]['latitude'],
+                    #'lng' : itm[keyIs]['longitude'],
                     'cc' : itm[keyIs]['country'],
                     'type' : itm['type']
                 }
@@ -178,6 +180,8 @@ class neo4jInterface:
                 'd' : decodedFBJson['id'],
                 'k' : decodedFBJson[ht]['id'],
                 'v' : decodedFBJson[ht]['name'],
+                #'lat' : itm[keyIs]['latitude'],
+                #'lng' : itm[keyIs]['longitude'],
                 'c' : decodedFBJson[ht]['city'],
                 'cc' : decodedFBJson[ht]['country'],
                 'type' : ht

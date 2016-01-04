@@ -66,15 +66,15 @@ class intercom:
                         if 'location' in data:
                             itm[keyIs].update(data['location'])
                         else:
-                            tmp = {'city':'null','country':'null'}
+                            tmp = {'city':'null','country':'null','longitude':'null','latitude':'null'}
                             itm[keyIs].update(tmp)
                         #decodedFBJson[int].update(itm[keyIs])
 
                 else:
                     data = facebookInt.getIdLocation(decodedFBJson[int]['id'])
                     decodedFBJson[int].update(data['location'])
-                logger.debug('dataFb decodedFBJson:%s',decodedFBJson)
                 neo4jInt.createInterestNode(graphDB,decodedFBJson,int)
+            logger.debug('dataFb decodedFBJson:%s',decodedFBJson)
         else:
             logger.debug('user already exists hence skipping the neo4J creation of nodes & interest')
         #once the nodes are created lets fetch the feeds
