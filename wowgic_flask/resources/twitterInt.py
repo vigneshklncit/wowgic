@@ -32,12 +32,16 @@ class twitterInt:
         auth.set_access_token(access_token, access_secret)
         self.api = tweepy.API(auth)
 
-    def retrieveTweetsBasedHashtag(self):
+    def retrieveTweetsBasedHashtag(self,Q,geoDict):
         feeds =[]
-        cricTweets = tweepy.Cursor(self.api.search, q='#madurai').items(1)
-        for tweet in cricTweets:
-            feeds.append(tweet._json)
-            #logger.debug("feed from twitter is %s", feeds)
+        try:
+            tweets = tweepy.Cursor(self.api.search, q=Q,rpp=20).items(20)
+            for tweet in tweets:
+                feeds.append(tweet._json)
+                #logger.debug("feed from twitter is %s", feeds)
+        except:
+            return feeds
+        feeds.extend(self.retrieveTweetBasedLocation(geoDict))
         return feeds
 
 
@@ -50,7 +54,6 @@ class twitterInt:
         #    logger.debug( 'Invalid Authentication')
         geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
         logger.debug('geoCode#%s',geoCode)
-        #tweets = tweepy.Cursor(self.api.search,q='a', geocode="-22.9122,-43.2302,1km").items(1)
         tweets = tweepy.Cursor(self.api.search,q='a',geocode=geoCode,rpp=10).items(10)
         #logger.info("location feed from twitter is %s", dir(tweets))
         for tweet in tweets:

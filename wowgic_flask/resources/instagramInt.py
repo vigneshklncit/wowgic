@@ -18,7 +18,7 @@ from collections import OrderedDict
 
 client_id = '081ccf9e86164090af417c8ce91cc2e4'
 client_secret = '5b623638585b46cd9d35a203e84114e0'
-access_token = '2300510664.081ccf9.545afdfe23b441dd9cfb3d8341c83ca7'
+access_token = '2300510664.081ccf9.545afdfe23b441dd9cfb3d8341c83ca7' # this is about to expire which has to updated each time
 client_ip = 'XX.XX.XX.XX'
 api=''
 
@@ -28,17 +28,19 @@ class instagramInt:
     api=''
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
+        self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
+        #return 1
         #authenticate twitter app
 
     def instagram_login(self):
 
-        redirect_uri = ('http://'+globalS.dictDb['HOST_NAME'] + url_for('handle_instagram_authorization'))
+        redirect_uri = ('http://'+globalS.dictDb['HOST_NAME'] + url_for('_handle_instagram_authorization'))
         instagram_client = client.InstagramAPI(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
         return redirect(instagram_client.get_authorize_url(scope=['basic']))
 
-    def handle_instagram_authorization(self):
+    def _handle_instagram_authorization(self):
 
-        redirect_uri = ('http://'+globalS.dictDb['HOST_NAME'] + url_for('handle_instagram_authorization'))
+        redirect_uri = ('http://'+globalS.dictDb['HOST_NAME'] + url_for('_handle_instagram_authorization'))
         code = request.values.get('code')
         if not code:
             return error_response('Missing code')
@@ -59,12 +61,19 @@ class instagramInt:
         #return globalS.dictDb
         return instagram_user
 
-    def retrieveMediaBasedTags(self):
+    def auth(self):
+        ''' this generalize the authentication with instagram'''
+
+    def retrieveMediaBasedTags(self,Q,geoDict):
         '''get recent media ids with the tag "instadogs", only get the most recent 80
         tag_recent_media returns 2 variables, the media ID in an array and the next
         url for the next page'''
-        self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
-        media_ids,next = self.api.tag_recent_media(tag_name='madurai', count=10,return_json=True)
+        #self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
+        #tag_search, next_tag = self.api.tag_search(q=Q)
+        #tag_recent_media,next = self.api.tag_recent_media(tag_name=Q, count=10,return_json=True)
+        medias = self.getLocationSearch(geoDict)
+        media_ids=[]
+        media_ids.extend(medias)
         for mid in media_ids:
             pass
             #mediaF=api.media(mid.id,return_json=True)
@@ -76,7 +85,7 @@ class instagramInt:
         ''' check whether it gets recent media objects based on location or returns
         location id '''
         mediaList=[]
-        self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
+        #self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
         #location_search = self.api.location_search(lat=geoCode['lat'],lng=geoCode['lng'],distance=(geoCode['distance']*1000))
         #for loc in  location_search:
         #    media_ids,next = self.api.location_recent_media(location_id=loc.id,return_json=True)

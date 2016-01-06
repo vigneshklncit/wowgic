@@ -19,6 +19,7 @@ class mongoInt():
     twitter datas etc'''
     conn={}
     db=None
+    databaseName='wowgicflaskapp'
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
         #authenticate twitter app
@@ -49,7 +50,7 @@ class mongoInt():
             #self.conn = pymongo.MongoClient('mongodb://admin:3Xfk5q16Nkbl@python-wowgic.rhcloud.com:27017')
         except Exception as e:
             logger.error("Could not connect to MongoDB: %s", e)
-        self.db=self.conn['wowgicflaskapp'] #our global database
+        self.db=self.conn[self.databaseName] #our global database
         return self.conn
 
     ############################################################################
@@ -157,13 +158,13 @@ class mongoInt():
         ''' basicall call methods like closing the ssh connection exiting the
         sql etc while python cleanup. In case if python encounters KILLSIG this
         method gets invoked and gracefully closes the ssh connection'''
-        #self.close()
+        self.conn.logout()
     ############################################################################
     #Function Name  :  #
     #Input          :  #
     #Return Value   :  #
     ############################################################################
-    def insertFeedData(self,feedData):
+    def insertFeedData(self,ID,feedData):
         '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
         identified by the base URI of the graph database'''
 
@@ -171,7 +172,7 @@ class mongoInt():
         #db = self.conn['userData']
         #
         updateCnt = 0
-        coll=self.db['feeds']
+        coll=self.db[ID]
         for feed in feedData:
             #instead of updating we can find_one initialyy and then do update operation
             WriteResult =coll.update({'id':feed['id']},feed,True)
@@ -184,3 +185,16 @@ class mongoInt():
             return 1
         else:
             return 0
+    ############################################################################
+    #Function Name  : createCollection #
+    #Input          :  #
+    #Return Value   :  #
+    ############################################################################
+    def createCollection(self,collInt):
+        ''' Get / create a Mongo collection
+        '''
+        collName = pymongo.collection.collection[self.databaseName,collInt]
+        logger.debug('Get create a Mongo collection:%s',collName)
+        self.createConstraint(collInt)
+
+        return 1

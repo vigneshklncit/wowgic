@@ -8,7 +8,7 @@
 # How to run     :twit_test.py -l info
 #                :twit_test.py -h
 #===============================================================================
-from flask_restful import fields, marshal_with, reqparse, Resource, Api
+#from flask_restful import fields, marshal_with, reqparse, Resource, Api
 from flask import url_for, request, session, redirect, Flask , flash, jsonify
 from flask_oauth import OAuth
 import time
@@ -45,7 +45,6 @@ app.config.from_pyfile('config.py')
 # Load the file specified by the APP_CONFIG_FILE environment variable
 # Variables defined here will override those in the default configuration
 app.config.from_envvar('APP_CONFIG_FILE')
-FlaskRestApi = Api(app) #creating a flask-restfull api
 
 ############################################################################
 #Function Name  : compileFileName                                          #
@@ -76,59 +75,22 @@ logger.debug('global dictDB file# %s',globalS.dictDb['MONGODB_PASSWORD'])
 app.logger_name = loggerRecord.get_logger() #associate the app logger with general logger
 import intercom
 intercom=intercom.intercom()
-#FbUserDetails is for testing the app
-class FbUserDetails(Resource):
-    def post(self):
-        feedList =[]
-        #facbook tmp input given by chella ltr retrive from app and give as inpu to this variable
-        ####
-        #Satheesh
-        jsonFBInput = '{"id":"1240560189303114","name":"Mari Satheesh","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106377336067638","name":"Bangalore, India"},"education":[{"school":{"id":"135521326484377","name":"Cathy Matriculationn Higher Secondary School"},"type":"High School"},{"school":{"id":"131854716845812","name":"KLN College of Engineering"},"type":"College"},{"school":{"id":"112188602140934","name":"kln"},"type":"College"}],"work":[{"employer":{"id":"114041451939962","name":"Sonus Networks"}}]}'
-        ####
-        #Vivek Su
-        #jsonFBInput ='{"id":"858104450925382","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
-        #feedList.append(intercom.facebook_authorized(jsonFBInput))
-        #feedList.append(intercom.retrieveMediaBasedTags())
-        #feeds=json.dumps(dict(feeds))
-        #logger.debug('feed is %s',feeds)
-        #return JSONEncoder().encode(feeds)
-        #for feed in feeds:
-            #feed=json.loads(json.dumps(feed))
-            #logger.debug('feed twitter text is#%s',feed.text)
-            #return jsonify(json.dumps(feed))
-        flash('just for testing')
-        return feedList
-
-
-class Departmental_Salary(Resource):
-    def get(self, department_name):
-        conn = e.connect()
-        query = conn.execute("select * from salaries where Department='%s'"%department_name.upper())
-        #Query the result and get cursor.Dumping that data to a JSON is looked by extension
-        result = {'data': [dict(zip(tuple (query.keys()) ,i)) for i in query.cursor]}
-        return result
-        #We can have PUT,DELETE,POST here. But in our API GET implementation is sufficient
-
-FlaskRestApi.add_resource(Departmental_Salary, '/dept/<string:department_name>')
-FlaskRestApi.add_resource(FbUserDetails, '/facebook')
-#FlaskRestApi.add_resource(Foo, '/Foo', '/Foo/<str:id>')
-#FlaskRestApi.add_resource(Bar, '/Bar', '/Bar/<str:id>')
-#FlaskRestApi.add_resource(Baz, '/Baz', '/Baz/<str:id>')
 
 @app.route('/')
 def hello():
     ''' this is just to check the index url is working '''
-    flash('data + play + magic = WOwgic')
-    return 'Hello Wowgic!'
+    #flash('') # this requires a rendering HTNL templete
+    return 'Hello Wowgic! Here data + play + magic'
 
+#change the url & in production we have to remove the try catch remove GET in production
 @app.route('/testing',methods=['GET', 'POST'])
 def testing():
     feedList =[]
     #facbook tmp input given by chella ltr retrive from app and give as inpu to this variable
     ####
     #Vivek Su
-    jsonFBInput = '{"id":"1240560189303114","name":"Mari Satheesh","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106377336067638","name":"Bangalore, India"},"education":[{"school":{"id":"135521326484377","name":"Cathy Matriculationn Higher Secondary School"},"type":"High School"},{"school":{"id":"131854716845812","name":"KLN College of Engineering"},"type":"College"},{"school":{"id":"112188602140934","name":"kln"},"type":"College"}],"work":[{"employer":{"id":"114041451939962","name":"Sonus Networks"}}]}'
-    #jsonFBInput ='{"id":"858104450925558","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
+    #jsonFBInput = '{"id":"1240560189303114","name":"Mari Satheesh","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106377336067638","name":"Bangalore, India"},"education":[{"school":{"id":"135521326484377","name":"Cathy Matriculationn Higher Secondary School"},"type":"High School"},{"school":{"id":"131854716845812","name":"KLN College of Engineering"},"type":"College"},{"school":{"id":"112188602140934","name":"kln"},"type":"College"}],"work":[{"employer":{"id":"114041451939962","name":"Sonus Networks"}}]}'
+    jsonFBInput ='{"id":"858104450925558","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
     data = request.data
     try:
         jsonFBInput = json.loads(data)
@@ -136,10 +98,25 @@ def testing():
         ####
         #Satheesh
         jsonFBInput = json.loads(jsonFBInput)
-    feedList.append(intercom.facebook_authorized(jsonFBInput))
+    feedList.extend(intercom.facebook_authorized(jsonFBInput))
     #intercom.getMydata()
     #feedList.append(intercom.retrieveMediaBasedTags())
-    flash('just for testing')
+    #flash('just for testing')
+    return json.dumps(feedList)
+
+@app.route('/refreshUserFeeds',methods=['GET'])
+def refreshUserFeeds():
+    ''' after first time login of user this gets invoked by an ID provided by UI
+    like Request: https://http://wowgicflaskapp-wowgic.rhcloud.com/id=q13512667
+    neo4j has associated feeds ID to be displayed to the user fetch them from mongdb and return it back
+    '''
+    try:
+        ID = resp['id']
+    except:
+        ID="858104450925558"
+    logger.debug('ID posted:%s',ID)
+    feedList =[]
+    feedList.extend(intercom.fetchNeo4jInterestNode(ID))
     return json.dumps(feedList)
 
 @app.route('/locationFeeds',methods=['POST'])
@@ -160,9 +137,9 @@ def locationFeeds():
 def instagram_login():
     return intercom.instagram_login()
 
-@app.route('/handle_instagram_authorization')
-def handle_instagram_authorization():
-    flash('You were successfully logged in via INSTAGRAM')
+@app.route('/_handle_instagram_authorization')
+def _handle_instagram_authorization():
+    #flash('You were successfully logged in via INSTAGRAM')
     return intercom.handle_instagram_authorization()
 #-------------------------------------------------------------------------------
 # facebook authentication
@@ -184,13 +161,13 @@ facebook = oauth.remote_app('facebook',
 
 @app.route('/facebook_login')
 def facebook_login():
-    return facebook.authorize(callback=url_for('facebook_authorized',
+    return facebook.authorize(callback=url_for('_facebook_authorized',
             next=request.args.get('next') or request.referrer or None,
             _external=True))
 
 @app.route('/login/authorized')
 @facebook.authorized_handler #this decorator passes the req as response below
-def facebook_authorized(resp):
+def _facebook_authorized(resp):
     if resp is None:
         return 'Access denied: reason=%s error=%s' % (
             request.args['error_reason'],
@@ -208,6 +185,7 @@ def facebook_authorized(resp):
 def get_facebook_oauth_token():
     return session.get('oauth_token')
 
+''' below is not required
 #-------------------------------------------------------------------------------
 # twitter authentication
 #-------------------------------------------------------------------------------
@@ -264,7 +242,7 @@ def twitOauthAuthorized(resp):
     else:
         session['twitter_oauth'] = resp
     return 'twitter authorized'
-
+'''
 if 'debug' in args.logLevel:
     app.debug = True
 

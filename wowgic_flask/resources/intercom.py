@@ -47,9 +47,9 @@ class intercom:
 
     def createUserNode(self,decodedFBJson):
         '''
+        latitude & longitude also needs to be stored in neo4j for retrival of reveland tweets
         '''
-        #decodedFBJson=json.loads(decodedFBJson)
-        #remove the or True just to enable the loop added this
+        #decodedFBJson=json.loads(decodedFBJson) remove true for now
         if mongoInt.insertFBUserLoginData(decodedFBJson) or True:
             neo4jInt.createUserNode(graphDB,decodedFBJson,'user')
             interestList = ['hometown','location','work','education']
@@ -63,36 +63,37 @@ class intercom:
                         if itm.get('type') == None:
                                 itm['type'] = keyIs
                         data = facebookInt.getIdLocation(itm[keyIs]['id'])
+                        logger.debug('Facebook get address using id:%s',data)
                         if 'location' in data:
                             itm[keyIs].update(data['location'])
-                        else:
-                            tmp = {'city':'null','country':'null','longitude':'null','latitude':'null'}
-                            itm[keyIs].update(tmp)
-                        #decodedFBJson[int].update(itm[keyIs])
-
                 else:
                     data = facebookInt.getIdLocation(decodedFBJson[int]['id'])
+                    logger.debug('Facebook get address using id:%s',data)
                     decodedFBJson[int].update(data['location'])
                 neo4jInt.createInterestNode(graphDB,decodedFBJson,int)
+                #creating mongoDb interest nodes with ID as thy are unique
+                if not mongoInt.createCollection(decodedFBJson['id']):
+                    logger.warn('unable to create collection in mongodb')
             logger.debug('dataFb decodedFBJson:%s',decodedFBJson)
         else:
             logger.debug('user already exists hence skipping the neo4J creation of nodes & interest')
         #once the nodes are created lets fetch the feeds
         return 1
 
-    def retrieveTweets(self):
-        '''retrieveTweetsBasedHashtag
+    def retrieveTweets(self,ID,Q,geoCode):
+        '''retrieveTweetsBasedHashtag from twitter
         '''
         passCnt = 0
-        #neo4jInt.showInterestNode(graphDB)
-        twits = twitterInt.retrieveTweetsBasedHashtag()
-        passCnt += mongoInt.insertFeedData(twits)
+        twits = twitterInt.retrieveTweetsBasedHashtag(Q,geoCode)
+        passCnt += mongoInt.insertFeedData(ID,twits)
         logger.debug('retrieve tweets')
         #page_sanitized = json_util.dumps(twits)
+        # below returning to be removed has to be done from mongoDB only
         return twits
 
     def instagram_login(self):
-        ''' bypasser for instagram login
+        ''' bypasser for instagram login as decorator functions are used This
+        function is called from app.py & calls instagramInt function
         '''
         return instagramInt.instagram_login()
 
@@ -101,14 +102,47 @@ class intercom:
         '''
         return facebookInt.getMydata()
 
-    def retrieveMediaBasedTags(self):
-        '''
+    def retrieveMediaBasedTags(self,ID,Q,geoDict):
+        '''instagram feeds this function is hanging correct it
         '''
         passCnt = 0
-        feedJson = instagramInt.retrieveMediaBasedTags()
+        feedJson = instagramInt.retrieveMediaBasedTags(Q,geoDict)
         #feedJson = json.loads(feedJson)
-        passCnt += mongoInt.insertFeedData(feedJson)
+        passCnt += mongoInt.insertFeedData(ID,feedJson)
+        # below returning to be removed has to be done from mongoDB only
         return feedJson
+
+    def refreshFeeds(self):
+        ''' this method is invoked when user hits 2nd time and we fetch his interest
+        via the ID provided by UI and fetch the corresponding neo4j interest nodes
+        returning feed Ids.
+        Also invoked for the very first time as well aftr cr8ing neo4j nodes ( this statment is tricky lets refine)
+        '''
+        #fetch neo4j interest based on ID's
+
+    def fetchNeo4jInterestNode(self,ID):
+        '''fetch the all neo4j interest nodes returning name & city then using those
+        tags search in twitter & instagram and store the output in mongoDb in a
+        collection mapped to interest nodes'''
+        recordList = neo4jInt.getInterestNode(graphDB,ID)
+        geoDict = {}
+        tweets=[]
+        #parse the recordList and frame the has tags here
+        for record in recordList:
+            if record[0]['lat'] is not None:
+                geoDict.update({'lat':record[0]['lat']})
+            #if record[0]['lng'] is not None:
+                geoDict.update({'lng':record[0]['lng']})
+                geoDict.update({'distance':'1'})
+                #tweets.extend(twitterInt.retrieveTweetBasedLocation(geoDict))
+            logger.debug('recordList output of neo4j:%s',record[0]['name'])
+            if record[0]['name'] is not None:
+                Q=record[0]['name'] +' '+ record[0]['city'] if record[0]['city'] is not None else ''
+            ID=record[0]['id']
+            tweets = self.retrieveTweets(ID,Q,geoDict)
+            tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
+        #currently returning tweets directly actually this has to be done from mongoDB
+        return tweets
 
     def handle_instagram_authorization(self):
         '''
@@ -120,6 +154,7 @@ class intercom:
 
     def facebook_authorized(self,userJson):
         '''
+        very first time user comes in
         '''
         passCnt = 0
         #store the user data along with access_token
@@ -130,11 +165,14 @@ class intercom:
             pass #while passing json directly this is not reqd in production remove this
         #passCnt += mongoInt.insertFBUserLoginData(userJson)
         self.createUserNode(userJson)
-        return self.retrieveTweets()
+        feedList =[]
+        feedList.extend(self.retrieveTweets())
+        feedLits.extend(self.retrieveMediaBasedTags)
+        return feedList
 
     def retrieveLocationBasedTags(self,geoCode):
-        '''
-        '''
+        ''' the slidebar feature based on radius dragging is done here both twitter
+        & instagram datas are retrieved'''
         passCnt = 0
         feedList=[]
         feedList.extend(twitterInt.retrieveTweetBasedLocation(geoCode))

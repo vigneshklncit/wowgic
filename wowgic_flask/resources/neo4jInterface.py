@@ -30,6 +30,7 @@ class neo4jInterface:
     #authenticate(connectUri,userName,passWord)
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
+
     ############################################################################
     #Function Name  : connect                                                  #
     #Input          : IP -> IP of the machine to connect                       #
@@ -99,23 +100,25 @@ class neo4jInterface:
 
     ############################################################################
     #Function Name  : getInterestNode                                          #
-    #Input          : k--> ssh key                                             #
-    #               : cmd --> cmd to send to the terminal                      #
+    #Input          : graphDB -> neo4j instance object                         #
+    #               : ID -> unique string of a Node                            #
     #Return Value   : 1 on success, 0 on failure                               #
     ############################################################################
-    def showInterestNode(self,graphDB):
+    def getInterestNode(self,graphDB,ID):
         ''' this query fetches the user details of the user and  will AI them to
         post the relevant tweets/instagram of their interest'''
 
-        query = """ MATCH (n:hometown) RETURN {name: n.name} as n """
-        cypher = graphDB.cypher
-        n=cypher.execute(query)
+        query = """ MATCH (u:user {id:{ID}})-[]->(n:interest) RETURN
+        {name:n.name,city:n.city,id:n.id,lat:n.latitude,lng:n.longitude} as nameCity """
+        #query = """ MATCH (u:user {id:{ID}})-[]->(n:interest) RETURN n.name,n.city """
+        n = graphDB.cypher.execute(query,ID=ID)
         logger.info('getInterestNode query output:\n%s',n)
         #from py2neo.cypher import Record,RecordProducer,RecordList
         #n=RecordProducer(n)
-        n=n[0][0]
-        logger.info('getInterestNode put:%s',n['name'])
+        #n=n[0][0]
+        #logger.info('getInterestNode put:%s',n)
         return n
+
     ############################################################################
     #Function Name  : execCreateRelQuery                                       #
     #Input          : k--> ssh key                                             #
@@ -128,11 +131,13 @@ class neo4jInterface:
         passCnt = 0
         labels=['interest']
         labels.append(ht)
-
         query = """ MERGE (i {id:{k}}) ON CREATE SET
             """+(('i:'+',i:'.join(labels)+",") if labels else '')+"""
-            i.id={k}, i.name={v},i.city={c},i.country={cc}
-            """ +   (("ON MATCH SET\n  i:"+',i:'.join(labels)) if labels else '') +"""
+            i.id={k}, i.name={v}
+            FOREACH(ignoreMe IN CASE WHEN trim({city}) <> "" THEN [1] ELSE [] END | SET i.city = {city} )
+            FOREACH(ignoreMe IN CASE WHEN trim({country}) <> "" THEN [1] ELSE [] END | SET i.country = {country})
+            FOREACH(ignoreMe IN CASE WHEN trim({longitude}) <> "" THEN [1] ELSE [] END | SET i.longitude = {longitude})
+            FOREACH(ignoreMe IN CASE WHEN trim({latitude}) <> "" THEN [1] ELSE [] END | SET i.latitude = {latitude})
             return i"""
         n=graphDB.cypher.execute(query,params)
         logger.info('cypher query output:%s',n)
@@ -167,12 +172,15 @@ class neo4jInterface:
                     'd' : decodedFBJson['id'],
                     'k' : itm[keyIs]['id'],
                     'v' : itm[keyIs]['name'],
-                    'c' : itm[keyIs]['city'],
-                    #'lat' : itm[keyIs]['latitude'],
-                    #'lng' : itm[keyIs]['longitude'],
-                    'cc' : itm[keyIs]['country'],
                     'type' : itm['type']
                 }
+                for key in ['city','country','latitude','longitude']:
+                    if key in itm[keyIs]:
+                        tmp={key:itm[keyIs][key]}
+                        params.update(tmp)
+                    else:
+                        tmp={key:''}
+                        params.update(tmp)
                 logger.info ("params:%s",params)
                 execCnt += self.execCreateRelQuery(graphDB,params,ht)
         else:
@@ -180,12 +188,15 @@ class neo4jInterface:
                 'd' : decodedFBJson['id'],
                 'k' : decodedFBJson[ht]['id'],
                 'v' : decodedFBJson[ht]['name'],
-                #'lat' : itm[keyIs]['latitude'],
-                #'lng' : itm[keyIs]['longitude'],
-                'c' : decodedFBJson[ht]['city'],
-                'cc' : decodedFBJson[ht]['country'],
                 'type' : ht
             }
+            for key in ['city','country','latitude','longitude']:
+                    if key in decodedFBJson[ht]:
+                        tmp={key:decodedFBJson[ht][key]}
+                        params.update(tmp)
+                    else:
+                        tmp={key:''}
+                        params.update(tmp)
             execCnt += self.execCreateRelQuery(graphDB,params,ht)
         return execCnt
 
