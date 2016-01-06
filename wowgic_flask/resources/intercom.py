@@ -139,7 +139,7 @@ class intercom:
             if record[0]['name'] is not None:
                 Q=record[0]['name'] +' '+ record[0]['city'] if record[0]['city'] is not None else ''
             ID=record[0]['id']
-            tweets = self.retrieveTweets(ID,Q,geoDict)
+            tweets.extend(self.retrieveTweets(ID,Q,geoDict))
             tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
         #currently returning tweets directly actually this has to be done from mongoDB
         return tweets
@@ -166,8 +166,8 @@ class intercom:
         #passCnt += mongoInt.insertFBUserLoginData(userJson)
         self.createUserNode(userJson)
         feedList =[]
-        feedList.extend(self.retrieveTweets())
-        feedLits.extend(self.retrieveMediaBasedTags)
+        #feedList.extend(self.retrieveTweets())
+        #feedLits.extend(self.retrieveMediaBasedTags)
         return feedList
 
     def retrieveLocationBasedTags(self,geoCode):
