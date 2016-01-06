@@ -193,8 +193,8 @@ class mongoInt():
     def createCollection(self,collInt):
         ''' Get / create a Mongo collection
         '''
-        collName = pymongo.collection.collection[self.databaseName,collInt]
-        logger.debug('Get create a Mongo collection:%s',collName)
-        self.createConstraint(collInt)
+        #collName = pymongo.collection.Collection(self.databaseName,collInt)
+        #logger.debug('Get create a Mongo collection:%s',collName)
+        #self.createConstraint(collInt)
 
         return 1
