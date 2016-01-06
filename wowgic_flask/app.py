@@ -113,7 +113,7 @@ def refreshUserFeeds():
     try:
         ID = resp['id']
     except:
-        ID="858104450925558"
+        ID="10207950005254824"
     logger.debug('ID posted:%s',ID)
     feedList =[]
     feedList.extend(intercom.fetchNeo4jInterestNode(ID))
