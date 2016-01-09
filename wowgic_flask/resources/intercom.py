@@ -84,9 +84,12 @@ class intercom:
         '''retrieveTweetsBasedHashtag from twitter
         '''
         passCnt = 0
-        twits = twitterInt.retrieveTweetsBasedHashtag(Q,geoCode)
-        passCnt += mongoInt.insertFeedData(ID,twits)
         logger.debug('retrieve tweets')
+        twits = twitterInt.retrieveTweetsBasedHashtag(Q)
+        if geoCode:
+            twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
+        logger.debug('storing tweets of twitter of both location baseed * keyworad mongoDb')
+        passCnt += mongoInt.insertFeedData(ID,twits)
         #page_sanitized = json_util.dumps(twits)
         # below returning to be removed has to be done from mongoDB only
         return twits
@@ -97,17 +100,16 @@ class intercom:
         '''
         return instagramInt.instagram_login()
 
-    def getMydata(self):
-        ''' bypasser for instagram login
-        '''
-        return facebookInt.getMydata()
-
     def retrieveMediaBasedTags(self,ID,Q,geoDict):
         '''instagram feeds this function is hanging correct it
         '''
         passCnt = 0
+        logger.debug('retrieve instagram medias')
         feedJson = instagramInt.retrieveMediaBasedTags(Q,geoDict)
+        if geoDict:
+            feedJson.extend(instagramInt.getLocationSearch(geoDict))
         #feedJson = json.loads(feedJson)
+        logger.debug('store instagram media in mongoDb')
         passCnt += mongoInt.insertFeedData(ID,feedJson)
         # below returning to be removed has to be done from mongoDB only
         return feedJson
@@ -120,7 +122,7 @@ class intercom:
         '''
         #fetch neo4j interest based on ID's
 
-    def fetchNeo4jInterestNode(self,ID):
+    def fetchInterestFeeds(self,ID):
         '''fetch the all neo4j interest nodes returning name & city then using those
         tags search in twitter & instagram and store the output in mongoDb in a
         collection mapped to interest nodes'''
@@ -131,14 +133,15 @@ class intercom:
         for record in recordList:
             if record[0]['lat'] is not None:
                 geoDict.update({'lat':record[0]['lat']})
-            #if record[0]['lng'] is not None:
                 geoDict.update({'lng':record[0]['lng']})
-                geoDict.update({'distance':'1'})
-                #tweets.extend(twitterInt.retrieveTweetBasedLocation(geoDict))
+                geoDict.update({'distance':'.5'})#default radius =500m
             logger.debug('recordList output of neo4j:%s',record[0]['name'])
-            if record[0]['name'] is not None:
-                Q=record[0]['name'] +' '+ record[0]['city'] if record[0]['city'] is not None else ''
+            if record[0]['city'] is not None:
+                Q=record[0]['name'] +' '+ record[0]['city']
+            else:
+                Q=record[0]['name']
             ID=record[0]['id']
+            logger.debug('fetchInterestFeeds ID:%s Q=%s geo cordinates =%s',ID,Q,geoDict)
             tweets.extend(self.retrieveTweets(ID,Q,geoDict))
             tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
         #currently returning tweets directly actually this has to be done from mongoDB
@@ -148,7 +151,7 @@ class intercom:
         '''
         '''
         passCnt = 0
-        user=instagramInt.handle_instagram_authorization()
+        user=instagramInt._handle_instagram_authorization()
         passCnt += mongoInt.insertInstagramUserLoginData(user)
         return "Thanks buddy ! Instagram is authorized"
 
@@ -165,9 +168,8 @@ class intercom:
             pass #while passing json directly this is not reqd in production remove this
         #passCnt += mongoInt.insertFBUserLoginData(userJson)
         self.createUserNode(userJson)
-        feedList =[]
-        #feedList.extend(self.retrieveTweets())
-        #feedLits.extend(self.retrieveMediaBasedTags)
+        logger.debug('retrieve instagram medias')
+        feedList=self.fetchInterestFeeds(userJson['id'])
         return feedList
 
     def retrieveLocationBasedTags(self,geoCode):
@@ -176,6 +178,7 @@ class intercom:
         passCnt = 0
         feedList=[]
         feedList.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
+        #do a reverse geocoding and hit with feeds
         feedList.extend(instagramInt.getLocationSearch(geoCode))
         #passCnt += mongoInt.insertInstagramUserLoginData(user)
         random.shuffle(feedList)

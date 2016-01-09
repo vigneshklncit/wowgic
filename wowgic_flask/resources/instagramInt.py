@@ -68,16 +68,17 @@ class instagramInt:
         '''get recent media ids with the tag "instadogs", only get the most recent 80
         tag_recent_media returns 2 variables, the media ID in an array and the next
         url for the next page'''
-        #self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
-        #tag_search, next_tag = self.api.tag_search(q=Q)
-        #tag_recent_media,next = self.api.tag_recent_media(tag_name=Q, count=10,return_json=True)
-        medias = self.getLocationSearch(geoDict)
         media_ids=[]
-        media_ids.extend(medias)
-        for mid in media_ids:
-            pass
-            #mediaF=api.media(mid.id,return_json=True)
-            #logger.debug('INstagram mediaIds:%s full_media:%s',mid,media_ids)
+        #self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
+        logger.debug('fetch instagram medias :%s',Q)
+        tag_search, next_tag = self.api.tag_search(q=Q)
+        logger.debug('tagsearch resulted : %s',tag_search)
+        #Below will work only if one word is searched
+        for tag in tag_search:
+            logger.debug('tagsearch resulted : %s',tag.name)
+            tag_recent_media,next = self.api.tag_recent_media(tag_name=tag.name, count=2,return_json=True)
+            #logger.debug('tagsearch resulted : %s',tag_recent_media)
+            media_ids.extend(tag_recent_media)
         #logger.debug('jsonify error:\n %s', mid)
         return media_ids
 

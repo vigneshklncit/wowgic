@@ -51,6 +51,8 @@ class mongoInt():
         except Exception as e:
             logger.error("Could not connect to MongoDB: %s", e)
         self.db=self.conn[self.databaseName] #our global database
+        for collection in ['FBLoginUserData']:
+            self.createCollection(collection)
         return self.conn
 
     ############################################################################
@@ -77,7 +79,7 @@ class mongoInt():
         #db = self.conn['userData']
         #
         coll=self.db['FBLoginUserData']
-        self.createConstraint(coll)
+        #self.createConstraint(coll)
         #instead of updating we can find_one initialyy and then do update operation
         logger.debug('FBJsonUserLoginData interest:%s',FBJsonUserLoginData['id'])
         WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
@@ -100,7 +102,7 @@ class mongoInt():
         #db = self.conn['userData']
         #
         coll=self.db['TwitterLoginUserData']
-        self.createConstraint(coll)
+        #self.createConstraint(coll)
         #instead of updating we can find_one initialyy and then do update operation
         WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
         if WriteResult['updatedExisting']:
@@ -122,7 +124,7 @@ class mongoInt():
         #db = self.conn['userData']
         #
         coll=self.db['InstagramLoginUserData']
-        self.createConstraint(coll)
+        #self.createConstraint(coll)
         #instead of updating we can find_one initialyy and then do update operation
         WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
         if WriteResult['updatedExisting']:
@@ -143,12 +145,13 @@ class mongoInt():
         idxDict = coll.index_information()
         logger.debug('the index dict is %s',idxDict)
         if not idxDict:
-            result = coll.create_index('id') #create & ensure i dont know which is perfect
+            result = coll.create_index([('id',pymongo.DESCENDING)],unique=True) #create & ensure i dont know which is perfect
             logger.debug('constraint create result %s',result)
             result = coll.ensure_index('id')
             logger.debug('constraint ensure result %s',result)
         else:
             logger.debug('already index exists on collection %s',coll)
+        return 1
     ############################################################################
     #Function Name  :  #
     #Input          :  #
@@ -172,6 +175,7 @@ class mongoInt():
         #db = self.conn['userData']
         #
         updateCnt = 0
+        self.createCollection(ID)
         coll=self.db[ID]
         for feed in feedData:
             #instead of updating we can find_one initialyy and then do update operation
@@ -193,8 +197,9 @@ class mongoInt():
     def createCollection(self,collInt):
         ''' Get / create a Mongo collection
         '''
-        #collName = pymongo.collection.Collection(self.databaseName,collInt)
-        #logger.debug('Get create a Mongo collection:%s',collName)
-        #self.createConstraint(collInt)
-
+        try:
+            self.db.create_collection(collInt)
+        except Exception as e:
+            logger.error('creating collection error %s',e)
+        self.createConstraint(self.db[collInt])
         return 1

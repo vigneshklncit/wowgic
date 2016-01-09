@@ -14,49 +14,61 @@ logger =  loggerRecord.get_logger()
 import tweepy
 from tweepy import Cursor
 
-#keys from twitter is stored here temp will be removed once we access the user credentials
+#keys from twitter is stored here temp will be removed once we access the user credentials from mongoDB and load it to globalDict file
 #chella's credentials
-consumer_key= 'HwvpHtsPt3LmOZocZXwtn72Zv';
-consumer_secret = 'afVEAR0Ri3ZluVItqbDi0kfm7BHSxjwRXbpw9m9kFhXGjnzHKh';
-access_token = '419412786-cpS2hDmR6cuIf8BD2kSSri0BAWAmXBA3pzcB56Pw';
-access_secret = 'pRx5MNKkmxyImwuhUFMNVOr1NrAWcRmOGUgGTLVYFAjsJ';
+oAuthStrings = dict(t_consumer_key= 'HwvpHtsPt3LmOZocZXwtn72Zv',
+t_consumer_secret = 'afVEAR0Ri3ZluVItqbDi0kfm7BHSxjwRXbpw9m9kFhXGjnzHKh',
+t_access_token = '419412786-cpS2hDmR6cuIf8BD2kSSri0BAWAmXBA3pzcB56Pw',
+t_access_secret = 'pRx5MNKkmxyImwuhUFMNVOr1NrAWcRmOGUgGTLVYFAjsJ')
+
+globalS.dictDb.update(oAuthStrings)
 
 class twitterInt:
-    ''' bla bla
+    ''' this class is meant for twitter
     '''
     api=''
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
         #authenticate twitter app
-        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-        auth.set_access_token(access_token, access_secret)
+        auth = tweepy.OAuthHandler(globalS.dictDb['t_consumer_key'], globalS.dictDb['t_consumer_secret'])
+        auth.set_access_token(globalS.dictDb['t_access_token'], globalS.dictDb['t_access_secret'])
         self.api = tweepy.API(auth)
 
-    def retrieveTweetsBasedHashtag(self,Q,geoDict):
+    def retrieveTweetsBasedHashtag(self,Q):
+        ''' Method returns tweets based on feeds or 0 in case of failure'''
         feeds =[]
-        try:
+        # tweepy resulting in 400 bad data has to be debug!!
+        logger.debug('twitter cursor search Q=%s',Q)
+        if Q is not None:
             tweets = tweepy.Cursor(self.api.search, q=Q,rpp=20).items(20)
             for tweet in tweets:
                 feeds.append(tweet._json)
-                #logger.debug("feed from twitter is %s", feeds)
-        except:
+            logger.debug('total tweets retrieved for keyword:%s is %s',Q,len(feeds))
             return feeds
-        feeds.extend(self.retrieveTweetBasedLocation(geoDict))
-        return feeds
+        else:
+            logger.error('twitter search string is empty')
+            return 0
 
+    def verifyCredentials():
+        ''' This returns 1 in case twitter credentials are authorized else results in
+        failure'''
+        userObj = self.api.verify_credentials()
+        if userObj:
+            logger.debug('twitter is it authenticated:%s',userObj.name)
+            return 1
+        else:
+            logger.debug( 'Invalid Authentication')
+            return 0
 
     def retrieveTweetBasedLocation(self,geoCode):
+        ''' based on the geo cordinates passed this information fetches the location details
+        '''
         feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
-        #userObj = self.api.verify_credentials()
-        #if userObj:
-        #    logger.debug('twitter is it authenticated:%s',userObj.name)
-        #else:
-        #    logger.debug( 'Invalid Authentication')
+        #reverse geocoding is also required here to do which is pending
         geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
-        logger.debug('geoCode#%s',geoCode)
-        tweets = tweepy.Cursor(self.api.search,q='a',geocode=geoCode,rpp=10).items(10)
-        #logger.info("location feed from twitter is %s", dir(tweets))
+        logger.debug('geoCode twitter search#%s',geoCode)
+        tweets = tweepy.Cursor(self.api.search,q='',geocode=geoCode,rpp=10).items(10)
         for tweet in tweets:
             feeds.append(tweet._json)
-        logger.debug("location feed from twitter is %s",feeds)
+        logger.debug("location feed geocode:%s from twitter is %s",geoCode,len(feeds))
         return feeds

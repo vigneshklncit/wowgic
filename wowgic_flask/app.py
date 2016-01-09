@@ -83,10 +83,9 @@ def hello():
     return 'Hello Wowgic! Here data + play + magic'
 
 #change the url & in production we have to remove the try catch remove GET in production
-@app.route('/testing',methods=['GET', 'POST'])
-def testing():
+@app.route('/FBLogin',methods=['GET', 'POST'])
+def FBLogin():
     feedList =[]
-    #facbook tmp input given by chella ltr retrive from app and give as inpu to this variable
     ####
     #Vivek Su
     jsonFBInput = '{"id":"1240560189303114","name":"Mari Satheesh","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106377336067638","name":"Bangalore, India"},"education":[{"school":{"id":"135521326484377","name":"Cathy Matriculationn Higher Secondary School"},"type":"High School"},{"school":{"id":"131854716845812","name":"KLN College of Engineering"},"type":"College"},{"school":{"id":"112188602140934","name":"kln"},"type":"College"}],"work":[{"employer":{"id":"114041451939962","name":"Sonus Networks"}}]}'
@@ -95,28 +94,22 @@ def testing():
     try:
         jsonFBInput = json.loads(data)
     except:
-        ####
-        #Satheesh
         jsonFBInput = json.loads(jsonFBInput)
     feedList.extend(intercom.facebook_authorized(jsonFBInput))
-    #intercom.getMydata()
-    #feedList.append(intercom.retrieveMediaBasedTags())
-    #flash('just for testing')
     return json.dumps(feedList)
 
-@app.route('/refreshUserFeeds',methods=['GET','POST'])
+@app.route('/refreshUserFeeds',methods=['GET'])
 def refreshUserFeeds():
     ''' after first time login of user this gets invoked by an ID provided by UI
     like Request: https://http://wowgicflaskapp-wowgic.rhcloud.com/id=q13512667
     neo4j has associated feeds ID to be displayed to the user fetch them from mongdb and return it back
     '''
-    try:
-        ID = resp['id']
-    except:
+    ID = request.args.get("ID")
+    if ID is None:
         ID="10207950005254824"
-    logger.debug('ID posted:%s',ID)
-    feedList =[]
-    feedList.extend(intercom.fetchNeo4jInterestNode(ID))
+    logger.debug('ID requested is:%s',ID)
+    feedList=[]
+    feedList.extend(intercom.fetchInterestFeeds(ID))
     return json.dumps(feedList)
 
 @app.route('/locationFeeds',methods=['POST'])
@@ -178,8 +171,7 @@ def _facebook_authorized(resp):
     me.data['fb_oauth_token'] = session['oauth_token']
     globalS.dictDb['fb_oauth_token'] = session['oauth_token']
     intercom.facebook_authorized(me.data)
-    return 'Logged in as me=%s me.data=%s redirect=%s' % \
-        (me, me.data, request.args.get('next'))
+    return 'Logged in as me=%s redirect=%s' % (me,request.args.get('next'))
 
 @facebook.tokengetter
 def get_facebook_oauth_token():
@@ -243,14 +235,8 @@ def twitOauthAuthorized(resp):
         session['twitter_oauth'] = resp
     return 'twitter authorized'
 '''
-if 'debug' in args.logLevel:
-    app.debug = True
+#if 'debug' in args.logLevel:
+#    app.debug = True
 
 if __name__ == '__main__':
-    # Get the environment information we need to start the server
-    #ip = os.environ['OPENSHIFT_PYTHON_IP']
-    #port = int(os.environ['OPENSHIFT_PYTHON_PORT'])
-    #host_name = os.environ['OPENSHIFT_GEAR_DNS']
-    #app.run(host=app.config.get('IP'),port=app.config.get('PORT'))
     app.run(host=globalS.dictDb['IP'],port=app.config.get('PORT'))
-    #app.run()
