@@ -170,6 +170,7 @@ def _facebook_authorized(resp):
     me = facebook.get('/me')
     me.data['fb_oauth_token'] = session['oauth_token']
     globalS.dictDb['fb_oauth_token'] = session['oauth_token']
+    logger.debug('FB user data entered # %s',me.data)
     intercom.facebook_authorized(me.data)
     return 'Logged in as me=%s redirect=%s' % (me,request.args.get('next'))
 
