@@ -54,27 +54,31 @@ class intercom:
         if mongoInt.insertFBUserLoginData(decodedFBJson) or True:
             neo4jInt.createUserNode(graphDB,decodedFBJson,'user')
             interestList = ['hometown','location','work','education']
-            for int in interestList:
-                if 'work' in int:
+            for intr in interestList:
+                if 'work' in intr:
                     keyIs='employer'
-                elif 'education' in int:
+                elif 'education' in intr:
                     keyIs='school'
-                if isinstance(decodedFBJson[int],list):
-                    for itm in decodedFBJson[int]:
-                        if itm.get('type') == None:
-                                itm['type'] = keyIs
-                        data = facebookInt.getIdLocation(itm[keyIs]['id'])
+                if intr in decodedFBJson:
+                    if isinstance(decodedFBJson[intr],list):
+                        for itm in decodedFBJson[intr]:
+                            if itm.get('type') == None:
+                                    itm['type'] = keyIs
+                            data = facebookInt.getIdLocation(itm[keyIs]['id'])
+                            logger.debug('Facebook get address using id:%s',data)
+                            if 'location' in data:
+                                itm[keyIs].update(data['location'])
+                    else:
+                        data = facebookInt.getIdLocation(decodedFBJson[intr]['id'])
                         logger.debug('Facebook get address using id:%s',data)
-                        if 'location' in data:
-                            itm[keyIs].update(data['location'])
+                        decodedFBJson[intr].update(data['location'])
+                    #add IF check whther interest is part of data provided
+                    neo4jInt.createInterestNode(graphDB,decodedFBJson,intr)
+                    #creating mongoDb interest nodes with ID as thy are unique
+                    if not mongoInt.createCollection(decodedFBJson['id']):
+                        logger.warn('unable to create collection in mongodb')
                 else:
-                    data = facebookInt.getIdLocation(decodedFBJson[int]['id'])
-                    logger.debug('Facebook get address using id:%s',data)
-                    decodedFBJson[int].update(data['location'])
-                neo4jInt.createInterestNode(graphDB,decodedFBJson,int)
-                #creating mongoDb interest nodes with ID as thy are unique
-                if not mongoInt.createCollection(decodedFBJson['id']):
-                    logger.warn('unable to create collection in mongodb')
+                    logger.debug('user key doesnot exists')
             logger.debug('dataFb decodedFBJson:%s',decodedFBJson)
         else:
             logger.debug('user already exists hence skipping the neo4J creation of nodes & interest')
