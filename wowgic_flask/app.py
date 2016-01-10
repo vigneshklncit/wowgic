@@ -149,7 +149,7 @@ facebook = oauth.remote_app('facebook',
     authorize_url='https://www.facebook.com/dialog/oauth',
     consumer_key=globalS.dictDb['FACEBOOK_APP_ID'],
     consumer_secret=globalS.dictDb['FACEBOOK_APP_SECRET'],
-    request_token_params={'scope': 'email'}
+    request_token_params={'scope': 'user_location,user_hometown,user_work_history,user_education_history'}
 )
 
 @app.route('/facebook_login')

@@ -71,12 +71,12 @@ class instagramInt:
         media_ids=[]
         #self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
         logger.debug('fetch instagram medias :%s',Q)
-        tag_search, next_tag = self.api.tag_search(q=Q)
+        tag_search, next_tag = self.api.tag_search(q=Q,count=2)
         logger.debug('tagsearch resulted : %s',tag_search)
         #Below will work only if one word is searched
         for tag in tag_search:
             logger.debug('tagsearch resulted : %s',tag.name)
-            tag_recent_media,next = self.api.tag_recent_media(tag_name=tag.name, count=2,return_json=True)
+            tag_recent_media,next = self.api.tag_recent_media(tag_name=tag.name, count=20,return_json=True)
             #logger.debug('tagsearch resulted : %s',tag_recent_media)
             media_ids.extend(tag_recent_media)
         #logger.debug('jsonify error:\n %s', mid)
@@ -86,6 +86,7 @@ class instagramInt:
         ''' check whether it gets recent media objects based on location or returns
         location id '''
         mediaList=[]
+        logger.debug('getLocationSearch instagram medias :%s',geoCode)
         #self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
         #location_search = self.api.location_search(lat=geoCode['lat'],lng=geoCode['lng'],distance=(geoCode['distance']*1000))
         #for loc in  location_search:

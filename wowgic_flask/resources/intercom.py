@@ -14,6 +14,7 @@ sys.path.append('resources')
 import globalS
 import generic
 import json
+from pygeocoder import Geocoder
 import neo4jInterface
 import mongoInt
 import twitterInt
@@ -105,9 +106,21 @@ class intercom:
         '''
         passCnt = 0
         logger.debug('retrieve instagram medias')
+        #tag search in instagram remove comma
+        #Q.replace(',','')
         feedJson = instagramInt.retrieveMediaBasedTags(Q,geoDict)
         if geoDict:
-            feedJson.extend(instagramInt.getLocationSearch(geoDict))
+            logger.debug('geoDict for instagram based media retrieve')
+        else:
+            # Example addr: 875 N Michigan Ave, Chicago, IL 60611
+            results = Geocoder.geocode(Q)
+            latlng=results.coordinates
+            logger.debug('google geocode api coordinate pair:%s',latlng)
+            geoDict.update({'lat':latlng[0]})
+            geoDict.update({'lng':latlng[1]})
+            geoDict.update({'distance':'.5'})#default radius =500m
+        logger.debug('geo cord to search in instagram is %s',geoDict)
+        feedJson.extend(instagramInt.getLocationSearch(geoDict))
         #feedJson = json.loads(feedJson)
         logger.debug('store instagram media in mongoDb')
         passCnt += mongoInt.insertFeedData(ID,feedJson)
@@ -144,6 +157,7 @@ class intercom:
             logger.debug('fetchInterestFeeds ID:%s Q=%s geo cordinates =%s',ID,Q,geoDict)
             tweets.extend(self.retrieveTweets(ID,Q,geoDict))
             tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
+            geoDict = {}#revert the geo dictionary
         #currently returning tweets directly actually this has to be done from mongoDB
         return tweets
 

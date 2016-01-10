@@ -1,8 +1,8 @@
 tweepy==2.3.0
-flask_restfull
 Flask>=0.10.1
 argparse==1.2.1
 py2neo
 pymongo
 python-instagram
 facepy>=1
+pygeocoder>=1
