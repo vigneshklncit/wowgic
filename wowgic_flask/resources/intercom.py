@@ -115,16 +115,17 @@ class intercom:
         feedJson = instagramInt.retrieveMediaBasedTags(Q,geoDict)
         if geoDict:
             logger.debug('geoDict for instagram based media retrieve')
-        else:
-            # Example addr: 875 N Michigan Ave, Chicago, IL 60611
-            results = Geocoder.geocode(Q)
-            latlng=results.coordinates
-            logger.debug('google geocode api coordinate pair:%s',latlng)
-            geoDict.update({'lat':latlng[0]})
-            geoDict.update({'lng':latlng[1]})
-            geoDict.update({'distance':'.5'})#default radius =500m
+            feedJson.extend(instagramInt.getLocationSearch(geoDict))
+        #else:
+        #    # Example addr: 875 N Michigan Ave, Chicago, IL 60611
+        #    results = Geocoder.geocode(Q)
+        #    latlng=results.coordinates
+        #    logger.debug('google geocode api coordinate pair:%s',latlng)
+        #    geoDict.update({'lat':latlng[0]})
+        #    geoDict.update({'lng':latlng[1]})
+        #    geoDict.update({'distance':'.5'})#default radius =500m
         logger.debug('geo cord to search in instagram is %s',geoDict)
-        feedJson.extend(instagramInt.getLocationSearch(geoDict))
+        #feedJson.extend(instagramInt.getLocationSearch(geoDict))
         #feedJson = json.loads(feedJson)
         logger.debug('store instagram media in mongoDb')
         passCnt += mongoInt.insertFeedData(ID,feedJson)

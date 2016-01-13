@@ -183,7 +183,7 @@ class mongoInt():
             if WriteResult['updatedExisting']:
                 logger.warn('mongoDB update feed result#%s',WriteResult)
             else:
-                logger.debug('USer already exists in DB')
+                logger.debug('feed is insterted into mongoDB')
                 updateCnt  += updateCnt
         if updateCnt:
             return 1
