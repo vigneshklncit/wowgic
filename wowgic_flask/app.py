@@ -105,10 +105,9 @@ def refreshUserFeeds():
     like Request: https://http://wowgicflaskapp-wowgic.rhcloud.com/id=q13512667
     neo4j has associated feeds ID to be displayed to the user fetch them from mongdb and return it back
     '''
-    ID = request.args.get("ID")
+    ID = request.args.get("id")
     if ID is None:
-        return response({},400)
-        ID="1240560189303114"
+        return 'id is missing',400
     logger.debug('ID requested is:%s',ID)
     feedList=[]
     feedList.extend(intercom.fetchInterestFeeds(ID))
