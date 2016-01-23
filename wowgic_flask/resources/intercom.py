@@ -161,12 +161,12 @@ class intercom:
                 Q=record[0]['name']
             ID=record[0]['id']
             logger.debug('fetchInterestFeeds ID:%s Q=%s geo cordinates =%s',ID,Q,geoDict)
-            if mongoInt.checkCollExists(ID):
+            if mongoInt.checkCollExists(ID) > 1:
+                tweets.extend(mongoInt.retrieveCollection(ID))
+            else:
                 tweets.extend(self.retrieveTweets(ID,Q,geoDict))
                 tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
                 geoDict = {}#revert the geo dictionary
-            else:
-                tweets.extend(mongoInt.retrieveCollection(ID))
         #currently returning tweets directly actually this has to be done from mongoDB
         return tweets
 

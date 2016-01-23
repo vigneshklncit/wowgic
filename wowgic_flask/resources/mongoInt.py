@@ -198,6 +198,9 @@ class mongoInt():
         ''' Get / create a Mongo collection
         '''
         if self.checkCollExists(collInt):
+            logger.warn('collection %s already exists in our mongoDB',collInt)
+            return 0
+        else:
             logger.debug('creating mongoDb collection %s ',collInt)
             try:
                 self.db.create_collection(collInt)
@@ -205,9 +208,6 @@ class mongoInt():
                 logger.error('creating collection error %s',e)
             self.createConstraint(self.db[collInt])
             return 1
-        else:
-            logger.warn('collection %s already exists in our mongoDB',collInt)
-            return 0
     ############################################################################
     #Function Name  : retrieveCollection #
     #Input          :  #
@@ -222,7 +222,7 @@ class mongoInt():
                                'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
                                'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                                'metadata':0},limit=5)
-        logger.debug('cursor is %s',cursor)
+        logger.debug('cursor is %s',cursor.explain())
         for document in cursor:
             #logger.debug('cursor documentis %s',document)
             feeds.append(document)
@@ -236,8 +236,9 @@ class mongoInt():
     def checkCollExists(self,collInt):
         ''' Check if a collection exists in Mongodb DB or not'''
         if collInt in self.db.collection_names():
-            logger.debug('collection:%s already exists',collInt)
-            return 0
+            totalDocs=self.db[collInt].count()
+            logger.debug('collection:%s total doc:%s already exists',collInt,totalDocs)
+            return totalDocs
         else:
             logger.debug('collection:%s does not exists',collInt)
-            return 1
+            return 0
