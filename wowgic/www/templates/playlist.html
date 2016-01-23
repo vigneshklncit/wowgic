@@ -1,0 +1,20 @@
+<ion-view view-title="Playlist">
+  <ion-content class="profile_page">
+    <div class="profile_image">
+    	<img ng-src="{{profile_image}}">
+    </div>
+    <div class="user_name">{{name}}</div>
+    <div class="user_description" ng-show={{followers}} class="ng-hide">{{description}}</div>
+    <div class="follower_following" ng-show={{followers}} class="ng-hide">
+    	<span class="follower">
+    		{{followers}} followers
+    	</span>
+    	<span class="follower">
+    		{{following}} Following
+    	</span>
+    </div>
+    <button class="button button-energized" ng-click="">
+  			Go to his instagram profile {{screen_name}}
+	</button>
+  </ion-content>
+</ion-view>

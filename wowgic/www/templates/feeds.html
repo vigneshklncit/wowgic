@@ -1,0 +1,43 @@
+<ion-view view-title="<img class='title-image' src='img/logo.png' />">
+  <ion-content lazy-scroll>
+    <ion-list>
+      <ion-item ng-repeat="feed in feeds track by $index" href="#/app/playlists/{{playlist.id}}" class="feeds">
+
+ 	<div class="feed">
+  		<div class="item item-avatar">
+      
+        <img ng-src={{feed.user.profile_image}} ng-click="gotoprofile(feed.id);">
+    		<h2 ng-click="gotoprofile(feed.id);">{{feed.user.name}}</h2>
+
+        <p am-time-ago="feed.time" class="feedTime"></p>
+        
+        <div class="location ng-hide" ng-show="feed.location">
+    			<span class="ion-location"></span><span>{{feed.location}}</span>
+    		</div>
+         
+    	<!--	<p>{{feed.time | datetime}}</p>-->
+    		 <div style="clear:both"></div>
+    		 <p class="feed-text">{{feed.text}} </p>
+  		</div>
+	</div>
+	<div class="feed-content">
+    	<img image-lazy-src={{feed.image}}>
+    </div>
+    <div class="feed-action">
+    	<span class="ion-thumbsup"></span>
+    </div>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+  <div class="tabs tabs-icon-left ">
+                <a class="tab-item" ng-click = "getNearby();" style="font-size: 12px; font-weight: 900;">
+                    <i class="icon ion-location"></i>
+                    Distance {{data.radius}} KM
+                </a>
+                <i class="icon ion-volume-low"></i>
+                <input type="range" name="volume" min="1" max="50" value="2" ng-model="data.radius">
+                    <i class="icon ion-volume-high"></i>
+    </div>
+</ion-view>
+
+
