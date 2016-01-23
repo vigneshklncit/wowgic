@@ -51,37 +51,38 @@ class intercom:
         latitude & longitude also needs to be stored in neo4j for retrival of reveland tweets
         '''
         #decodedFBJson=json.loads(decodedFBJson) remove true for now
-        if mongoInt.insertFBUserLoginData(decodedFBJson) or True:
-            neo4jInt.createUserNode(graphDB,decodedFBJson,'user')
-            interestList = ['hometown','location','work','education']
-            for intr in interestList:
-                if 'work' in intr:
-                    keyIs='employer'
-                elif 'education' in intr:
-                    keyIs='school'
-                if intr in decodedFBJson:
-                    if isinstance(decodedFBJson[intr],list):
-                        for itm in decodedFBJson[intr]:
-                            if itm.get('type') == None:
-                                    itm['type'] = keyIs
-                            data = facebookInt.getIdLocation(itm[keyIs]['id'])
-                            logger.debug('Facebook get address using id:%s',data)
-                            if 'location' in data:
-                                itm[keyIs].update(data['location'])
-                    else:
-                        data = facebookInt.getIdLocation(decodedFBJson[intr]['id'])
+        #if mongoInt.insertFBUserLoginData(decodedFBJson) or True:
+        mongoInt.insertFBUserLoginData(decodedFBJson)
+        neo4jInt.createUserNode(graphDB,decodedFBJson,'user')
+        interestList = ['hometown','location','work','education']
+        for intr in interestList:
+            if 'work' in intr:
+                keyIs='employer'
+            elif 'education' in intr:
+                keyIs='school'
+            if intr in decodedFBJson:
+                if isinstance(decodedFBJson[intr],list):
+                    for itm in decodedFBJson[intr]:
+                        if itm.get('type') == None:
+                                itm['type'] = keyIs
+                        data = facebookInt.getIdLocation(itm[keyIs]['id'])
                         logger.debug('Facebook get address using id:%s',data)
-                        decodedFBJson[intr].update(data['location'])
-                    #add IF check whther interest is part of data provided
-                    neo4jInt.createInterestNode(graphDB,decodedFBJson,intr)
-                    #creating mongoDb interest nodes with ID as thy are unique
-                    if not mongoInt.createCollection(decodedFBJson['id']):
-                        logger.warn('unable to create collection in mongodb')
+                        if 'location' in data:
+                            itm[keyIs].update(data['location'])
                 else:
-                    logger.debug('user key doesnot exists')
-            logger.debug('dataFb decodedFBJson:%s',decodedFBJson)
-        else:
-            logger.debug('user already exists hence skipping the neo4J creation of nodes & interest')
+                    data = facebookInt.getIdLocation(decodedFBJson[intr]['id'])
+                    logger.debug('Facebook get address using id:%s',data)
+                    decodedFBJson[intr].update(data['location'])
+                #add IF check whther interest is part of data provided
+                neo4jInt.createInterestNode(graphDB,decodedFBJson,intr)
+                #creating mongoDb interest nodes with ID as thy are unique
+                if not mongoInt.createCollection(decodedFBJson['id']):
+                    logger.warn('unable to create collection in mongodb')
+            else:
+                logger.debug('user key doesnot exists')
+        logger.debug('dataFb decodedFBJson:%s',decodedFBJson)
+        #else:
+        logger.debug('user already exists hence skipping the neo4J creation of nodes & interest')
         #once the nodes are created lets fetch the feeds
         return 1
 
@@ -142,8 +143,8 @@ class intercom:
 
     def fetchInterestFeeds(self,ID):
         '''fetch the all neo4j interest nodes returning name & city then using those
-        tags search in twitter & instagram and store the output in mongoDb in a
-        collection mapped to interest nodes'''
+        tags look for mongoDb collection if not then do search in twitter &
+        instagram and store the output in mongoDb in a collection mapped to interest nodes'''
         recordList = neo4jInt.getInterestNode(graphDB,ID)
         geoDict = {}
         tweets=[]
@@ -160,9 +161,12 @@ class intercom:
                 Q=record[0]['name']
             ID=record[0]['id']
             logger.debug('fetchInterestFeeds ID:%s Q=%s geo cordinates =%s',ID,Q,geoDict)
-            tweets.extend(self.retrieveTweets(ID,Q,geoDict))
-            tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
-            geoDict = {}#revert the geo dictionary
+            if mongoInt.checkCollExists(ID):
+                tweets.extend(self.retrieveTweets(ID,Q,geoDict))
+                tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
+                geoDict = {}#revert the geo dictionary
+            else:
+                tweets.extend(mongoInt.retrieveCollection(ID))
         #currently returning tweets directly actually this has to be done from mongoDB
         return tweets
 

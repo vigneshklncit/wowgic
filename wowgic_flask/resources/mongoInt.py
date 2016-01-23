@@ -181,9 +181,9 @@ class mongoInt():
             #instead of updating we can find_one initialyy and then do update operation
             WriteResult =coll.update({'id':feed['id']},feed,True)
             if WriteResult['updatedExisting']:
-                logger.warn('mongoDB update feed result#%s',WriteResult)
+                logger.warn('mongoDB update feed id:%s result#%s',feed['id'],WriteResult)
             else:
-                logger.debug('feed is insterted into mongoDB')
+                logger.debug('feed is insterted into mongoDB:%s',feed['id'])
                 updateCnt  += updateCnt
         if updateCnt:
             return 1
@@ -197,9 +197,46 @@ class mongoInt():
     def createCollection(self,collInt):
         ''' Get / create a Mongo collection
         '''
-        try:
-            self.db.create_collection(collInt)
-        except Exception as e:
-            logger.error('creating collection error %s',e)
-        self.createConstraint(self.db[collInt])
-        return 1
+        if self.checkCollExists(collInt):
+            logger.debug('creating mongoDb collection %s ',collInt)
+            try:
+                self.db.create_collection(collInt)
+            except Exception as e:
+                logger.error('creating collection error %s',e)
+            self.createConstraint(self.db[collInt])
+            return 1
+        else:
+            logger.warn('collection %s already exists in our mongoDB',collInt)
+            return 0
+    ############################################################################
+    #Function Name  : retrieveCollection #
+    #Input          :  #
+    #Return Value   :  #
+    ############################################################################
+    def retrieveCollection(self,collName):
+        ''' by passing the collection name fetch recent feeeds. Query the database
+        '''
+        feeds=[]
+        coll = self.db[collName]
+        cursor = coll.find({},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+                               'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
+                               'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0},limit=5,max_scan=10)
+        logger.debug('cursor is %s',cursor)
+        for document in cursor:
+            #logger.debug('cursor documentis %s',document)
+            feeds.append(document)
+        #if bool(re.match(cursor.collection,collName)):
+        if len(feeds):
+            return feeds
+        else:
+            return 0
+
+    #returns 0 if collection exits
+    def checkCollExists(self,collInt):
+        ''' Check if a collection exists in Mongodb DB or not'''
+        if collInt in self.db.collection_names():
+            logger.debug('collection:%s already exists',collInt)
+            return 0
+        else:
+            logger.debug('collection:%s does not exists',collInt)
+            return 1
