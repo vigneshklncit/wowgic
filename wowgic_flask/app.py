@@ -107,6 +107,7 @@ def refreshUserFeeds():
     '''
     ID = request.args.get("ID")
     if ID is None:
+        return response({},400)
         ID="1240560189303114"
     logger.debug('ID requested is:%s',ID)
     feedList=[]
