@@ -178,7 +178,7 @@ class intercom:
         passCnt += mongoInt.insertInstagramUserLoginData(user)
         return "Thanks buddy ! Instagram is authorized"
 
-    def facebook_authorized(self,userJson):
+    def FBLoginData(self,userJson):
         '''
         very first time user comes in
         '''
@@ -190,8 +190,9 @@ class intercom:
         except:
             pass #while passing json directly this is not reqd in production remove this
         #passCnt += mongoInt.insertFBUserLoginData(userJson)
+        logger.debug('FB data obtained is %s',userJson)
         self.createUserNode(userJson)
-        logger.debug('retrieve instagram medias')
+        logger.debug('fetch interest based feeds')
         feedList=self.fetchInterestFeeds(userJson['id'])
         return feedList
 
