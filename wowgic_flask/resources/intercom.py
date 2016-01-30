@@ -22,6 +22,7 @@ import instagramInt
 import facebookInt
 import loggerRecord
 import random
+import sparkInt
 logger =  loggerRecord.get_logger()
 
 
@@ -167,7 +168,7 @@ class intercom:
                 tweets.extend(self.retrieveTweets(ID,Q,geoDict))
                 tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
                 geoDict = {}#revert the geo dictionary
-        #currently returning tweets directly actually this has to be done from mongoDB
+        sparkInt.Parallelized(tweets)
         return tweets
 
     def handle_instagram_authorization(self):

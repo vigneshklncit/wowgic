@@ -6,3 +6,5 @@ pymongo
 python-instagram
 facepy>=1
 pygeocoder>=1
+flask_oauth
+py4j

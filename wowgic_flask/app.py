@@ -9,7 +9,7 @@
 #                :twit_test.py -h
 #===============================================================================
 #from flask_restful import fields, marshal_with, reqparse, Resource, Api
-from flask import url_for, request, session, redirect, Flask , flash, jsonify
+from flask import url_for, request, session, redirect, Flask
 from flask_oauth import OAuth
 import time
 import sys

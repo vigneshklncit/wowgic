@@ -108,8 +108,8 @@ class neo4jInterface:
         ''' this query fetches the user details of the user and  will AI them to
         post the relevant tweets/instagram of their interest'''
 
-        query = """ MATCH (u:user {id:{ID}})-[]->(n:interest) RETURN
-        {name:n.name,city:n.city,id:n.id,lat:n.latitude,lng:n.longitude} as nameCity """
+        query = """ MATCH (u:user {id:{ID}})-[r]->(n:interest) RETURN
+        {name:n.name,city:n.city,id:n.id,lat:n.latitude,lng:n.longitude,relation:type(r)} as nameCity """
         #query = """ MATCH (u:user {id:{ID}})-[]->(n:interest) RETURN n.name,n.city """
         n = graphDB.cypher.execute(query,ID=ID)
         logger.info('getInterestNode query output:\n%s',n)
