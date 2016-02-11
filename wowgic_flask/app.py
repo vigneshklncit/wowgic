@@ -9,8 +9,10 @@
 #                :twit_test.py -h
 #===============================================================================
 #from flask_restful import fields, marshal_with, reqparse, Resource, Api
-from flask import url_for, request, session, redirect, Flask
+from flask import url_for, request, session, redirect, Flask, make_response
 from flask_oauth import OAuth
+from functools import wraps
+#from userAuth import authorized
 import time
 import sys
 import json
@@ -77,34 +79,41 @@ import intercom
 intercom=intercom.intercom()
 
 @app.route('/')
-def hello():
+def index():
     ''' this is just to check the index url is working '''
     #flash('') # this requires a rendering HTNL templete
     return 'Hello Wowgic! Here data + play + magic'
 
-#change the url & in production we have to remove the try catch remove GET in production
-@app.route('/FBLogin',methods=['GET', 'POST'])
-def FBLogin():
-    feedList =[]
-    ####
-    #Vivek Su
-    #jsonFBInput = '{"id":"1240560189303114","name":"Mari Satheesh","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106377336067638","name":"Bangalore, India"},"education":[{"school":{"id":"135521326484377","name":"Cathy Matriculationn Higher Secondary School"},"type":"High School"},{"school":{"id":"131854716845812","name":"KLN College of Engineering"},"type":"College"},{"school":{"id":"112188602140934","name":"kln"},"type":"College"}],"work":[{"employer":{"id":"114041451939962","name":"Sonus Networks"}}]}'
-    jsonFBInput ='{"id":"858104450925558","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
-    data = request.data
-    try:
-        jsonFBInput = json.loads(data)
-    except:
-        jsonFBInput = json.loads(jsonFBInput)
-    feedList.extend(intercom.FBLoginData(jsonFBInput))
-    return json.dumps(feedList)
+def requiresAuth(fn):
+    """Decorator that checks that requests contain an id-token in the request header.
+    userid will be None if the authentication failed, and have an id otherwise.
+    """
+    @wraps(fn)
+    def _wrap(*args, **kwargs):
+        if 'Authorization' not in request.headers:
+            # Unauthorized
+            logger.warn("No token in header")
+            return make_response('Could not verify your access level for that URL',401)
+        else:
+            logger.debug('request header conatains:%s',request.headers)
 
-@app.route('/refreshUserFeeds',methods=['GET'])
-def refreshUserFeeds():
+        logger.debug("Checking token...")
+        userid = validate_token(request.headers['Authorization'])
+        if userid is None:
+            logger.warn("Not valid token!")
+            # Unauthorized
+            return make_response('Token Expired or Bad Token',401)
+        return fn(userid=userid, *args, **kwargs)
+    return _wrap
+
+@app.route('/refreshUserFeeds')
+@requiresAuth
+def refreshUserFeeds(ID):
     ''' after first time login of user this gets invoked by an ID provided by UI
     like Request: https://http://wowgicflaskapp-wowgic.rhcloud.com/id=q13512667
     neo4j has associated feeds ID to be displayed to the user fetch them from mongdb and return it back
     '''
-    ID = request.args.get("id")
+    #ID = request.args.get("userid")
     if ID is None:
         return 'id is missing',400
     logger.debug('ID requested is:%s',ID)
@@ -113,7 +122,8 @@ def refreshUserFeeds():
     return json.dumps(feedList)
 
 @app.route('/locationFeeds',methods=['POST'])
-def locationFeeds():
+@requiresAuth
+def locationFeeds(ID):
     ''' Based on location and user provided radius lets retrive the tweets
     '''
     geoData = request.data
@@ -243,11 +253,81 @@ def twitOauthAuthorized(resp):
 
 @app.errorhandler(404)
 def page_not_found(error):
-    return response({},404)
+    return make_response('Awww...! 404 Error',404)
+
+#------------------------------------------------------------------------------#
+#---------------------------USER LOGIN AUTHENTICATION -------------------------#
+#------------------------------------------------------------------------------#
+
+from itsdangerous import (TimedJSONWebSignatureSerializer, BadSignature,
+                          SignatureExpired,URLSafeSerializer)
+
+def generate_auth_token(ID, expiration = 1800):
+    if expiration is None:
+        passWord = URLSafeSerializer(globalS.dictDb['SECRET_KEY']).dumps([ID])
+    else:
+        passWord = TimedJSONWebSignatureSerializer(globalS.dictDb['SECRET_KEY'], expires_in = expiration).dumps({ 'ID': ID })
+    logger.debug('TimedJSONWebSignatureSerializer:%s',passWord)
+    return passWord
+
+def validate_token(token):
+    '''Verifies that an access-token is valid and
+    meant for this app.
+
+    Returns None on fail, and an e-mail on success'''
+    logger.debug('access_token is :%s',token)
+
+    s = TimedJSONWebSignatureSerializer(globalS.dictDb['SECRET_KEY'])
+    logger.debug('secret_key :%s',globalS.dictDb['SECRET_KEY'])
+    try:
+        data = s.loads(token)
+        logger.debug('data after decoding is :%s',data)
+    except SignatureExpired:
+        logger.warn('valid token, but expired')
+        return None # valid token, but expired
+    except BadSignature:
+        logger.warn('invalid token')
+        return None # invalid token
+    user = intercom.verifyAuthUser(data['ID'])
+    return user
+
+@app.route('/renewAuth')
+def renewAuth():
+    ''' If auth is expired renew the authorization token with the use of password.
+    '''
+    password = request.headers['password']
+    s = URLSafeSerializer(globalS.dictDb['SECRET_KEY'])
+    ID=s.loads(password)
+    storedPswd = intercom.verifyAuthUser(ID)
+    if password == storedPswd:
+        #generete a new token valid for 30mins
+        serialized = generate_auth_token(jsonFBInput['id'],1800)
+        return json.dumps({'Authorization':serialized})
+    else:
+        return make_response('Bad apssword Token',401)
 
 
-#if 'debug' in args.logLevel:
-#    app.debug = True
+#change the url & in production we have to remove the try catch remove GET in production
+@app.route('/FBLogin',methods=['POST'])
+def FBLogin():
+    #feedList =[]
+    ####
+    #Vivek Su
+    jsonFBInput = '{"id":"1240560189303114","name":"Mari Satheesh","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106377336067638","name":"Bangalore, India"},"education":[{"school":{"id":"135521326484377","name":"Cathy Matriculationn Higher Secondary School"},"type":"High School"},{"school":{"id":"131854716845812","name":"KLN College of Engineering"},"type":"College"},{"school":{"id":"112188602140934","name":"kln"},"type":"College"}],"work":[{"employer":{"id":"114041451939962","name":"Sonus Networks"}}]}'
+    #jsonFBInput ='{"id":"858104450925558","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
+    data = request.data
+    try:
+        jsonFBInput = json.loads(data)
+    except:
+        jsonFBInput = json.loads(jsonFBInput)
+    #Generate a user token here
+    serialized = generate_auth_token(jsonFBInput['id'])
+    password = generate_auth_token(jsonFBInput['id'],None)
+    jsonFBInput.update({'password':password})
+    ID = intercom.FBLoginData(jsonFBInput)
+    #return json.dumps(feedList)
+    return json.dumps({'Authorization':serialized,'password':password})
+
 
 if __name__ == '__main__':
     app.run(host=globalS.dictDb['IP'],port=app.config.get('PORT'))

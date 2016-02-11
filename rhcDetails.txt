@@ -45,3 +45,18 @@ mongo wowgicflaskapp-wowgic.rhcloud.com:27017/wowgicflaskapp -u admin -p 8ygFBXZ
 mongodb://wowgic:wowgic@ds043714.mongolab.com:43714/wogicdb
 
 http://localhost/www/#/app/playlists
+
+export SPARK_HOME=/var/lib/openshift/567cc1842d52712f2000013a/app-root/dependencies/spark-1.6.0-bin-hadoop2.6/
+export PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
+
+https://www.facebook.com/jennakatieharris
+https://www.facebook.com/jamie.harris.585112?fref=pb&hc_location=friends_tab&pnref=friends.all
+
+
+
+ssh root@ec2-54-68-162-40.us-west-2.compute.amazonaws.com
+ssh root@52.35.65.3
+
+arn:aws:iam::387870237516:user/sathishsms
+172.31.30.169
+/root/Downloads/neo4j-community-2.3.1/bin

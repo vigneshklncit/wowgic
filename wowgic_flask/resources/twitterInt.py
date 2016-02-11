@@ -40,7 +40,7 @@ class twitterInt:
         # tweepy resulting in 400 bad data has to be debug!!
         logger.debug('twitter cursor search Q=%s',Q)
         if Q is not None:
-            tweets = tweepy.Cursor(self.api.search, q=Q,rpp=20).items(20)
+            tweets = tweepy.Cursor(self.api.search, q=Q).items(200)
             for tweet in tweets:
                 feeds.append(tweet._json)
             logger.debug('total tweets retrieved for keyword:%s is %s',Q,len(feeds))

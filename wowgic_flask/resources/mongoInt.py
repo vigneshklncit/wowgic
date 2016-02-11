@@ -39,14 +39,14 @@ class mongoInt():
             #uri = "mongodb://admin:wowgic@ds043714-a.mongolab.com:43714/wogicdb"
             #uri = 'mongodb://'+globalS.dictDb['MONGODB_USERNAME']+':'+globalS.dictDb['MONGODB_PASSWORD']+'@'+globalS.dictDb['MONGODB_HOST']+':'+globalS.dictDb['MONGODB_PORT']+'/wowgicflaskapp'
             uri = 'mongodb://'+globalS.dictDb['MONGODB_USERNAME']+':'+globalS.dictDb['MONGODB_PASSWORD']+'@'+globalS.dictDb['MONGODB_HOST']+':'+globalS.dictDb['MONGODB_PORT']
-            logger.debug('mongoDb URI#%s',uri)
             try:
-                self.conn = pymongo.MongoClient(uri)
-                logger.debug("mongdb connected to openshift")
+                self.conn = pymongo.MongoClient()
+                logger.debug("mongdb connected to localhost")
             except Exception as e:
                 logger.debug('Exception raised in starting mongoDB:%s',e)
-                self.conn = pymongo.MongoClient() #local mongoDB running
-                logger.debug("mongdb connected to localhost")
+                logger.debug('mongoDb URI#%s',uri)
+                self.conn = pymongo.MongoClient(uri) #local mongoDB running
+                logger.debug("mongdb connected to openshift")
             #self.conn = pymongo.MongoClient('mongodb://admin:3Xfk5q16Nkbl@python-wowgic.rhcloud.com:27017')
         except Exception as e:
             logger.error("Could not connect to MongoDB: %s", e)
@@ -242,3 +242,13 @@ class mongoInt():
         else:
             logger.debug('collection:%s does not exists',collInt)
             return 0
+
+    #returns 0 if collection exits
+    def validateToken(self,ID):
+        ''' Check if a collection exists in Mongodb DB or not'''
+        coll = self.db['FBLoginUserData']
+        document = coll.find_one({'id':ID},['password'])
+        logger.debug('ID:%s lookup in FBJsonUserLoginData',ID)
+        #cursor = coll.find()
+        logger.debug('cursor is %s',document)
+        return document['password']

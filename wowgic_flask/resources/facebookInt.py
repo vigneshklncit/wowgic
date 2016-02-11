@@ -36,6 +36,7 @@ class facebookInt:
         ''' do a rest api for facebook fetching the page location details'''
         #https://lookup-id.com/
         #self.initializeGraph()
+        logger.debug('facepy get request for location :%s',id)
         path = str(id)+'?fields=location'
         data = self.fbGraph.get(path)
         #logger.debug('my data from facebook:%s',data)
