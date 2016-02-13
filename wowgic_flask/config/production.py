@@ -1,11 +1,12 @@
 import os
-DEBUG = False
+DEBUG = True
 PROPAGATE_EXCEPTIONS = True
 SECRET_KEY = 'puthuPonnuKurichi88921satheesh41137'
 #SECRET_KEY = os.environ.get('SECRET_KEY','\xfb\x13\xdf\xa1@i\xd6>V\xc0\xbf\x8fp\x16#Z\x0b\x81\xeb\x16')
 #Get the environment information we need to start the server
 HOST_NAME = os.environ.get('OPENSHIFT_APP_DNS','localhost')
 APP_NAME = os.environ.get('OPENSHIFT_APP_NAME','flask')
+os.environ['SPARK_HOME'] = '/home/ec2-user/spark-1.6.0-bin-hadoop2.6/'
 IP = os.uname()[1]
 PORT = 8080
 LOGGER_NAME='wowgic_dev'

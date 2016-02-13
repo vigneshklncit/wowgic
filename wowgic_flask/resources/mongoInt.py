@@ -161,7 +161,7 @@ class mongoInt():
         ''' basicall call methods like closing the ssh connection exiting the
         sql etc while python cleanup. In case if python encounters KILLSIG this
         method gets invoked and gracefully closes the ssh connection'''
-        self.conn.logout()
+        #self.conn.logout()
     ############################################################################
     #Function Name  :  #
     #Input          :  #
