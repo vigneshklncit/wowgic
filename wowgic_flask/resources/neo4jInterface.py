@@ -27,7 +27,7 @@ class neo4jInterface:
     #Rest server uri
     #connectUri='neo-graciela-stracke-cornsilk-564c5f886175e.do-stories.graphstory.com:7473'
     #connectUri='wowgic.sb02.stations.graphenedb.com:24789/db/data/'
-    connectUri='localhost:7474/db/data/'
+    connectUri=globalS.dictDb['IP']+':7474/db/data/'
 
     #optional authentication for database servers, enabled by default
     #authenticate(connectUri,userName,passWord)

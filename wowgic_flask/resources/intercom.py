@@ -36,7 +36,7 @@ graphDB=neo4jInt.connect()
 # End of boilerplate, interesting code starts here:
 neo4jInt.createConstraint(graphDB)
 mongoInt=mongoInt.mongoInt()
-#sparkInt=sparkInt.sparkInt()
+sparkInt=sparkInt.sparkInt()
 
 class intercom:
     ''' this file act as a intercaller /router / flow chart whaterver you call. T o& fro
@@ -46,7 +46,7 @@ class intercom:
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
         mconnect = mongoInt.connect()
-        #sparkInt.connect()
+        sparkInt.connect()
         #authenticate twitter app
 
     def createUserNode(self,decodedFBJson):
@@ -98,7 +98,7 @@ class intercom:
         if geoCode:
             twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
         logger.debug('storing tweets of twitter of both location baseed * keyworad mongoDb')
-        #twits=sparkInt.wowFieldTrueOrFalse(twits)
+        twits=sparkInt.wowFieldTrueOrFalse(twits)
         passCnt += mongoInt.insertFeedData(ID,twits)
         #page_sanitized = json_util.dumps(twits)
         # below returning to be removed has to be done from mongoDB only
@@ -134,7 +134,7 @@ class intercom:
         #feedJson = json.loads(feedJson)
         logger.debug('store instagram media in mongoDb')
         #use spark removed unwanted feilds in json & add a key:value
-        #feedJson=sparkInt.wowFieldTrueOrFalse(feedJson)
+        feedJson=sparkInt.wowFieldTrueOrFalse(feedJson)
         passCnt += mongoInt.insertFeedData(ID,feedJson)
         # below returning to be removed has to be done from mongoDB only
         return feedJson
@@ -174,7 +174,7 @@ class intercom:
                 tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
                 geoDict = {}#revert the geo dictionary
         #sparkInt.Parallelized(tweets)
-        #feedJson=sparkInt.wowFieldTrueOrFalse(tweets)
+        feedJson=sparkInt.wowFieldTrueOrFalse(tweets)
         return tweets
 
     def handle_instagram_authorization(self):

@@ -110,22 +110,22 @@ def requiresAuth(fn):
 
 @app.route('/refreshUserFeeds')
 @requiresAuth
-def refreshUserFeeds(ID):
+def refreshUserFeeds(userid):
     ''' after first time login of user this gets invoked by an ID provided by UI
     like Request: https://http://wowgicflaskapp-wowgic.rhcloud.com/id=q13512667
     neo4j has associated feeds ID to be displayed to the user fetch them from mongdb and return it back
     '''
     #ID = request.args.get("userid")
-    if ID is None:
+    if userid is None:
         return 'id is missing',400
-    logger.debug('ID requested is:%s',ID)
+    logger.debug('ID requested is:%s',userid)
     feedList=[]
-    feedList.extend(intercom.fetchInterestFeeds(ID))
+    feedList.extend(intercom.fetchInterestFeeds(userid))
     return json.dumps(feedList)
 
 @app.route('/locationFeeds',methods=['POST'])
 @requiresAuth
-def locationFeeds(ID):
+def locationFeeds(userid):
     ''' Based on location and user provided radius lets retrive the tweets
     '''
     geoData = request.data
@@ -329,7 +329,7 @@ def FBLogin():
     ID = intercom.FBLoginData(jsonFBInput)
     #return json.dumps(feedList)
 
-    return make_response('wowgic Login Authorized',202,{'Authorization':serialized,'password':password})
+    return json.dumps({'Authorization':serialized,'password':password, 'text':'wowgic Login Authorized'})
     #return json.dumps({'Authorization':serialized,'password':password})
 
 
