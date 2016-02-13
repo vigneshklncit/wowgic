@@ -60,3 +60,7 @@ ssh root@52.35.65.3
 arn:aws:iam::387870237516:user/sathishsms
 172.31.30.169
 /root/Downloads/neo4j-community-2.3.1/bin
+/home/ec2-user/neo4j-community-2.3.2/bin/neo4j start
+
+mod_wsgi-express start-server wsgi.py --port=80 --user sathishsms
+

@@ -42,7 +42,7 @@ app = Flask(__name__,instance_relative_config=True)
 app.config.from_object('config.default')
 
 # Load the configuration from the instance folder
-app.config.from_pyfile('config.py')
+#app.config.from_pyfile('config.py')
 
 # Load the file specified by the APP_CONFIG_FILE environment variable
 # Variables defined here will override those in the default configuration
@@ -102,7 +102,9 @@ def requiresAuth(fn):
         if userid is None:
             logger.warn("Not valid token!")
             # Unauthorized
-            return make_response('Token Expired or Bad Token',401)
+            return make_response('Bad Token',401)
+        elif userid=='403':
+            return make_response('Token Expired',userid)
         return fn(userid=userid, *args, **kwargs)
     return _wrap
 
@@ -284,7 +286,7 @@ def validate_token(token):
         logger.debug('data after decoding is :%s',data)
     except SignatureExpired:
         logger.warn('valid token, but expired')
-        return None # valid token, but expired
+        return '403' # valid token, but expired
     except BadSignature:
         logger.warn('invalid token')
         return None # invalid token
@@ -308,7 +310,7 @@ def renewAuth():
 
 
 #change the url & in production we have to remove the try catch remove GET in production
-@app.route('/FBLogin',methods=['POST'])
+@app.route('/FBLogin',methods=['GET','POST'])
 def FBLogin():
     #feedList =[]
     ####
@@ -326,7 +328,9 @@ def FBLogin():
     jsonFBInput.update({'password':password})
     ID = intercom.FBLoginData(jsonFBInput)
     #return json.dumps(feedList)
-    return json.dumps({'Authorization':serialized,'password':password})
+
+    return make_response('wowgic Login Authorized',202,{'Authorization':serialized,'password':password})
+    #return json.dumps({'Authorization':serialized,'password':password})
 
 
 if __name__ == '__main__':
