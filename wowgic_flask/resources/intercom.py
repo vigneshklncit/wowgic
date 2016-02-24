@@ -36,6 +36,7 @@ graphDB=neo4jInt.connect()
 # End of boilerplate, interesting code starts here:
 neo4jInt.createConstraint(graphDB)
 mongoInt=mongoInt.mongoInt()
+mconnect = mongoInt.connect()
 #sparkInt=sparkInt.sparkInt()
 
 class intercom:
@@ -45,7 +46,7 @@ class intercom:
     '''
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
-        mconnect = mongoInt.connect()
+        #mconnect = mongoInt.connect()
         #sparkInt.connect()
         #authenticate twitter app
 
@@ -94,15 +95,17 @@ class intercom:
         '''
         passCnt = 0
         logger.debug('retrieve tweets')
-        twits = twitterInt.retrieveTweetsBasedHashtag(Q)
-        if geoCode:
-            twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
+
+        twits = twitterInt.retrieveTweets(Q,geoCode)
+        #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
+        #if geoCode:
+        #    twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
         logger.debug('storing tweets of twitter of both location baseed * keyworad mongoDb')
         #twits=sparkInt.wowFieldTrueOrFalse(twits)
         passCnt += mongoInt.insertFeedData(ID,twits)
         #page_sanitized = json_util.dumps(twits)
         # below returning to be removed has to be done from mongoDB only
-        return twits
+        return passCnt
 
     def instagram_login(self):
         ''' bypasser for instagram login as decorator functions are used This
@@ -218,3 +221,8 @@ class intercom:
         ''' just return the password token stored in mongoDB
         '''
         return mongoInt.validateToken(ID)
+
+    def getAllInterestNode(self):
+        ''' just return the password token stored in mongoDB
+        '''
+        return neo4jInt.getAllInterestNode(graphDB)

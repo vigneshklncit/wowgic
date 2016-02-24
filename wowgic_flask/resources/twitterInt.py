@@ -32,7 +32,7 @@ class twitterInt:
         #authenticate twitter app
         auth = tweepy.OAuthHandler(globalS.dictDb['t_consumer_key'], globalS.dictDb['t_consumer_secret'])
         auth.set_access_token(globalS.dictDb['t_access_token'], globalS.dictDb['t_access_secret'])
-        self.api = tweepy.API(auth)
+        self.api = tweepy.API(auth,wait_on_rate_limit=True,wait_on_rate_limit_notify=True,retry_count=2)
 
     def retrieveTweetsBasedHashtag(self,Q):
         ''' Method returns tweets based on feeds or 0 in case of failure'''
@@ -60,6 +60,12 @@ class twitterInt:
             logger.debug( 'Invalid Authentication')
             return 0
 
+    def rateLimitStatus(self):
+        ''' Show the rate Limits'''
+        rateLimits = self.api.rate_limit_status()
+        logger.debug('twitter the rate Limit:%s',rateLimits)
+        return  rateLimits['resources']['statuses']['/statuses/home_timeline']
+
     def retrieveTweetBasedLocation(self,geoCode):
         ''' based on the geo cordinates passed this information fetches the location details
         '''
@@ -71,4 +77,29 @@ class twitterInt:
         for tweet in tweets:
             feeds.append(tweet._json)
         logger.debug("location feed geocode:%s from twitter is %s",geoCode,len(feeds))
+        return feeds
+
+    def retrieveTweets(self,Q,geoCode):
+        '''
+        '''
+        feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
+        #reverse geocoding is also required here to do which is pending
+        logger.debug('geoCode twitter search#%s',geoCode)
+        #self.rateLimitStatus()
+        try:
+            if Q is not None:
+                #tweepy set count to largets number
+                tweets = tweepy.Cursor(self.api.search, q=Q).items(200)
+            elif geoCode :
+                geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
+                tweets = tweepy.Cursor(self.api.search,q='',geocode=geoCode).items(200)
+            else:
+                logger.error('twitter search string is empty')
+                return 0
+        except tweepy.TweepError as e:
+            self.rateLimitStatus()
+            logger.error('raised tweepyerror %s',e)
+        for tweet in tweets:
+            feeds.append(tweet._json)
+        logger.debug('total tweets retrieved for keyword:%s is %s',Q,len(feeds))
         return feeds

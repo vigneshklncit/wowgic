@@ -27,7 +27,7 @@ class neo4jInterface:
     #Rest server uri
     #connectUri='neo-graciela-stracke-cornsilk-564c5f886175e.do-stories.graphstory.com:7473'
     #connectUri='wowgic.sb02.stations.graphenedb.com:24789/db/data/'
-    connectUri=globalS.dictDb['IP']+':7474/db/data/'
+    connectUri=globalS.dictDb['NEO4J_IP']+':7474/db/data/'
 
     #optional authentication for database servers, enabled by default
     #authenticate(connectUri,userName,passWord)
@@ -49,6 +49,7 @@ class neo4jInterface:
         #neo4jInt.connect('localhost:7474/db/data/','neo4j','admin')
         logger.debug('who invoked me ? hey u - %s',secureUri)
         graphDB = Graph(secureUri)
+        #graphDB = Graph()
         #return Graph(secureUri)
         return graphDB
 
@@ -113,7 +114,8 @@ class neo4jInterface:
 
         query = """ MATCH (u:user {id:{ID}})-[r]->(n:interest) RETURN
         {name:n.name,city:n.city,id:n.id,lat:n.latitude,lng:n.longitude,relation:type(r)} as nameCity """
-        #query = """ MATCH (u:user {id:{ID}})-[]->(n:interest) RETURN n.name,n.city """
+        query = """ MATCH (n:interest) RETURN
+        {name:n.name,city:n.city,id:n.id,lat:n.latitude,lng:n.longitude} as nameCity"""
         n = graphDB.cypher.execute(query,ID=ID)
         logger.info('getInterestNode query output:\n%s',n)
         #from py2neo.cypher import Record,RecordProducer,RecordList
@@ -122,6 +124,25 @@ class neo4jInterface:
         #logger.info('getInterestNode put:%s',n)
         return n
 
+    ############################################################################
+    #Function Name  : getAllInterestNode                                          #
+    #Input          : graphDB -> neo4j instance object                         #
+    #               : ID -> unique string of a Node                            #
+    #Return Value   : 1 on success, 0 on failure                               #
+    ############################################################################
+    def getAllInterestNode(self,graphDB):
+        ''' this query fetches the user details of the user and  will AI them to
+        post the relevant tweets/instagram of their interest'''
+
+        query = ''' MATCH (n:interest) RETURN {name:n.name,city:n.city,id:n.id,
+        lat:n.latitude,lng:n.longitude} as nameCity'''
+        n = graphDB.cypher.execute(query)
+        logger.info('getAllInterestNode query output:\n%s',n)
+        #from py2neo.cypher import Record,RecordProducer,RecordList
+        #n=RecordProducer(n)
+        #n=n[0][0]
+        #logger.info('getInterestNode put:%s',n)
+        return n
     ############################################################################
     #Function Name  : execCreateRelQuery                                       #
     #Input          : k--> ssh key                                             #

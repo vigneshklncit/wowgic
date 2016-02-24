@@ -1,4 +1,4 @@
-tweepy==2.3.0
+tweepy
 Flask>=0.10.1
 argparse==1.2.1
 py2neo
@@ -8,8 +8,10 @@ facepy>=1
 pygeocoder>=1
 flask_oauth
 py4j
-numpy
-python-devel
+#numpy
+#python-devel
 flask-login
 itsdangerous
 watchdog
+flower
+celery

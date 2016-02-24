@@ -12,6 +12,7 @@
 from flask import url_for, request, session, redirect, Flask, make_response
 from flask_oauth import OAuth
 from functools import wraps
+
 #from userAuth import authorized
 import time
 import sys
@@ -24,15 +25,11 @@ import generic
 import loggerRecord
 
 #parse the run-time args passed
-parser = argparse.ArgumentParser(description='  To get the mra.log,rc.log,\
-        qpTraces & tcpdump to the log viewer machine or any user defined server\
-        all in one place with a single click. Works among multiple Active Pairs \
-        (MPE\'s, MRA\'s)..................................................\
-        Example: ./app CAM-92410 -c serverRack_C6GRsetup.cfg or ./loggy \
+parser = argparse.ArgumentParser(description='  webapp for wowgic \
         CAM-92410 or ./app -v ',add_help=True)
 #parser.add_argument('testName',help='Name suffixed to log file name generated')
 #if the def file is not passed as arg thn take the default file.
-parser.add_argument('-c', '--config',default='serverRack.def',help='definition file')
+parser.add_argument('-c', '--config',default='wowgic.def',help='definition file')
 parser.add_argument('-v', '--version', action='version', version='%(prog)s 1.3')
 parser.add_argument("-l", "--logLevel",default='error',help="Enable standard output verbosity")
 args = parser.parse_args()
@@ -280,7 +277,6 @@ def validate_token(token):
     logger.debug('access_token is :%s',token)
 
     s = TimedJSONWebSignatureSerializer(globalS.dictDb['SECRET_KEY'])
-    logger.debug('secret_key :%s',globalS.dictDb['SECRET_KEY'])
     try:
         data = s.loads(token)
         logger.debug('data after decoding is :%s',data)
@@ -293,17 +289,22 @@ def validate_token(token):
     user = intercom.verifyAuthUser(data['ID'])
     return user
 
-@app.route('/renewAuth')
+@app.route('/renewAuth',methods=['POST'])
 def renewAuth():
     ''' If auth is expired renew the authorization token with the use of password.
     '''
-    password = request.headers['password']
+    password = request.data
+    password = json.loads(password)
+    password = password['password']
+    logger.debug('password is:%s',password)
     s = URLSafeSerializer(globalS.dictDb['SECRET_KEY'])
-    ID=s.loads(password)
+    ID=s.loads(password)[0]
     storedPswd = intercom.verifyAuthUser(ID)
     if password == storedPswd:
         #generete a new token valid for 30mins
-        serialized = generate_auth_token(jsonFBInput['id'],1800)
+        serialized = generate_auth_token(ID,1800)
+        #update user data when it was renewed
+
         return json.dumps({'Authorization':serialized})
     else:
         return make_response('Bad apssword Token',401)
@@ -325,13 +326,16 @@ def FBLogin():
     #Generate a user token here
     serialized = generate_auth_token(jsonFBInput['id'])
     password = generate_auth_token(jsonFBInput['id'],None)
-    jsonFBInput.update({'password':password})
+    tmpDict = {'iat':time(),'password':password}
+    jsonFBInput.update(tmpDict)
     ID = intercom.FBLoginData(jsonFBInput)
     #return json.dumps(feedList)
 
     return json.dumps({'Authorization':serialized,'password':password, 'text':'wowgic Login Authorized'})
     #return json.dumps({'Authorization':serialized,'password':password})
 
+if globalS.dictDb['DEBUG']:
+    app.debug = True
 
 if __name__ == '__main__':
     app.run(host=globalS.dictDb['IP'],port=app.config.get('PORT'))
