@@ -1,20 +1,27 @@
 angular.module('starter.controllers', ['ngCordova', 'angularMoment'])
 
-.controller('fbCtrl', function($scope, $cordovaFacebook, $state, fbService, $timeout) {
-    
+.controller('fbCtrl', function($scope, $cordovaFacebook, $state, fbService, $timeout, $window, $http) {
+     var browser;
+    if(!$window.orientation) {
+      browser = true;
+    }
+    else {
+      browser = false;
+    }
+
     if(localStorage.getItem("userid") && localStorage.getItem("userid")!='null'){
       $state.go("app.feeds");
     }
 
     $scope.fbsignin = function() {
 
-        $cordovaFacebook.login(["public_profile", "email", "user_friends","user_photos","user_status","user_education_history","user_hometown","user_location","user_tagged_places","user_work_history"])
+        $cordovaFacebook.login(["public_profile", "email", "user_friends","user_photos","user_status","user_education_history","user_hometown","user_location","user_tagged_places","user_work_history","user_likes"])
             .then(function(userdetails) {
                $scope.fbuserdetails();
             
             }, function(error) {     
               console.log('errorfb', error);
-              $cordovaFacebook.login(["public_profile", "email", "user_friends","user_photos","user_status","user_education_history","user_hometown","user_location","user_tagged_places","user_work_history"])
+              $cordovaFacebook.login(["public_profile", "email", "user_friends","user_photos","user_status","user_education_history","user_hometown","user_location","user_tagged_places","user_work_history","user_likes"])
               .then(function(userdetails) {
                 $scope.fbuserdetails();
               });
@@ -66,28 +73,41 @@ angular.module('starter.controllers', ['ngCordova', 'angularMoment'])
     return null;
   }
 })
-.factory('dataFactory', ['$http', function($http) {
+.factory('dataFactory', ['$http','$window', function($http, $window) {
 
-    var urlBase = 'http://wowgicflaskapp-wowgic.rhcloud.com';
+  var browser = false;
+  if(!$window.orientation) {
+    browser = true;
+  }
+    //var urlBase = 'http://wowgicflaskapp-wowgic.rhcloud.com';
+    var urlBase = 'http://52.36.56.217:8080';
     var dataFactory = {};
     var code = '0a1932b22820439b95511e581c4fd8e4';
 
     dataFactory.wowgicLogin = function (data) {
+      if(browser){
+        return $http.get(urlBase+'/FBLogin');
+      }
+      else{
       return $http.post(urlBase+'/FBLogin',data);
+      }
     };
     
     /*2nd time user*/
     dataFactory.fetchAllfeeds = function (data) {
       var id = localStorage.getItem('userid');
 
-        return $http.get(urlBase+'/refreshUserFeeds?id='+id);
-
-      
+        return $http.get(urlBase+'/refreshUserFeeds?id='+id);      
     };
 
     dataFactory.login = function (place) {
         return $http.get(urlBase+'/insta/login.php?code='+code+'&place='+place); 
     };
+
+    dataFactory.renewoath = function () {
+        return $http.post(urlBase+'/renewAuth',{password:localStorage.getItem('wowgicpassword')}); 
+    };
+
     dataFactory.location = function (lat,lng) {
       return $http.get(urlBase+'/insta/login.php?code='+code+'&lat='+lat+'&long='+lng); 
     };  
@@ -123,7 +143,7 @@ angular.module('starter.controllers', ['ngCordova', 'angularMoment'])
     $state.go('facebook');
   }
 })
-.controller('AppCtrl', function($scope, $ionicModal, $timeout, dataFactory, fbService, $filter, $state, $ionicLoading) {
+.controller('AppCtrl', function($scope, $ionicModal, $timeout, dataFactory, fbService, $filter, $state, $ionicLoading, $http) {
 
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
@@ -134,11 +154,12 @@ angular.module('starter.controllers', ['ngCordova', 'angularMoment'])
 
   // Form data for the login modal
   $scope.feeds = [];
+  $scope.errorjs = false;
   var data = fbService.getData();
   var feeds;
 
   $scope.fetchAllfeeds = function () {
-    
+    alert('in fettch all feeds');
     $state.go("app.feeds");
     dataFactory.fetchAllfeeds().success(function(resp) {
     feeds = resp;
@@ -155,47 +176,73 @@ angular.module('starter.controllers', ['ngCordova', 'angularMoment'])
       
       });
     $ionicLoading.hide();
-    }).error(function(error) {
-      console.log('login wowgic error' + error);
+    
+    if(!feeds.length) {
+      $scope.errorjs = 'No feeds this time :( try later';
+    }
+
+    }).error(function(error,status,thrown) {
+      $ionicLoading.hide();
+      $scope.errorjs = error.textStatus;
+      switch(status) {
+        case 503:
+          $scope.errorjs = "we're under maintanance. try after sometime";
+        break;
+        case 500:
+          $scope.errorjs = "Something went wrong. try later";
+        break;
+        case 401:
+          $scope.errorjs = "Sorry!! your not authorized to view this page";
+        break;
+      }
     });
   }
 
 $scope.loginWowgic = function () {
-
     dataFactory.wowgicLogin(fbService.getData()).success(function(resp) {
     feeds = resp;
-    $scope.feeds=[];
-    angular.forEach(resp, function(key, value) {
-        
-        if(key.created_at) {
-
-          $scope.parseTwitter(key)
-          console.log(key.created_at);
-        }
-        else {
-          $scope.parseInstagram(key);
-        }
-      
-      });
-        $ionicLoading.hide();
+    localStorage.setItem('wowgicpassword',resp.password);
+    localStorage.setItem('wowgictoken',resp.Authorization);
     
+    $http.defaults.headers.common.Authorization = resp.Authorization;
+    $scope.fetchAllfeeds();
     }).error(function(error) {
-          $ionicLoading.hide();
-    
-      console.log('login wowgic error' + error);
+      $ionicLoading.hide();
+      $scope.errorjs = error.textStatus;
+      switch(status) {
+        case 503:
+          $scope.errorjs = "we're under maintanance. try after sometime";
+        break;
+        case 500:
+          $scope.errorjs = "Something went wrong. try later";
+        break;
+        case 401:
+          $scope.errorjs = "Sorry!! your not authorized to view this page";
+        break;
+      }
     });
 } 
 $ionicLoading.show({
       template: 'Wowing...'
     }); 
+
+renewoath = function() {
+  dataFactory.renewoath().success(function(resp) {
+    $http.defaults.headers.common.Authorization = resp.Authorization;
+  })
+}
+
+
   if(data) {
     //first time user
-    $scope.loginWowgic();
+    $scope.loginWowgic();  
   }
   else {
-    //regular users
-    $scope.fetchAllfeeds();
+    $scope.loginWowgic();  
+    renewoath();
   }
+
+
   $scope.gotoprofile = function(id) {
 
       var singlefeed = $filter('getById')(feeds, id);
@@ -203,14 +250,20 @@ $ionicLoading.show({
       if(singlefeed.created_time) {
         //INSTAGRAM
         $scope.profile_image = singlefeed.user.profile_picture;
-        $scope.followers = false;
+        $scope.showdetails = false;
+        $scope.name = singlefeed.user.full_name;
+        $scope.source = "instagram";
+
       }
-      else{
+      else {
       //TWITTER
       $scope.profile_image = singlefeed.user.profile_image_url;
       $scope.followers = singlefeed.user.followers_count;
       $scope.following = singlefeed.user.friends_count;
       $scope.description = singlefeed.user.description;
+      $scope.name = singlefeed.user.name;
+      $scope.source = "twitter";
+      $scope.showdetails = true;
     }
   }
 
@@ -363,7 +416,9 @@ $scope.data = {
   ];
 })
 
-.controller('PlaylistCtrl', function($scope, $stateParams) {
+.controller('profileCtrl', function($scope, $state, $stateParams) {
+
+  $scope.profiletitle =  $stateParams.profileid;
 });
 
 moment.locale('en', {

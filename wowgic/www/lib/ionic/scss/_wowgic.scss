@@ -89,13 +89,19 @@ body{
 	text-align: center;
 
 	@include vertical-align();
-
+	top: 25%;
+	width: 94%;
+	margin: auto;
+	padding-bottom: 30%;
+	background: #FFFFFF;
+	border-radius: 6px;
 	.user_name, user_description {
 		margin: 4px;
 	}
 
 	.profile_image img {	
 		border-radius: 50%;
+		margin-top: -50px;
 	    width: 150px;
 	    height: 150px;
 	}
@@ -105,13 +111,65 @@ body{
 	    	padding: 16px;
 	    }
 	}
+	.button {
+		margin-top: 15px;
+	}
 }
 
 .title-image {
 
 	width: 100PX;
 	vertical-align: middle;	
-}    
+}   
 
+.feedError {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	margin-left: -108px;	
 
+	.ion-sad-outline {
+		font-size: 35px;
+		color: red;
+		margin:auto;
+	}
+}
+
+.grad1 {
+    background: #ac2d15; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(#ac2d15, white); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(#ac2d15, white); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(#ac2d15, white); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(#ac2d15, white); /* Standard syntax (must be last) */
+}
+ 
+
+/* star animation */
+
+.heart {
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: url(https://cssanimation.rocks/images/posts/steps/heart.png) no-repeat;
+  background-position: 0 0;
+  cursor: pointer;
+  animation: fave-heart 1s steps(28);
+
+	&:hover {
+  		background-position: -2800px 0;
+  		transition: background 1s steps(28);
+	}
+}
+
+@keyframes fave-heart {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: -2800px 0;
+  }
+}
 

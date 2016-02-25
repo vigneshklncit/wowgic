@@ -23,6 +23,8 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ionicLazyLoad'])
 })
 
 .config(function($stateProvider, $urlRouterProvider) {
+
+
   $stateProvider
 
 
@@ -81,11 +83,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ionicLazyLoad'])
       }
   })
   .state('app.single', {
-    url: '/playlists/:playlistId',
+    url: '/profile/:profileid',
     views: {
       'menuContent': {
-        templateUrl: 'templates/playlist.html',
-        controller: 'PlaylistCtrl'
+        templateUrl: 'templates/profile.html',
+        controller: 'profileCtrl'
       }
     }
   });

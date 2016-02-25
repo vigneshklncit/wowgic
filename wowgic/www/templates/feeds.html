@@ -1,13 +1,13 @@
 <ion-view view-title="<img class='title-image' src='img/logo.png' />">
   <ion-content lazy-scroll>
     <ion-list>
-      <ion-item ng-repeat="feed in feeds track by $index" href="#/app/playlists/{{playlist.id}}" class="feeds">
+      <ion-item ng-repeat="feed in feeds track by $index"  class="feeds wowFeedContainer">
 
- 	<div class="feed">
+  <div class="feed">
   		<div class="item item-avatar">
       
-        <img ng-src={{feed.user.profile_image}} ng-click="gotoprofile(feed.id);">
-    		<h2 ng-click="gotoprofile(feed.id);">{{feed.user.name}}</h2>
+        <img ng-src={{feed.user.profile_image}} ng-click="gotoprofile(feed.id);" href="#/app/profile/{{feed.user.name}}">
+    		<h2 ng-click="gotoprofile(feed.id);" href="#/app/profile/{{feed.user.name}}">{{feed.user.name}}</h2>
 
         <p am-time-ago="feed.time" class="feedTime"></p>
         
@@ -22,11 +22,16 @@
 	</div>
 	<div class="feed-content">
     	<img image-lazy-src={{feed.image}}>
-    </div>
+  </div>
     <div class="feed-action">
+      <span class="heart"></span>
     	<span class="ion-thumbsup"></span>
     </div>
       </ion-item>
+    <div class="feedError ng-hide" ng-show="errorjs">
+      <span class="ion-sad-outline"></span>
+      <span class="error-message">{{errorjs}}</span>
+    </div>
     </ion-list>
   </ion-content>
   <div class="tabs tabs-icon-left ">
