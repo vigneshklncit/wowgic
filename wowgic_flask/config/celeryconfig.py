@@ -1,4 +1,6 @@
 import os
+from celery.schedules import crontab
+
 CELERY_BROKER_URL='amqp://guest@localhost//'
 CELERY_RESULT_BACKEND = 'mongodb://localhost:27017/'
 CELERY_MONGODB_BACKEND_SETTINGS = {
