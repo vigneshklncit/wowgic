@@ -100,12 +100,12 @@ class intercom:
         #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
         #if geoCode:
         #    twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
-        logger.debug('storing tweets of twitter of both location baseed * keyworad mongoDb')
+        logger.debug('storing tweets of twitter of both location baseed on keyworad mongoDb')
         #twits=sparkInt.wowFieldTrueOrFalse(twits)
         passCnt += mongoInt.insertFeedData(ID,twits)
         #page_sanitized = json_util.dumps(twits)
         # below returning to be removed has to be done from mongoDB only
-        return passCnt
+        return twits
 
     def instagram_login(self):
         ''' bypasser for instagram login as decorator functions are used This

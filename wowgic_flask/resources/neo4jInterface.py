@@ -167,7 +167,7 @@ class neo4jInterface:
         logger.info('cypher query output:%s',n)
         if len(n): passCnt += 1
 
-        rQuery = """ Match """'(u {id:{d}}), (i {id:{k}}) MERGE u-[:`'+params['type']+'`]->i' """
+        rQuery = """ Match """'(u {id:{d}}), (i {id:{k}}) MERGE (u)-[:`'+params['type']+'`]->(i)' """
                   return i """
         n=graphDB.cypher.execute(rQuery,params)
         if len(n): passCnt += 1

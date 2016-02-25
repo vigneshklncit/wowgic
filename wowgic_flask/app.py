@@ -52,7 +52,7 @@ app.config.from_envvar('APP_CONFIG_FILE')
 ############################################################################
 def compileFileName():
     dayTime      = generic.dateTimeFields()
-    dayTime      = 'wowgic'+'_'+dayTime
+    dayTime      = 'wowgic'+'_'+'flask'
     return dayTime
 ############################################################################
 
