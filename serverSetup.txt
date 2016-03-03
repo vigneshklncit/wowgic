@@ -79,7 +79,7 @@ yum -y install mongodb-org mongoldb-org-server
 
 yum install python-pip python-devel nginx gcc
 yum install -y gcc libxml2-devel python-devel python-pip PyXML unzip make sudo
-
+pip install uwsgi
 #------------------------------------------
 #               Start App 
 #------------------------------------------
