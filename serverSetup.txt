@@ -77,3 +77,11 @@ yum -y install mongodb-org mongoldb-org-server
   116  systemctl start mongod
   117  systemctl status mongod
 
+yum install python-pip python-devel nginx gcc
+yum install -y gcc libxml2-devel python-devel python-pip PyXML unzip make sudo
+
+#------------------------------------------
+#               Start App 
+#------------------------------------------
+cd wowgic_flask 
+uwsgi dragon.ini
