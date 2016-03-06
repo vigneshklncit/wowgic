@@ -329,7 +329,6 @@ def FBTesting():
 @app.route('/FBLogin',methods=['POST'])
 def FBLogin():
     data = request.data
-    jsonFBInput = json.loads(data)
     #Generate a user token here
     serialized = generate_auth_token(jsonFBInput['id'])
     password = generate_auth_token(jsonFBInput['id'],None)

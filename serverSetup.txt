@@ -55,13 +55,13 @@ sudo yum install git
    55  useradd wowgic
    56  passwd wowgic
 
-cd appDir 
+cd appDir
 pip install -r requirements.txt
 
 yum install npm
 git clone https://github.com/mrvautin/adminMongo.git && cd adminMongo
 npm install
-npm start 
+npm start
 
 
 vim /etc/yum.repos.d/mongodb.repo
@@ -81,7 +81,16 @@ yum install python-pip python-devel nginx gcc
 yum install -y gcc libxml2-devel python-devel python-pip PyXML unzip make sudo
 pip install uwsgi
 #------------------------------------------
-#               Start App 
+#               Start App
 #------------------------------------------
-cd wowgic_flask 
-uwsgi dragon.ini
+cd wowgic_flask
+uwsgi dragon.ini --pulgin python
+
+wget http://neo4j.com/artifact.php?name=neo4j-community-2.3.2-unix.tar.gz
+mv artifact.php\?name\=neo4j-community-2.3.2-unix.tar.gz neo4j-community-2.3.2-unix.tar.gz
+ tar -xvf neo4j-community-2.3.2-unix.tar.gz
+
+yum install rabbitmq-server
+rabbitmq-server start
+flower -A tasks --port=5555
+/home/wowgic/wowgic/wowgic_flask
