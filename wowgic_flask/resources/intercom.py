@@ -163,7 +163,7 @@ class intercom:
                 geoDict.update({'lat':record[0]['lat']})
                 geoDict.update({'lng':record[0]['lng']})
                 geoDict.update({'distance':'.5'})#default radius =500m
-            logger.debug('recordList output of neo4j:%s',record[0]['name'])
+            logger.info('recordList output of neo4j:%s',record[0]['name'])
             if record[0]['city'] is not None:
                 Q=record[0]['name'] +' '+ record[0]['city']
             else:
@@ -199,7 +199,7 @@ class intercom:
         except:
             pass #while passing json directly this is not reqd in production remove this
         #passCnt += mongoInt.insertFBUserLoginData(userJson)
-        logger.debug('FB data obtained is %s',userJson)
+        logger.info('FB data obtained is %s',userJson)
         self.createUserNode(userJson)
         logger.debug('fetch interest based feeds')
         #feedList=self.fetchInterestFeeds(userJson['id'])

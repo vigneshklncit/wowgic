@@ -38,7 +38,29 @@ def getAllInterestNode():
     interesetNodes = intercom.getAllInterestNode()
     logger.debug('feedList:%s',interesetNodes)
     geoDict = {}
-    for record in interesetNodes:
+    #for record in interesetNodes:
+    #    if record[0]['lat'] is not None:
+    #        geoDict.update({'lat':record[0]['lat']})
+    #        geoDict.update({'lng':record[0]['lng']})
+    #        geoDict.update({'distance':'.5'})#default radius =500m
+    #    logger.debug('recordList output of neo4j:%s',record[0]['name'])
+    #    if record[0]['city'] is not None:
+    #        Q=record[0]['name'] +' '+ record[0]['city']
+    #    else:
+    #        Q=record[0]['name']
+    #    ID=record[0]['id']
+    #    logger.debug('fetchInterestFeeds Q=%s geo cordinates =%s',Q,geoDict)
+    #    retrieveTweets.delay(ID,Q,geoDict)
+    #    retrieveMediaBasedTags.delay(ID,Q,geoDict)
+    #    #if mongoInt.checkCollExists(ID) > 1:
+    #    #    tweets.extend(mongoInt.retrieveCollection(ID))
+    #    #else:
+    #    #    tweets.extend(self.retrieveTweets(Q,geoDict))
+    #    #    tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
+    #    #    geoDict = {}#revert the geo dictionary
+    ##sparkInt.Parallelized(tweets)
+    ##feedJson=sparkInt.wowFieldTrueOrFalse(tweets)
+    def iterFunc(record):
         if record[0]['lat'] is not None:
             geoDict.update({'lat':record[0]['lat']})
             geoDict.update({'lng':record[0]['lng']})
@@ -52,20 +74,13 @@ def getAllInterestNode():
         logger.debug('fetchInterestFeeds Q=%s geo cordinates =%s',Q,geoDict)
         retrieveTweets.delay(ID,Q,geoDict)
         retrieveMediaBasedTags.delay(ID,Q,geoDict)
-        #if mongoInt.checkCollExists(ID) > 1:
-        #    tweets.extend(mongoInt.retrieveCollection(ID))
-        #else:
-        #    tweets.extend(self.retrieveTweets(Q,geoDict))
-        #    tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
-        #    geoDict = {}#revert the geo dictionary
-    #sparkInt.Parallelized(tweets)
-    #feedJson=sparkInt.wowFieldTrueOrFalse(tweets)
+    map(iterFunc,interesetNodes)
     return True
 
 
 @celery.task(rate_limit='13/m')
 def retrieveTweets(collName,Q,geoDict):
-    logger.info('retrieveTweets:$s,%s,%s',collName,Q,geoDict)
+    logger.info('retrieveTweets:%s,%s,%s',collName,Q,geoDict)
     intercom.retrieveTweets(collName,Q,geoDict)
 
 @celery.task(rate_limit='13/m')

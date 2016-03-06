@@ -114,8 +114,6 @@ class neo4jInterface:
 
         query = """ MATCH (u:user {id:{ID}})-[r]->(n:interest) RETURN
         {name:n.name,city:n.city,id:n.id,lat:n.latitude,lng:n.longitude,relation:type(r)} as nameCity """
-        query = """ MATCH (n:interest) RETURN
-        {name:n.name,city:n.city,id:n.id,lat:n.latitude,lng:n.longitude} as nameCity"""
         n = graphDB.cypher.execute(query,ID=ID)
         logger.info('getInterestNode query output:\n%s',n)
         #from py2neo.cypher import Record,RecordProducer,RecordList

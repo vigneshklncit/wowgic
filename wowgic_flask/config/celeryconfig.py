@@ -7,7 +7,7 @@ CELERY_MONGODB_BACKEND_SETTINGS = {
         'database': 'wowgicflaskapp',
         'taskmeta_collection': 'my_taskmeta_collection',
     }
-CELERY_ACCEPT_CONTENT = ['pickle', 'json']
+#CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 #CELERY_TASK_SERIALIZER='json'
 #CELERY_RESULT_SERIALIZER='json'
 #CELERY_TIMEZONE='Europe/Oslo'

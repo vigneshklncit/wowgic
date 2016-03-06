@@ -9,4 +9,6 @@ export APP_CONFIG_FILE=../config/production.py
 #/root/Downloads/neo4j-community-2.3.1/bin/neo4j start
 #service rabbitmq-server start
 python app.py -l debug
+#uwsgi dragon.ini
 #celery -A tasks worker -l info -B
+#flower -A tasks --port=5555

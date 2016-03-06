@@ -19,7 +19,8 @@ class mongoInt():
     twitter datas etc'''
     conn={}
     db=None
-    databaseName='wowgicflaskapp'
+    databaseName = 'wowgicflaskapp'
+    userCollName = 'FBLoginUserData'
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
         #authenticate twitter app
@@ -51,8 +52,7 @@ class mongoInt():
         except Exception as e:
             logger.error("Could not connect to MongoDB: %s", e)
         self.db=self.conn[self.databaseName] #our global database
-        for collection in ['FBLoginUserData']:
-            self.createCollection(collection)
+        self.createCollection(self.userCollName)
         return self.conn
 
     ############################################################################
@@ -78,7 +78,7 @@ class mongoInt():
         # Connect to the databases
         #db = self.conn['userData']
         #
-        coll=self.db['FBLoginUserData']
+        coll=self.db[self.userCollName]
         #self.createConstraint(coll)
         #instead of updating we can find_one initialyy and then do update operation
         logger.debug('FBJsonUserLoginData interest:%s',FBJsonUserLoginData['id'])
@@ -94,45 +94,45 @@ class mongoInt():
     #Input          :  #
     #Return Value   :  #
     ############################################################################
-    def insertTwitterUserLoginData(self,FBJsonUserLoginData):
-        '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
-        identified by the base URI of the graph database'''
-
-        # Connect to the databases
-        #db = self.conn['userData']
-        #
-        coll=self.db['TwitterLoginUserData']
-        #self.createConstraint(coll)
-        #instead of updating we can find_one initialyy and then do update operation
-        WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
-        if WriteResult['updatedExisting']:
-            logger.warn('mongoDB update method result#%s',WriteResult)
-            return 0
-        else:
-            logger.debug('USer DB already exists')
-            return 1
+    #def insertTwitterUserLoginData(self,FBJsonUserLoginData):
+    #    '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
+    #    identified by the base URI of the graph database'''
+    #
+    #    # Connect to the databases
+    #    #db = self.conn['userData']
+    #    #
+    #    coll=self.db['TwitterLoginUserData']
+    #    #self.createConstraint(coll)
+    #    #instead of updating we can find_one initialyy and then do update operation
+    #    WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
+    #    if WriteResult['updatedExisting']:
+    #        logger.warn('mongoDB update method result#%s',WriteResult)
+    #        return 0
+    #    else:
+    #        logger.debug('USer DB already exists')
+    #        return 1
     ############################################################################
     #Function Name  :  #
     #Input          :  #
     #Return Value   :  #
     ############################################################################
-    def insertInstagramUserLoginData(self,FBJsonUserLoginData):
-        '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
-        identified by the base URI of the graph database'''
-
-        # Connect to the databases
-        #db = self.conn['userData']
-        #
-        coll=self.db['InstagramLoginUserData']
-        #self.createConstraint(coll)
-        #instead of updating we can find_one initialyy and then do update operation
-        WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
-        if WriteResult['updatedExisting']:
-            logger.warn('mongoDB update method result#%s',WriteResult)
-            return 0
-        else:
-            logger.debug('USer already exists in DB')
-            return 1
+    #def insertInstagramUserLoginData(self,FBJsonUserLoginData):
+    #    '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
+    #    identified by the base URI of the graph database'''
+    #
+    #    # Connect to the databases
+    #    #db = self.conn['userData']
+    #    #
+    #    coll=self.db['InstagramLoginUserData']
+    #    #self.createConstraint(coll)
+    #    #instead of updating we can find_one initialyy and then do update operation
+    #    WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
+    #    if WriteResult['updatedExisting']:
+    #        logger.warn('mongoDB update method result#%s',WriteResult)
+    #        return 0
+    #    else:
+    #        logger.debug('USer already exists in DB')
+    #        return 1
     ############################################################################
     #Function Name  :  #
     #Input          :  #
@@ -144,7 +144,7 @@ class mongoInt():
         must be an instance of basestring (str in python 3)'''
         idxDict = coll.index_information()
         logger.debug('the index dict is %s',idxDict)
-        if not idxDict:
+        if 'id_1' not in idxDict:
             result = coll.create_index([('id',pymongo.DESCENDING)],unique=True) #create & ensure i dont know which is perfect
             logger.debug('constraint create result %s',result)
             result = coll.ensure_index('id')
@@ -177,6 +177,7 @@ class mongoInt():
         updateCnt = 0
         self.createCollection(ID)
         coll=self.db[ID]
+        #chag to fucntional prog
         for feed in feedData:
             #instead of updating we can find_one initialyy and then do update operation
             WriteResult =coll.update({'id':feed['id']},feed,True)
@@ -205,7 +206,7 @@ class mongoInt():
             try:
                 self.db.create_collection(collInt)
             except Exception as e:
-                logger.error('creating collection error %s',e)
+                logger.warn('creating collection error %s',e)
             self.createConstraint(self.db[collInt])
             return 1
     ############################################################################
@@ -222,12 +223,21 @@ class mongoInt():
                                'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
                                'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                                'metadata':0},limit=5)
-        logger.debug('cursor is %s',cursor.explain())
-        for document in cursor:
-            #logger.debug('cursor documentis %s',document)
-            feeds.append(document)
-        #if bool(re.match(cursor.collection,collName)):
-        if len(feeds):
+        logger.info('cursor is %s',cursor.explain())
+        #chg to functional prog
+        #for document in cursor:
+        #    #logger.debug('cursor document is %s',document)
+        #    feeds.append(document)
+
+        ##way1
+        #def document(x): return doc
+        #feeds=list(map(document,cursor))
+
+        #way2
+        feeds=list(map(lambda x:x,cursor))
+        feedsLength = len(feeds)
+        if feedsLength:
+            logger.debug('total feed trieved %s',feedsLength)
             return feeds
         else:
             return 0
@@ -246,7 +256,7 @@ class mongoInt():
     #returns 0 if collection exits
     def validateToken(self,ID):
         ''' Check if a collection exists in Mongodb DB or not'''
-        coll = self.db['FBLoginUserData']
+        coll = self.db[self.userCollName]
         document = coll.find_one({'id':ID},['password'])
         logger.debug('ID:%s lookup in FBJsonUserLoginData',ID)
         #cursor = coll.find()

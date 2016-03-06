@@ -41,8 +41,9 @@ class twitterInt:
         logger.debug('twitter cursor search Q=%s',Q)
         if Q is not None:
             tweets = tweepy.Cursor(self.api.search, q=Q).items(200)
-            for tweet in tweets:
-                feeds.append(tweet._json)
+            #for tweet in tweets:
+            #    feeds.append(tweet._json)
+            feeds=list(map(lambda x:x._json,tweets))
             logger.debug('total tweets retrieved for keyword:%s is %s',Q,len(feeds))
             return feeds
         else:
@@ -99,7 +100,8 @@ class twitterInt:
         except tweepy.TweepError as e:
             self.rateLimitStatus()
             logger.error('raised tweepyerror %s',e)
-        for tweet in tweets:
-            feeds.append(tweet._json)
+        #for tweet in tweets:
+        #    feeds.append(tweet._json)
+        feeds=list(map(lambda x:x._json,tweets))
         logger.debug('total tweets retrieved for keyword:%s is %s',Q,len(feeds))
         return feeds

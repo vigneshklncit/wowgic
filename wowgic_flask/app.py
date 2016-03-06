@@ -115,7 +115,7 @@ def refreshUserFeeds(userid):
     #ID = request.args.get("userid")
     if userid is None:
         return 'id is missing',400
-    logger.debug('ID requested is:%s',userid)
+    logger.info('ID requested is:%s',userid)
     feedList=[]
     feedList.extend(intercom.fetchInterestFeeds(userid))
     return json.dumps(feedList)
@@ -286,8 +286,7 @@ def validate_token(token):
     except BadSignature:
         logger.warn('invalid token')
         return None # invalid token
-    user = intercom.verifyAuthUser(data['ID'])
-    return user
+    return data['ID']
 
 @app.route('/renewAuth',methods=['POST'])
 def renewAuth():
@@ -311,18 +310,12 @@ def renewAuth():
 
 
 #change the url & in production we have to remove the try catch remove GET in production
-@app.route('/FBLogin',methods=['GET','POST'])
-def FBLogin():
-    #feedList =[]
-    ####
+@app.route('/FBTesting')
+def FBTesting():
     #Vivek Su
     #jsonFBInput = '{"id":"1240560189303114","name":"Mari Satheesh","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106377336067638","name":"Bangalore, India"},"education":[{"school":{"id":"135521326484377","name":"Cathy Matriculationn Higher Secondary School"},"type":"High School"},{"school":{"id":"131854716845812","name":"KLN College of Engineering"},"type":"College"},{"school":{"id":"112188602140934","name":"kln"},"type":"College"}],"work":[{"employer":{"id":"114041451939962","name":"Sonus Networks"}}]}'
     jsonFBInput ='{"id":"858104450925558","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
-    data = request.data
-    try:
-        jsonFBInput = json.loads(data)
-    except:
-        jsonFBInput = json.loads(jsonFBInput)
+    jsonFBInput = json.loads(jsonFBInput)
     #Generate a user token here
     serialized = generate_auth_token(jsonFBInput['id'])
     password = generate_auth_token(jsonFBInput['id'],None)
@@ -332,7 +325,19 @@ def FBLogin():
     #return json.dumps(feedList)
 
     return json.dumps({'Authorization':serialized,'password':password, 'text':'wowgic Login Authorized'})
-    #return json.dumps({'Authorization':serialized,'password':password})
+
+@app.route('/FBLogin',methods=['POST'])
+def FBLogin():
+    data = request.data
+    #Generate a user token here
+    serialized = generate_auth_token(jsonFBInput['id'])
+    password = generate_auth_token(jsonFBInput['id'],None)
+    tmpDict = {'iat':time.time(),'password':password}
+    jsonFBInput.update(tmpDict)
+    ID = intercom.FBLoginData(jsonFBInput)
+    #return json.dumps(feedList)
+
+    return json.dumps({'Authorization':serialized,'password':password, 'text':'wowgic Login Authorized'})
 
 if globalS.dictDb['DEBUG']:
     app.debug = True
