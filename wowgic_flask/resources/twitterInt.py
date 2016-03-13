@@ -48,7 +48,7 @@ class twitterInt:
         logger.info('twitter connect')
         self.auth.set_access_token(oauth_token, oauth_token_secret)
         if options.get("wait_on_rate_limit"):
-            twitterApi = tweepy.API(self.auth,wait_on_rate_limit=False,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
+            twitterApi = tweepy.API(self.auth,wait_on_rate_limit=True,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
         else:
             twitterApi = tweepy.API(self.auth,wait_on_rate_limit=False,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
         return twitterApi
@@ -109,7 +109,7 @@ class twitterInt:
         logger.info('geoCode twitter search#%s',geoCode)
         if not self.rateLimitStatus(api)['remaining']:
             logger.warn('trying with viveks ouath')
-            api = self.connect(globalS.dictDb['vivek_token'],globalS.dictDb['vivek_token_secret'])
+            api = self.connect(globalS.dictDb['vivek_token'],globalS.dictDb['vivek_token_secret'],wait_on_rate_limit=1)
             if not self.rateLimitStatus(api)['remaining']:
                 logger.error('twitter rate limit execeeded')
                 return 0

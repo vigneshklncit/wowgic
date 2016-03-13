@@ -222,7 +222,7 @@ class mongoInt():
         cursor = coll.find({},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
                                'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
                                'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
-                               'metadata':0},limit=5)
+                               'metadata':0},limit=1)
         logger.info('cursor is %s',cursor.explain())
         #chg to functional prog
         #for document in cursor:
