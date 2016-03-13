@@ -100,7 +100,7 @@ class intercom:
         #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
         #if geoCode:
         #    twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
-        logger.debug('storing tweets of twitter of both location baseed on keyworad mongoDb')
+        logger.debug('storing tweets of twitter of both location based on keyword mongoDb')
         #twits=sparkInt.wowFieldTrueOrFalse(twits)
         if twits:
             passCnt += mongoInt.insertFeedData(ID,twits)

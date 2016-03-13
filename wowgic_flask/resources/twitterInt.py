@@ -123,12 +123,11 @@ class twitterInt:
             logger.error('twitter search string is empty')
             return 0
 
-        api=self.api #revert to universal api
         try:
             feeds=list(map(lambda twt:twt._json,tweets))
         except tweepy.TweepError as e:
             logger.error('raised tweepyerror %s',e)
-            logger.error('ratelimitStatus for /search/tweets:%s',self.rateLimitStatus())
+        logger.info('ratelimitStatus data for /search/tweets:%s',self.rateLimitStatus(api))
 
         logger.debug('total tweets retrieved for keyword:%s is %s',Q,len(feeds))
         return feeds
