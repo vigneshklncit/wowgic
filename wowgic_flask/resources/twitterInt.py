@@ -13,16 +13,19 @@ logger =  loggerRecord.get_logger()
 # Get tweepy set up
 import tweepy
 from tweepy import Cursor
-
+#some concreete solutiuon has to be implemented below is just junk HOT fix
 #keys from twitter is stored here temp will be removed once we access the user credentials from mongoDB and load it to globalDict file
 #chella's credentials
+#sathish ouath ofr location feeds & new user this should not exhaust at any case
 oAuthStrings = dict(
     t_consumer_key= 'HwvpHtsPt3LmOZocZXwtn72Zv',
     t_consumer_secret = 'afVEAR0Ri3ZluVItqbDi0kfm7BHSxjwRXbpw9m9kFhXGjnzHKh',
     t_access_token = '419412786-cpS2hDmR6cuIf8BD2kSSri0BAWAmXBA3pzcB56Pw',
     t_access_secret = 'pRx5MNKkmxyImwuhUFMNVOr1NrAWcRmOGUgGTLVYFAjsJ',
     sathish_token_secret = 'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8',
-    sathish_token = '56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS')
+    sathish_token = '56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS',
+    vivek_token_secret = '8h1T0x2237pmUWA1Hg7QSi3sPRQt9WN6Okg6A0dMSYvRL',
+    vivek_token = '2976291321-gfESJJC7xBvZk0mv8tbkbYgoMseQChUBwPslbYc')
 
 globalS.dictDb.update(oAuthStrings)
 
@@ -76,9 +79,9 @@ class twitterInt:
             logger.debug( 'Invalid Authentication')
             return 0
 
-    def rateLimitStatus(self):
+    def rateLimitStatus(self,api):
         ''' Show the rate Limits'''
-        rateLimits = self.api.rate_limit_status()
+        rateLimits = api.rate_limit_status()
         logger.debug('twitter the rate Limit:%s',rateLimits)
         return  rateLimits['resources']['search']['/search/tweets']
 
@@ -88,7 +91,7 @@ class twitterInt:
         api=self.api
         feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
         #reverse geocoding is also required here to do which is pending
-        if not self.rateLimitStatus()['remaining']:
+        if not self.rateLimitStatus(api)['remaining']:
             api = self.connect(globalS.dictDb['sathish_token'],globalS.dictDb['sathish_token_secret'])
         geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
         logger.debug('geoCode twitter search#%s',geoCode)
@@ -104,9 +107,12 @@ class twitterInt:
         feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
         #reverse geocoding is also required here to do which is pending
         logger.info('geoCode twitter search#%s',geoCode)
-        if not self.rateLimitStatus()['remaining']:
-            logger.error('twitter rate limit execeeded')
-            return 0
+        if not self.rateLimitStatus(api)['remaining']:
+            logger.warn('trying with viveks ouath')
+            api = self.connect(globalS.dictDb['vivek_token'],globalS.dictDb['vivek_token_secret'])
+            if not self.rateLimitStatus(api)['remaining']:
+                logger.error('twitter rate limit execeeded')
+                return 0
         if Q is not None:
             #tweepy set count to largets number
             tweets = tweepy.Cursor(api.search, q=Q).items()

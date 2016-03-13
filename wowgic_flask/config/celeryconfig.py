@@ -26,3 +26,4 @@ CELERYBEAT_SCHEDULE =   {# Executes every Monday morning at 7:30 A.M
     'schedule': crontab(minute='*/15'),
         },
     }
+CELERYBEAT_SCHEDULE_FILENAME = "/tmp/wowgic_celerySchedule.conf"
