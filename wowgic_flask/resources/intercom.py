@@ -159,23 +159,27 @@ class intercom:
         tweets=[]
         #parse the recordList and frame the has tags here
         for record in recordList:
+            geoDict = {}#revert the geo dictionary
+
             if record[0]['lat'] is not None:
                 geoDict.update({'lat':record[0]['lat']})
                 geoDict.update({'lng':record[0]['lng']})
                 geoDict.update({'distance':'.5'})#default radius =500m
             logger.info('recordList output of neo4j:%s',record[0]['name'])
+
             if record[0]['city'] is not None:
                 Q=record[0]['name'] +' '+ record[0]['city']
             else:
                 Q=record[0]['name']
+
             ID=record[0]['id']
             logger.debug('fetchInterestFeeds ID:%s Q=%s geo cordinates =%s',ID,Q,geoDict)
+
             if mongoInt.checkCollExists(ID) > 1:
                 tweets.extend(mongoInt.retrieveCollection(ID))
             else:
-                tweets.extend(self.retrieveTweets(ID,Q,geoDict))
+                tweets.extend(self.retrieveTweets(ID,Q,geoDict,priority=1))
                 tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
-                geoDict = {}#revert the geo dictionary
         #sparkInt.Parallelized(tweets)
         #feedJson=sparkInt.wowFieldTrueOrFalse(tweets)
         return tweets

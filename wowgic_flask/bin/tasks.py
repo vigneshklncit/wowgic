@@ -8,7 +8,7 @@ import generic
 import loggerRecord
 import json
 
-logFileName='/tmp/wowgic_celery.txt'
+logFileName='/tmp/wowgic_celery.log'
 logger,fhandler       = loggerRecord.loggerInit(logFileName,'debug')
 logger.debug('Log file# %s & TestBed file',logFileName)
 celery = Celery('tasks', broker='amqp://guest@localhost//')
@@ -74,19 +74,20 @@ def getAllInterestNode():
         logger.debug('fetchInterestFeeds Q=%s geo cordinates =%s',Q,geoDict)
         retrieveTweets.delay(ID,Q,geoDict)
         retrieveMediaBasedTags.delay(ID,Q,geoDict)
+
     map(iterFunc,interesetNodes)
     return True
 
 
-@celery.task(rate_limit='13/m')
+@celery.task(rate_limit='10/m')
 def retrieveTweets(collName,Q,geoDict):
     logger.info('retrieveTweets:%s,%s,%s',collName,Q,geoDict)
     intercom.retrieveTweets(collName,Q,geoDict)
 
-@celery.task(rate_limit='13/m')
+@celery.task(rate_limit='20/m')
 def retrieveMediaBasedTags(ID,Q,geoDict):
     logger.info('retrieveMediaBasedTags:%s,%s,%s',ID,Q,geoDict)
-
+    intercom.retrieveMediaBasedTags(ID,Q,geoDict)
 
 if __name__ == '__main__':
     celery.start()

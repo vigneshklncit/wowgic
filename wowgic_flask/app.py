@@ -8,7 +8,6 @@
 # How to run     :twit_test.py -l info
 #                :twit_test.py -h
 #===============================================================================
-#from flask_restful import fields, marshal_with, reqparse, Resource, Api
 from flask import url_for, request, session, redirect, Flask, make_response
 from flask_oauth import OAuth
 from functools import wraps
@@ -69,9 +68,29 @@ logger,fhandler       = loggerRecord.loggerInit(logFileName,args.logLevel)
 logger.debug('Log file# %s & TestBed file',logFileName)
 logger.debug('global dictDB file# %s',globalS.dictDb['MONGODB_PASSWORD'])
 #logger.debug('global app file# %s',app.config)
-
+logger.info('''
+.----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------.
+| .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |
+| | _____  _____ | || |     ____     | || | _____  _____ | || |    ______    | || |     _____    | || |     ______   | |
+| ||_   _||_   _|| || |   .'    `.   | || ||_   _||_   _|| || |  .' ___  |   | || |    |_   _|   | || |   .' ___  |  | |
+| |  | | /\ | |  | || |  /  .--.  \  | || |  | | /\ | |  | || | / .'   \_|   | || |      | |     | || |  / .'   \_|  | |
+| |  | |/  \| |  | || |  | |    | |  | || |  | |/  \| |  | || | | |    ____  | || |      | |     | || |  | |         | |
+| |  |   /\   |  | || |  \  `--'  /  | || |  |   /\   |  | || | \ `.___]  _| | || |     _| |_    | || |  \ `.___.'\  | |
+| |  |__/  \__|  | || |   `.____.'   | || |  |__/  \__|  | || |  `._____.'   | || |    |_____|   | || |   `._____.'  | |
+| |              | || |              | || |              | || |              | || |              | || |              | |
+| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |
+ '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'
+''')
 #app.logger.addHandler(fhandler) #associate the app logger with general logger
 app.logger_name = loggerRecord.get_logger() #associate the app logger with general logger
+
+####
+#43apps access strings
+oAuthStrings = dict(t_consumer_key= 'HwvpHtsPt3LmOZocZXwtn72Zv',
+t_consumer_secret = 'afVEAR0Ri3ZluVItqbDi0kfm7BHSxjwRXbpw9m9kFhXGjnzHKh')
+
+globalS.dictDb.update(oAuthStrings)
+
 import intercom
 intercom=intercom.intercom()
 
@@ -143,9 +162,11 @@ def instagram_login():
 def _handle_instagram_authorization():
     #flash('You were successfully logged in via INSTAGRAM')
     return intercom.handle_instagram_authorization()
-#-------------------------------------------------------------------------------
-# facebook authentication
-#-------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------#
+#                       facebook authentication                                #
+#------------------------------------------------------------------------------#
+
 # To get an access token to consume the API on behalf of a user, use a suitable OAuth library for your platform
 globalS.dictDb['FACEBOOK_APP_ID'] = '575443062564498'
 globalS.dictDb['FACEBOOK_APP_SECRET'] = '3112a499e27dcd991b9869a5dd5524c0'
@@ -187,10 +208,12 @@ def _facebook_authorized(resp):
 def get_facebook_oauth_token():
     return session.get('oauth_token')
 
-''' below is not required
-#-------------------------------------------------------------------------------
-# twitter authentication
-#-------------------------------------------------------------------------------
+# below is required for admins to collect the twitter access for overcoming ratelimiting
+
+
+#------------------------------------------------------------------------------#
+#                       twitter authentication                                 #
+#------------------------------------------------------------------------------#
 # Use Twitter as example remote application
 twitter = oauth.remote_app('twitter',
     # unless absolute urls are used to make requests, this will be added
@@ -206,8 +229,8 @@ twitter = oauth.remote_app('twitter',
     # user interface on the twitter side.
     authorize_url='https://api.twitter.com/oauth/authenticate',
     # the consumer keys from the twitter application registry.
-    consumer_key= 'HwvpHtsPt3LmOZocZXwtn72Zv',
-    consumer_secret = 'afVEAR0Ri3ZluVItqbDi0kfm7BHSxjwRXbpw9m9kFhXGjnzHKh'
+    consumer_key= globalS.dictDb['t_consumer_key'],
+    consumer_secret = globalS.dictDb['t_consumer_secret']
 )
 
 @twitter.tokengetter
@@ -231,7 +254,7 @@ def twitterLogin():
 @app.route('/twitterLogout')
 def twitterLogout():
     session.pop('screen_name', None)
-    flash('You were signed out')
+    logger.info('You were signed out')
     return redirect(request.referrer or url_for('twitLoginCheck'))
 
 @app.route('/twitOauthAuthorized')
@@ -240,13 +263,12 @@ def twitOauthAuthorized(resp):
     #resp = twitter.authorized_response()
     logger.debug('twitter resp:%s',resp)
     if resp is None:
-        flash('You denied the request to sign in.')
+        logger.error('You denied the request to sign in.')
     else:
         session['twitter_oauth'] = resp
     return 'twitter authorized'
-'''
 
-#
+###
 # Error handing
 #
 
@@ -308,36 +330,33 @@ def renewAuth():
     else:
         return make_response('Bad apssword Token',401)
 
-
-#change the url & in production we have to remove the try catch remove GET in production
+#in production we have to remove the try catch remove GET in production
 @app.route('/FBTesting')
 def FBTesting():
     #Vivek Su
     #jsonFBInput = '{"id":"1240560189303114","name":"Mari Satheesh","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106377336067638","name":"Bangalore, India"},"education":[{"school":{"id":"135521326484377","name":"Cathy Matriculationn Higher Secondary School"},"type":"High School"},{"school":{"id":"131854716845812","name":"KLN College of Engineering"},"type":"College"},{"school":{"id":"112188602140934","name":"kln"},"type":"College"}],"work":[{"employer":{"id":"114041451939962","name":"Sonus Networks"}}]}'
     jsonFBInput ='{"id":"858104450925558","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
     jsonFBInput = json.loads(jsonFBInput)
-    #Generate a user token here
     serialized = generate_auth_token(jsonFBInput['id'])
     password = generate_auth_token(jsonFBInput['id'],None)
     tmpDict = {'iat':time.time(),'password':password}
     jsonFBInput.update(tmpDict)
     ID = intercom.FBLoginData(jsonFBInput)
-    #return json.dumps(feedList)
-
     return json.dumps({'Authorization':serialized,'password':password, 'text':'wowgic Login Authorized'})
 
 @app.route('/FBLogin',methods=['POST'])
 def FBLogin():
     data = request.data
-    jsonFBInput = json.loads(data)
+    try:
+        jsonFBInput = json.loads(data)
+    except:
+        return make_response('Empty Data',400)
     #Generate a user token here
     serialized = generate_auth_token(jsonFBInput['id'])
     password = generate_auth_token(jsonFBInput['id'],None)
     tmpDict = {'iat':time.time(),'password':password}
     jsonFBInput.update(tmpDict)
     ID = intercom.FBLoginData(jsonFBInput)
-    #return json.dumps(feedList)
-
     return json.dumps({'Authorization':serialized,'password':password, 'text':'wowgic Login Authorized'})
 
 if globalS.dictDb['DEBUG']:

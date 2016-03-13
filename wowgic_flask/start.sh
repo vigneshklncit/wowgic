@@ -5,8 +5,6 @@
 #export APP_CONFIG_FILE=../config/development.py
 export C_FORCE_ROOT=True
 export APP_CONFIG_FILE=../config/production.py
-#service mongod start
-#/root/Downloads/neo4j-community-2.3.1/bin/neo4j start
 #service rabbitmq-server start
 python app.py -l debug
 #uwsgi dragon.ini

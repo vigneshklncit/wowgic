@@ -41,7 +41,7 @@ class mongoInt():
             #uri = 'mongodb://'+globalS.dictDb['MONGODB_USERNAME']+':'+globalS.dictDb['MONGODB_PASSWORD']+'@'+globalS.dictDb['MONGODB_HOST']+':'+globalS.dictDb['MONGODB_PORT']+'/wowgicflaskapp'
             uri = 'mongodb://'+globalS.dictDb['MONGODB_USERNAME']+':'+globalS.dictDb['MONGODB_PASSWORD']+'@'+globalS.dictDb['MONGODB_HOST']+':'+globalS.dictDb['MONGODB_PORT']
             try:
-                self.conn = pymongo.MongoClient()
+                self.conn = pymongo.MongoClient(connect=False)
                 logger.debug("mongdb connected to localhost")
             except Exception as e:
                 logger.debug('Exception raised in starting mongoDB:%s',e)
@@ -143,12 +143,12 @@ class mongoInt():
         Takes either a single key or a list of (key, direction) pairs. The key(s)
         must be an instance of basestring (str in python 3)'''
         idxDict = coll.index_information()
-        logger.debug('the index dict is %s',idxDict)
+        logger.info('the index dict is %s',idxDict)
         if 'id_1' not in idxDict:
             result = coll.create_index([('id',pymongo.DESCENDING)],unique=True) #create & ensure i dont know which is perfect
-            logger.debug('constraint create result %s',result)
-            result = coll.ensure_index('id')
-            logger.debug('constraint ensure result %s',result)
+            logger.info('constraint create result %s',result)
+            #result = coll.ensure_index('id')
+            #logger.debug('constraint ensure result %s',result)
         else:
             logger.debug('already index exists on collection %s',coll)
         return 1
@@ -185,7 +185,7 @@ class mongoInt():
                 logger.warn('mongoDB update feed id:%s result#%s',feed['id'],WriteResult)
             else:
                 logger.debug('feed is insterted into mongoDB:%s',feed['id'])
-                updateCnt  += updateCnt
+                updateCnt += updateCnt
         if updateCnt:
             return 1
         else:

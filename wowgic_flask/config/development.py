@@ -14,3 +14,5 @@ MONGODB_PORT = '27017'
 MONGODB_USERNAME = 'admin'
 MONGODB_PASSWORD = '8ygFBXZHeIW6'
 LOGGER_NAME='wowgic_dev'
+#service mongod start
+#/root/Downloads/neo4j-community-2.3.1/bin/neo4j start
