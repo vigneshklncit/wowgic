@@ -34,20 +34,20 @@ class twitterInt:
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
         #authenticate twitter app
-        auth = tweepy.OAuthHandler(globalS.dictDb['t_consumer_key'], globalS.dictDb['t_consumer_secret'])
-        self.api = self.connect(auth,globalS.dictDb['t_access_token'], globalS.dictDb['t_access_secret'],wait_on_rate_limit=True)
+        self.auth = tweepy.OAuthHandler(globalS.dictDb['t_consumer_key'], globalS.dictDb['t_consumer_secret'])
+        self.api = self.connect(globalS.dictDb['t_access_token'], globalS.dictDb['t_access_secret'],wait_on_rate_limit=True)
         #auth.set_access_token(globalS.dictDb['t_access_token'], globalS.dictDb['t_access_secret'])
         #self.api = tweepy.API(auth,wait_on_rate_limit=True,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
 
-    def connect(self,auth,oauth_token,oauth_token_secret,**options):
+    def connect(self,oauth_token,oauth_token_secret,**options):
         ''' Sure shot this will give PROBLEMS due to rate limit 1 search tweet exhaust
         '''
         logger.info('twitter connect')
-        auth.set_access_token(oauth_token, oauth_token_secret)
+        self.auth.set_access_token(oauth_token, oauth_token_secret)
         if options.get("wait_on_rate_limit"):
-            twitterApi = tweepy.API(auth,wait_on_rate_limit=False,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
+            twitterApi = tweepy.API(self.auth,wait_on_rate_limit=False,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
         else:
-            twitterApi = tweepy.API(auth,wait_on_rate_limit=False,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
+            twitterApi = tweepy.API(self.auth,wait_on_rate_limit=False,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
         return twitterApi
 
     #def retrieveTweetsBasedHashtag(self,Q):
@@ -88,8 +88,8 @@ class twitterInt:
         api=self.api
         feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
         #reverse geocoding is also required here to do which is pending
-        if not self.rateLimitStatus():
-            api = connect(sathish_token,sathish_token_secret)
+        if not self.rateLimitStatus()['remaining']:
+            api = self.connect(globalS.dictDb['sathish_token'],globalS.dictDb['sathish_token_secret'])
         geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
         logger.debug('geoCode twitter search#%s',geoCode)
         tweets = tweepy.Cursor(api.search,q='',geocode=geoCode).items(100)
@@ -104,7 +104,7 @@ class twitterInt:
         feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
         #reverse geocoding is also required here to do which is pending
         logger.info('geoCode twitter search#%s',geoCode)
-        if not self.rateLimitStatus():
+        if not self.rateLimitStatus()['remaining']:
             logger.error('twitter rate limit execeeded')
             return 0
         if Q is not None:
