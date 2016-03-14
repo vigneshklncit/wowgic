@@ -96,7 +96,7 @@ class intercom:
         passCnt = 0
         logger.debug('retrieve tweets')
         #fetch the latest since_id and pass it in next twitter call
-        since_id = mongoInt.retrieveID(ID)
+        #since_id = mongoInt.retrieveSinceID(ID)
         twits = twitterInt.retrieveTweets(Q,geoCode)
         #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
         #if geoCode:
