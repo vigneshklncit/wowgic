@@ -82,12 +82,12 @@ def getAllInterestNode():
 @celery.task(rate_limit='10/m')
 def retrieveTweets(collName,Q,geoDict):
     logger.info('retrieveTweets:%s,%s,%s',collName,Q,geoDict)
-    intercom.retrieveTweets(collName,Q,geoDict)
+    return intercom.retrieveTweets(collName,Q,geoDict)
 
 @celery.task(rate_limit='20/m')
 def retrieveMediaBasedTags(ID,Q,geoDict):
     logger.info('retrieveMediaBasedTags:%s,%s,%s',ID,Q,geoDict)
-    intercom.retrieveMediaBasedTags(ID,Q,geoDict)
+    return intercom.retrieveMediaBasedTags(ID,Q,geoDict)
 
 if __name__ == '__main__':
     celery.start()

@@ -106,7 +106,7 @@ class intercom:
             passCnt += mongoInt.insertFeedData(ID,twits)
         #page_sanitized = json_util.dumps(twits)
         # below returning to be removed has to be done from mongoDB only
-        return twits
+        return len(twits)
 
     def instagram_login(self):
         ''' bypasser for instagram login as decorator functions are used This
@@ -141,7 +141,7 @@ class intercom:
         #feedJson=sparkInt.wowFieldTrueOrFalse(feedJson)
         passCnt += mongoInt.insertFeedData(ID,feedJson)
         # below returning to be removed has to be done from mongoDB only
-        return feedJson
+        return len(feedJson)
 
     def refreshFeeds(self):
         ''' this method is invoked when user hits 2nd time and we fetch his interest
