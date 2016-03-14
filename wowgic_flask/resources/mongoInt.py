@@ -214,7 +214,7 @@ class mongoInt():
     #Input          :  #
     #Return Value   :  #
     ############################################################################
-    def retrieveCollection(self,collName):
+    def retrieveCollection(self,collName,limit=5):
         ''' by passing the collection name fetch recent feeeds. Query the database
         '''
         feeds=[]
@@ -222,7 +222,7 @@ class mongoInt():
         cursor = coll.find({},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
                                'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
                                'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
-                               'metadata':0},limit=5,sort=[('id',pymongo.DESCENDING)])
+                               'metadata':0},limit=limit,sort=[('id',pymongo.DESCENDING)])
         logger.info('cursor is %s',cursor.explain())
         #chg to functional prog
         #for document in cursor:
@@ -262,3 +262,10 @@ class mongoInt():
         #cursor = coll.find()
         logger.debug('cursor is %s',document)
         return document['password']
+
+    def retrieveSinceID(self,ID):
+        ''' Check if a collection exists in Mongodb DB or not'''
+        coll = self.db[self.userCollName]
+        document = coll.find_one({},['id'],sort=[('id',pymongo.DESCENDING)])
+        logger.debug('collection %s contains Max id as %s',ID,document)
+        return document['id']

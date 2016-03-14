@@ -100,7 +100,7 @@ class twitterInt:
         logger.debug("location feed geocode:%s from twitter is %s",geoCode,len(feeds))
         return feeds
 
-    def retrieveTweets(self,Q,geoCode):
+    def retrieveTweets(self,Q,geoCode,since_id=0):
         '''
         '''
         api=self.api
@@ -115,10 +115,10 @@ class twitterInt:
                 return 0
         if Q is not None:
             #tweepy set count to largets number
-            tweets = tweepy.Cursor(api.search, q=Q).items()
+            tweets = tweepy.Cursor(api.search, q=Q, since_id=since_id).items()
         elif geoCode :
             geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
-            tweets = tweepy.Cursor(api.search,q='',geocode=geoCode).items()
+            tweets = tweepy.Cursor(api.search,q='',geocode=geoCode, since_id=since_id).items()
         else:
             logger.error('twitter search string is empty')
             return 0
