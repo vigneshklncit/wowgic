@@ -16,3 +16,4 @@ MONGODB_PASSWORD = '8ygFBXZHeIW6'
 LOGGER_NAME='wowgic_dev'
 #service mongod start
 #/root/Downloads/neo4j-community-2.3.1/bin/neo4j start
+#celery -A tasks worker -l debug -B

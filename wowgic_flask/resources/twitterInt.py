@@ -50,7 +50,7 @@ class twitterInt:
         if options.get("wait_on_rate_limit"):
             twitterApi = tweepy.API(self.auth,wait_on_rate_limit=True,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
         else:
-            twitterApi = tweepy.API(self.auth,wait_on_rate_limit=False,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
+            twitterApi = tweepy.API(self.auth,wait_on_rate_limit=False,wait_on_rate_limit_notify=True,retry_count=1,timeout=8)
         return twitterApi
 
     #def retrieveTweetsBasedHashtag(self,Q):

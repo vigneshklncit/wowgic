@@ -359,6 +359,20 @@ def FBLogin():
     ID = intercom.FBLoginData(jsonFBInput)
     return json.dumps({'Authorization':serialized,'password':password, 'text':'wowgic Login Authorized'})
 
+#------------------------------------------------------------------------------#
+#---------------------------Debug Endpoints------------------------------------#
+#------------------------------------------------------------------------------#
+@app.route('/displayFeeds',methods=['GET'])
+def displayFeeds():
+    collId = request.args.get('collId')
+    count = request.args.get('count')
+    if collId is None:
+        return 'collection id is missing',400
+    logger.info('collId requested is:%s & count is %s',collId,count)
+    feedList = []
+    feedList.extend(intercom.retrieveCollection(collId,count))
+    return json.dumps(feedList)
+
 if globalS.dictDb['DEBUG']:
     app.debug = True
 

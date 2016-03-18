@@ -180,7 +180,7 @@ class intercom:
             if mongoInt.checkCollExists(ID) > 1:
                 tweets.extend(mongoInt.retrieveCollection(ID))
             else:
-                tweets.extend(self.retrieveTweets(ID,Q,geoDict,priority=1))
+                tweets.extend(self.retrieveTweets(ID,Q,geoDict))
                 tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
         #sparkInt.Parallelized(tweets)
         #feedJson=sparkInt.wowFieldTrueOrFalse(tweets)
@@ -232,3 +232,8 @@ class intercom:
         ''' just return the password token stored in mongoDB
         '''
         return neo4jInt.getAllInterestNode(graphDB)
+
+    def retrieveCollection(self,ID,count):
+        tweets=[]
+        tweets.extend(mongoInt.retrieveCollection(ID,count))
+        return tweets
