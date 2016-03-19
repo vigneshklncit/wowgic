@@ -6,8 +6,46 @@
 // 'starter.controllers' is found in controllers.js
 angular.module('starter', ['ionic', 'starter.controllers', 'ionicLazyLoad'])
 
-.run(function($ionicPlatform) {
+
+
+.run(function($ionicPlatform, $rootScope, $ionicHistory) {
+
+
+  document.addEventListener("online", function online(){
+      $rootScope.appError = false;
+  }, false);
+  document.addEventListener("offline", function offline(){
+    $rootScope.appError = true;
+    
+  }, false);
+
+/*
+  $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
+
+    console.log("Changing state to :");
+    console.log(toState);
+      if(toState.name === 'facebook' ) {
+
+     //   ionic.Platform.exitApp();
+        
+      }
+
+  });
+    $rootScope.$ionicGoBack = function(backCount) {
+      alert(1);
+      $ionicHistory.goBack(-2);
+    };*/
+
   $ionicPlatform.ready(function() {
+    $ionicPlatform.registerBackButtonAction(function (event) {
+   // alert($ionicHistory.backView().stateName);
+  if ($ionicHistory.backView().stateName === 'facebook' || $ionicHistory.currentStateName()==='facebook'){
+    ionic.Platform.exitApp(); // stops the app
+  } else {
+    $ionicHistory.goBack();
+  }
+}, 100);
+
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
     if (window.cordova && window.cordova.plugins.Keyboard) {
@@ -21,9 +59,17 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ionicLazyLoad'])
     }
   });
 })
+ .factory('timeoutHttpIntercept', function ($rootScope, $q) {
+    return {
+      'request': function(config) {
+        config.timeout = 10000;
+        return config;
+      }
+    };
+ })
+.config(function($stateProvider, $urlRouterProvider, $httpProvider) {
 
-.config(function($stateProvider, $urlRouterProvider) {
-
+  $httpProvider.interceptors.push('timeoutHttpIntercept');
 
   $stateProvider
 
@@ -65,14 +111,16 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ionicLazyLoad'])
     }
   })
   .state('app.feeds', {
-      url: '/feeds',
+      url: '/feeds?mongoid&count',
       views: {
         'menuContent': {
           templateUrl: 'templates/feeds.html',
           controller: 'feedsCtrl'
         }
       }
-  })
+  }
+  )
+
   .state('app.settings', {
       url: '/settings',
       views: {
