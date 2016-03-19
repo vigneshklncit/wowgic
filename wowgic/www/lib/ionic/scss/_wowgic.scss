@@ -4,6 +4,13 @@ body{
 .fb-bg {
 	background: $energized;
 }
+.appError {    
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    padding: 5px;
+}
 
 .fb-login-btn {	
 	position: absolute;
