@@ -181,7 +181,9 @@ class intercom:
             logger.debug('fetchInterestFeeds ID:%s Q=%s geo cordinates =%s',ID,Q,geoDict)
 
             if mongoInt.checkCollExists(ID) > 1:
-                tweets.extend(mongoInt.retrieveCollection(ID,lastTimeStamp))
+                docs = mongoInt.retrieveCollection(ID,lastTimeStamp)
+                tweets.extend(docs) if docs else 0
+                #tweets.extend(mongoInt.retrieveCollection(ID,lastTimeStamp))
             else:
                 feeds = self.retrieveTweets(ID,Q,geoDict)
                 tweets.extend(feeds) if feeds else 0
