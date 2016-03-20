@@ -131,12 +131,21 @@ def refreshUserFeeds(userid):
     like Request: https://http://wowgicflaskapp-wowgic.rhcloud.com/id=q13512667
     neo4j has associated feeds ID to be displayed to the user fetch them from mongdb and return it back
     '''
-    #ID = request.args.get("userid")
+    #if user hasnt
+    lastTimeStamp = request.args.get("lastTimeStamp")
     if userid is None:
         return 'id is missing',400
-    logger.info('ID requested is:%s',userid)
+    elif lastTimeStamp is None:
+        lastTimeStamp = time.time() - 24*60*60 #epoch time minus 1 day
+
+    logger.info('ID requested is:%s and lastTimeStamp : %s',userid,lastTimeStamp)
+
     feedList=[]
-    feedList.extend(intercom.fetchInterestFeeds(userid))
+    feedList.extend(intercom.fetchInterestFeeds(userid,lastTimeStamp))
+    #store the last login
+    jsonFBInput = {'id':userid,'last_login':time.time()}
+    intercom.updateFBUserLoginData(jsonFBInput)
+
     return json.dumps(feedList)
 
 @app.route('/locationFeeds',methods=['POST'])
@@ -354,8 +363,7 @@ def FBLogin():
     #Generate a user token here
     serialized = generate_auth_token(jsonFBInput['id'])
     password = generate_auth_token(jsonFBInput['id'],None)
-    tmpDict = {'iat':time.time(),'password':password}
-    jsonFBInput.update(tmpDict)
+    jsonFBInput.update({'iat':time.time(),'password':password})
     ID = intercom.FBLoginData(jsonFBInput)
     return json.dumps({'Authorization':serialized,'password':password, 'text':'wowgic Login Authorized'})
 
@@ -366,11 +374,15 @@ def FBLogin():
 def displayFeeds():
     collId = request.args.get('collId')
     count = request.args.get('count')
-    if collId is None:
-        return 'collection id is missing',400
-    logger.info('collId requested is:%s & count is %s',collId,count)
+    lastTimeStamp = request.args.get('lastTimeStamp')
+    if collId is None and count is None:
+        return 'collection id or count is missing',400
+    elif lastTimeStamp is None:
+        #lastTimeStamp = time.time() - 24*60*60 #epoch time minus 1 day
+        lastTimeStamp = 1451606400
+    logger.info('collId requested is:%s & lasttimeStamp:%s count is %s',collId,lastTimeStamp,count)
     feedList = []
-    feedList.extend(intercom.retrieveCollection(collId,count))
+    feedList.extend(intercom.retrieveCollection(collId,lastTimeStamp,count))
     return json.dumps(feedList)
 
 if globalS.dictDb['DEBUG']:

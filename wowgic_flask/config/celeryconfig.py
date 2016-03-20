@@ -4,6 +4,7 @@ from celery.schedules import crontab
 CELERY_BROKER_URL='amqp://guest@localhost//'
 CELERY_RESULT_BACKEND = 'mongodb://localhost:27017/'
 CELERY_ACKS_LATE = True
+CELERY_REDIRECT_STDOUTS_LEVEL = 'DEBUG'
 CELERY_TRACK_STARTED = True
 CELERY_MONGODB_BACKEND_SETTINGS = {
         'database': 'wowgicflaskapp',
@@ -22,10 +23,10 @@ MONGODB_PORT = '27017'
 MONGODB_USERNAME = 'admin'
 MONGODB_PASSWORD = '8ygFBXZHeIW6'
 LOGGER_NAME='wowgic_dev'
-#CELERYBEAT_SCHEDULE =   {# Executes every Monday morning at 7:30 A.M
-#    'getAllInterestNode_every15mins': {
-#    'task': 'tasks.getAllInterestNode',
-#    'schedule': crontab(minute='*/15'),
-#        },
-#    }
+CELERYBEAT_SCHEDULE =   {# Executes every Monday morning at 7:30 A.M
+    'getAllInterestNode_every15mins': {
+    'task': 'tasks.getAllInterestNode',
+    'schedule': crontab(minute='*/1'),
+        },
+    }
 CELERYBEAT_SCHEDULE_FILENAME = "/tmp/wowgic_celerySchedule.conf"

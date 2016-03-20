@@ -145,7 +145,8 @@ class mongoInt():
         idxDict = coll.index_information()
         logger.info('the index dict is %s',idxDict)
         if 'id_1' not in idxDict:
-            result = coll.create_index([('id',pymongo.DESCENDING)],unique=True)
+            result = coll.create_index([('id',pymongo.DESCENDING)],unique=True) #remove dup with ID's
+            result = coll.create_index([('created_time',pymongo.DESCENDING)]) #based on times
             logger.info('constraint create result %s',result)
             #result = coll.ensure_index('id')
             #logger.debug('constraint ensure result %s',result)
@@ -214,13 +215,13 @@ class mongoInt():
     #Input          :  #
     #Return Value   :  #
     ############################################################################
-    def retrieveCollection(self,collName,count=5):
+    def retrieveCollection(self,collName,lastTimeStamp,count=5):
         ''' by passing the collection name fetch recent feeeds. Query the database
         '''
         feeds=[]
         logger.debug('arg is collName = %s & limit = %s',collName,count)
         coll = self.db[collName]
-        cursor = coll.find({},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+        cursor = coll.find({'created_at': { '$gt': lastTimeStamp } },{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
                                'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
                                'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                                'metadata':0},limit=int(count),sort=[('id',pymongo.DESCENDING)])
@@ -251,7 +252,7 @@ class mongoInt():
             logger.debug('collection:%s total doc:%s already exists',collInt,totalDocs)
             return totalDocs
         else:
-            logger.debug('collection:%s does not exists',collInt)
+            logger.warn('collection:%s does not exists',collInt)
             return 0
 
     #returns 0 if collection exits

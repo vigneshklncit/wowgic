@@ -1,5 +1,6 @@
 import os
 DEBUG = True
+APP_DEBUG = True
 PROPAGATE_EXCEPTIONS = True
 SECRET_KEY = 'puthuPonnuKurichi88921satheesh41137'
 #os.environ['SPARK_HOME'] = '/home/satheesh/spark-1.6.0-bin-hadoop2.6'

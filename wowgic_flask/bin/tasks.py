@@ -1,4 +1,4 @@
-from celery import Celery, group
+from celery import Celery
 import sys
 sys.path.append('../common')
 sys.path.append('../config')
@@ -72,25 +72,26 @@ def getAllInterestNode():
             Q=record[0]['name']
         ID=record[0]['id']
         logger.debug('fetchInterestFeeds Q=%s geo cordinates =%s',Q,geoDict)
-        retrieveTweets.s(ID,Q,geoDict)
+        retrieveTweets.delay(ID,Q,geoDict)
+        #retrieveTweets.s(ID,Q,geoDict)
         #retrieveMediaBasedTags.delay(ID,Q,geoDict)
 
     map(iterFunc,interesetNodes)
 
-    jobs = group
+    #jobs = group
     return True
 
 
-@celery.task(rate_limit='1/m')
+@celery.task(rate_limit='10/m')
 def retrieveTweets(collName,Q,geoDict):
     logger.info('retrieveTweets:%s,%s,%s',collName,Q,geoDict)
     return intercom.retrieveTweets(collName,Q,geoDict)
 
-@celery.task(rate_limit='2/m')
+@celery.task(rate_limit='20/m')
 def retrieveMediaBasedTags(ID,Q,geoDict):
     logger.info('retrieveMediaBasedTags:%s,%s,%s',ID,Q,geoDict)
     return intercom.retrieveMediaBasedTags(ID,Q,geoDict)
 
-getAllInterestNode.delay()
+#getAllInterestNode.delay()
 if __name__ == '__main__':
     celery.start()

@@ -12,7 +12,8 @@ logger =  loggerRecord.get_logger()
 ####
 # Get tweepy set up
 import tweepy
-from tweepy import Cursor
+import time
+#from tweepy import Cursor
 #some concreete solutiuon has to be implemented below is just junk HOT fix
 #keys from twitter is stored here temp will be removed once we access the user credentials from mongoDB and load it to globalDict file
 #chella's credentials
@@ -129,5 +130,9 @@ class twitterInt:
             logger.error('raised tweepyerror %s',e)
         logger.info('ratelimitStatus data for /search/tweets:%s',self.rateLimitStatus(api))
 
+        #Thz functionality should be moved to intercom.py
+        #map(lambda tw:tw.update({'created_at': 'satheesh'}),feeds)
+        #map(lambda tw:tw.update({'created_at': datetime.datetime.strptime(tw['created_at'], '%a %b %d %H:%M:%S +0000 %Y')}),feeds)
+        map(lambda tw:tw.update({'created_time': time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),feeds)
         logger.debug('total tweets retrieved for keyword:%s is %s',Q,len(feeds))
         return feeds

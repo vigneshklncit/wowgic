@@ -86,7 +86,7 @@ class intercom:
                 logger.debug('user key doesnot exists')
         logger.debug('dataFb decodedFBJson:%s',decodedFBJson)
         #else:
-        logger.debug('user already exists hence skipping the neo4J creation of nodes & interest')
+        #logger.debug('user already exists hence skipping the neo4J creation of nodes & interest')
         #once the nodes are created lets fetch the feeds
         return 1
 
@@ -105,6 +105,9 @@ class intercom:
         #twits=sparkInt.wowFieldTrueOrFalse(twits)
         if twits:
             passCnt += mongoInt.insertFeedData(ID,twits)
+        else:
+            if not mongoInt.createCollection(ID):
+                logger.warn('unable to create collection in mongodb')
         #page_sanitized = json_util.dumps(twits)
         # below returning to be removed has to be done from mongoDB only
         return len(twits)
@@ -152,7 +155,7 @@ class intercom:
         '''
         #fetch neo4j interest based on ID's
 
-    def fetchInterestFeeds(self,ID):
+    def fetchInterestFeeds(self,ID,lastTimeStamp):
         '''fetch the all neo4j interest nodes returning name & city then using those
         tags look for mongoDb collection if not then do search in twitter &
         instagram and store the output in mongoDb in a collection mapped to interest nodes'''
@@ -178,13 +181,32 @@ class intercom:
             logger.debug('fetchInterestFeeds ID:%s Q=%s geo cordinates =%s',ID,Q,geoDict)
 
             if mongoInt.checkCollExists(ID) > 1:
-                tweets.extend(mongoInt.retrieveCollection(ID))
+                tweets.extend(mongoInt.retrieveCollection(ID,lastTimeStamp))
             else:
-                tweets.extend(self.retrieveTweets(ID,Q,geoDict))
-                tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
+                feeds = self.retrieveTweets(ID,Q,geoDict)
+                tweets.extend(feeds) if feeds else 0
+                medias = self.retrieveMediaBasedTags(ID,Q,geoDict)
+                tweets.extend(medias) if medias else 0
+
+        if globalS.dictDb['APP_DEBUG']:
+            def insertQueryData(twit,*argv):
+                twit.update({'queryDetails':argv})
+                return twit
+            map(lambda twit: insertQueryData(twit,ID,Q,geoDict), tweets);
         #sparkInt.Parallelized(tweets)
         #feedJson=sparkInt.wowFieldTrueOrFalse(tweets)
         return tweets
+
+    def updateFBUserLoginData(self,userJson):
+        '''store last_login into user data
+        '''
+        #0 means it gets updated
+        if not mongoInt.insertFBUserLoginData(userJson):
+            logger.error('updated user login DB with last_login ')
+            return 1
+        else:
+            logger.error('updating user login DB with last_login failed')
+            return 0
 
     def handle_instagram_authorization(self):
         '''
@@ -233,7 +255,15 @@ class intercom:
         '''
         return neo4jInt.getAllInterestNode(graphDB)
 
-    def retrieveCollection(self,ID,count):
+    def retrieveCollection(self,ID,lastTimeStamp,count):
+        ''' for displayFeeds debugging stuff
+        '''
         tweets=[]
-        tweets.extend(mongoInt.retrieveCollection(ID,count))
+        docs = mongoInt.retrieveCollection(ID,lastTimeStamp,count)
+        tweets.extend(docs) if docs else 0
+        if globalS.dictDb['APP_DEBUG']:
+            def insertQueryData(twit,ID):
+                twit.update({'collection':ID})
+                return twit
+            map(lambda twit: insertQueryData(twit, ID), tweets);
         return tweets
