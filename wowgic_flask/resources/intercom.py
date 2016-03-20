@@ -105,12 +105,14 @@ class intercom:
         #twits=sparkInt.wowFieldTrueOrFalse(twits)
         if twits:
             passCnt += mongoInt.insertFeedData(ID,twits)
+            returnVar = len(twits)
         else:
             if not mongoInt.createCollection(ID):
                 logger.warn('unable to create collection in mongodb')
+            returnVar = 0
         #page_sanitized = json_util.dumps(twits)
         # below returning to be removed has to be done from mongoDB only
-        return len(twits)
+        return returnVar
 
     def instagram_login(self):
         ''' bypasser for instagram login as decorator functions are used This

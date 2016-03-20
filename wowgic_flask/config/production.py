@@ -1,5 +1,6 @@
 import os
 DEBUG = True
+APP_DEBUG = True
 PROPAGATE_EXCEPTIONS = True
 SECRET_KEY = 'puthuPonnuKurichi88921satheesh41137'
 #SECRET_KEY = os.environ.get('SECRET_KEY','\xfb\x13\xdf\xa1@i\xd6>V\xc0\xbf\x8fp\x16#Z\x0b\x81\xeb\x16')
