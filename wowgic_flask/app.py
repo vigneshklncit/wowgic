@@ -29,16 +29,16 @@ parser = argparse.ArgumentParser(description='  webapp for wowgic \
 #parser.add_argument('testName',help='Name suffixed to log file name generated')
 #if the def file is not passed as arg thn take the default file.
 parser.add_argument('-c', '--config',default='wowgic.def',help='definition file')
-parser.add_argument('-v', '--version', action='version', version='%(prog)s 1.3')
+parser.add_argument('-v', '--version', action='version', version='%(prog)s 1.4')
 parser.add_argument("-l", "--logLevel",default='error',help="Enable standard output verbosity")
 args = parser.parse_args()
 #create a flask app
 app = Flask(__name__,instance_relative_config=True)
-# Load the default configuration
-app.config.from_object('config.default')
+# Load the default configuration via a class object
+#app.config.from_object('config.default')
 
 # Load the configuration from the instance folder
-#app.config.from_pyfile('config.py')
+app.config.from_pyfile('flaskapp.cfg')
 
 # Load the file specified by the APP_CONFIG_FILE environment variable
 # Variables defined here will override those in the default configuration
@@ -66,7 +66,7 @@ sufFileName = compileFileName()
 logFileName  = "/tmp/" + sufFileName + ".log"
 logger,fhandler       = loggerRecord.loggerInit(logFileName,args.logLevel)
 logger.debug('Log file# %s & TestBed file',logFileName)
-logger.debug('global dictDB file# %s',globalS.dictDb['MONGODB_PASSWORD'])
+logger.debug('global dictDB file# %s',globalS.dictDb)
 #logger.debug('global app file# %s',app.config)
 logger.info('''
 .----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------.
@@ -86,10 +86,10 @@ app.logger_name = loggerRecord.get_logger() #associate the app logger with gener
 
 ####
 #43apps access strings
-oAuthStrings = dict(t_consumer_key= 'HwvpHtsPt3LmOZocZXwtn72Zv',
-t_consumer_secret = 'afVEAR0Ri3ZluVItqbDi0kfm7BHSxjwRXbpw9m9kFhXGjnzHKh')
-
-globalS.dictDb.update(oAuthStrings)
+#oAuthStrings = dict(T_CONSUMER_KEY= 'HwvpHtsPt3LmOZocZXwtn72Zv',
+#T_CONSUMER_SECRET = 'afVEAR0Ri3ZluVItqbDi0kfm7BHSxjwRXbpw9m9kFhXGjnzHKh')
+#
+#globalS.dictDb.update(oAuthStrings)
 
 import intercom
 intercom=intercom.intercom()
@@ -238,8 +238,8 @@ twitter = oauth.remote_app('twitter',
     # user interface on the twitter side.
     authorize_url='https://api.twitter.com/oauth/authenticate',
     # the consumer keys from the twitter application registry.
-    consumer_key= globalS.dictDb['t_consumer_key'],
-    consumer_secret = globalS.dictDb['t_consumer_secret']
+    consumer_key= globalS.dictDb['T_CONSUMER_KEY'],
+    consumer_secret = globalS.dictDb['T_CONSUMER_SECRET']
 )
 
 @twitter.tokengetter

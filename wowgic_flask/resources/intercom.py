@@ -91,7 +91,7 @@ class intercom:
         return 1
 
     def retrieveTweets(self,ID,Q,geoCode):
-        '''retrieveTweetsBasedHashtag from twitter
+        '''retrieveTweets from twitter and store the feeds into MongoDB
         '''
         passCnt = 0
         logger.debug('retrieve tweets')
@@ -103,16 +103,14 @@ class intercom:
         #    twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
         logger.debug('storing tweets of twitter of both location based on keyword mongoDb')
         #twits=sparkInt.wowFieldTrueOrFalse(twits)
-        if twits:
+        if len(twits):
             passCnt += mongoInt.insertFeedData(ID,twits)
-            returnVar = len(twits)
         else:
             if not mongoInt.createCollection(ID):
                 logger.warn('unable to create collection in mongodb')
-            returnVar = 0
         #page_sanitized = json_util.dumps(twits)
         # below returning to be removed has to be done from mongoDB only
-        return returnVar
+        return twits
 
     def instagram_login(self):
         ''' bypasser for instagram login as decorator functions are used This
@@ -147,7 +145,7 @@ class intercom:
         #feedJson=sparkInt.wowFieldTrueOrFalse(feedJson)
         passCnt += mongoInt.insertFeedData(ID,feedJson)
         # below returning to be removed has to be done from mongoDB only
-        return len(feedJson)
+        return feedJson
 
     def refreshFeeds(self):
         ''' this method is invoked when user hits 2nd time and we fetch his interest
@@ -183,14 +181,16 @@ class intercom:
             logger.debug('fetchInterestFeeds ID:%s Q=%s geo cordinates =%s',ID,Q,geoDict)
 
             if mongoInt.checkCollExists(ID) > 1:
-                docs = mongoInt.retrieveCollection(ID,lastTimeStamp)
-                tweets.extend(docs) if docs else 0
-                #tweets.extend(mongoInt.retrieveCollection(ID,lastTimeStamp))
+                #docs = mongoInt.retrieveCollection(ID,lastTimeStamp)
+                #tweets.extend(docs) if len(docs) else 0
+                tweets.extend(mongoInt.retrieveCollection(ID,lastTimeStamp))
             else:
-                feeds = self.retrieveTweets(ID,Q,geoDict)
-                tweets.extend(feeds) if feeds else 0
-                medias = self.retrieveMediaBasedTags(ID,Q,geoDict)
-                tweets.extend(medias) if medias else 0
+                tweets.extend(self.retrieveTweets(ID,Q,geoDict))
+                tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
+                #feeds = self.retrieveTweets(ID,Q,geoDict)
+                #tweets.extend(feeds) if len(feeds) else 0
+                #medias = self.retrieveMediaBasedTags(ID,Q,geoDict)
+                #tweets.extend(medias) if len(medias) else 0
 
         if globalS.dictDb['APP_DEBUG']:
             def insertQueryData(twit,*argv):
@@ -201,12 +201,12 @@ class intercom:
         #feedJson=sparkInt.wowFieldTrueOrFalse(tweets)
         return tweets
 
-    def updateFBUserLoginData(self,userJson):
+    def updateFBUserLoginData(self,userTimeJson):
         '''store last_login into user data
         '''
-        #0 means it gets updated
-        if not mongoInt.insertFBUserLoginData(userJson):
-            logger.error('updated user login DB with last_login ')
+        #0 means not updated
+        if mongoInt.updateFBUserLoginData(userTimeJson):
+            logger.debug('updated user login DB with last_login ')
             return 1
         else:
             logger.error('updating user login DB with last_login failed')
@@ -263,8 +263,9 @@ class intercom:
         ''' for displayFeeds debugging stuff
         '''
         tweets=[]
-        docs = mongoInt.retrieveCollection(ID,lastTimeStamp,count)
-        tweets.extend(docs) if docs else 0
+        #docs = mongoInt.retrieveCollection(ID,lastTimeStamp,count)
+        #tweets.extend(docs) if docs>0 else 0
+        tweets.extend(mongoInt.retrieveCollection(ID,lastTimeStamp))
         if globalS.dictDb['APP_DEBUG']:
             def insertQueryData(twit,ID):
                 twit.update({'collection':ID})

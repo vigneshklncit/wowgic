@@ -92,25 +92,25 @@ class mongoInt():
     ############################################################################
     #Function Name  :  #
     #Input          :  #
-    #Return Value   :  #
+    #Return Value   : 1 if update is success 0 if user update fails
     ############################################################################
-    #def insertTwitterUserLoginData(self,FBJsonUserLoginData):
-    #    '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
-    #    identified by the base URI of the graph database'''
-    #
-    #    # Connect to the databases
-    #    #db = self.conn['userData']
-    #    #
-    #    coll=self.db['TwitterLoginUserData']
-    #    #self.createConstraint(coll)
-    #    #instead of updating we can find_one initialyy and then do update operation
-    #    WriteResult =coll.update({'id':FBJsonUserLoginData['id']},FBJsonUserLoginData,True)
-    #    if WriteResult['updatedExisting']:
-    #        logger.warn('mongoDB update method result#%s',WriteResult)
-    #        return 0
-    #    else:
-    #        logger.debug('USer DB already exists')
-    #        return 1
+    def updateFBUserLoginData(self,jsonDoc):
+        '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
+        identified by the base URI of the graph database'''
+
+        # Connect to the databases
+        #db = self.conn['userData']
+        #
+        coll=self.db[self.userCollName]
+        #instead of updating we can find_one initialyy and then do update operation
+        logger.info('doc with last_login is :%s',jsonDoc)
+        WriteResult =coll.update_one({'id':jsonDoc['id']},{'$set':{'last_login':jsonDoc['last_login']}})
+        logger.debug('mongoDB update_one modified_count#%s matched_count %s',WriteResult.modified_count,WriteResult.matched_count)
+        if WriteResult.modified_count:
+            return 1
+        else:
+            logger.error('updating last_login failed in mongodb')
+            return 0
     ############################################################################
     #Function Name  :  #
     #Input          :  #
@@ -221,7 +221,7 @@ class mongoInt():
         feeds=[]
         logger.debug('arg is collName = %s & limit = %s',collName,count)
         coll = self.db[collName]
-        cursor = coll.find({'created_at': { '$gt': lastTimeStamp } },{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+        cursor = coll.find({'created_time': { '$gt': lastTimeStamp } },{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
                                'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
                                'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                                'metadata':0},limit=int(count),sort=[('id',pymongo.DESCENDING)])
@@ -237,12 +237,14 @@ class mongoInt():
 
         #way2
         feeds=list(map(lambda x:x,cursor))
-        feedsLength = len(feeds)
-        if feedsLength:
-            logger.debug('total feed trieved %s',feedsLength)
-            return feeds
-        else:
-            return 0
+        #feedsLength = len(feeds)
+        #if feedsLength:
+        #    logger.debug('total feed trieved %s',feedsLength)
+        #    return feeds
+        #else:
+        #    return 0
+        logger.debug('total documents retrieved %s',len(feeds))
+        return feeds
 
     #returns 0 if collection exits
     def checkCollExists(self,collInt):

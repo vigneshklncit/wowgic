@@ -141,6 +141,7 @@ class neo4jInterface:
         #n=n[0][0]
         #logger.info('getInterestNode put:%s',n)
         return n
+
     ############################################################################
     #Function Name  : execCreateRelQuery                                       #
     #Input          : k--> ssh key                                             #

@@ -18,17 +18,17 @@ import time
 #keys from twitter is stored here temp will be removed once we access the user credentials from mongoDB and load it to globalDict file
 #chella's credentials
 #sathish ouath ofr location feeds & new user this should not exhaust at any case
-oAuthStrings = dict(
-    t_consumer_key= 'HwvpHtsPt3LmOZocZXwtn72Zv',
-    t_consumer_secret = 'afVEAR0Ri3ZluVItqbDi0kfm7BHSxjwRXbpw9m9kFhXGjnzHKh',
-    t_access_token = '419412786-cpS2hDmR6cuIf8BD2kSSri0BAWAmXBA3pzcB56Pw',
-    t_access_secret = 'pRx5MNKkmxyImwuhUFMNVOr1NrAWcRmOGUgGTLVYFAjsJ',
-    sathish_token_secret = 'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8',
-    sathish_token = '56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS',
-    vivek_token_secret = '8h1T0x2237pmUWA1Hg7QSi3sPRQt9WN6Okg6A0dMSYvRL',
-    vivek_token = '2976291321-gfESJJC7xBvZk0mv8tbkbYgoMseQChUBwPslbYc')
-
-globalS.dictDb.update(oAuthStrings)
+#oAuthStrings = dict(
+#    T_CONSUMER_KEY= 'HwvpHtsPt3LmOZocZXwtn72Zv',
+#    t_consumer_secret = 'afVEAR0Ri3ZluVItqbDi0kfm7BHSxjwRXbpw9m9kFhXGjnzHKh',
+#    T_ACCESS_TOKEN = '419412786-cpS2hDmR6cuIf8BD2kSSri0BAWAmXBA3pzcB56Pw',
+#    T_ACCESS_SECRET = 'pRx5MNKkmxyImwuhUFMNVOr1NrAWcRmOGUgGTLVYFAjsJ',
+#    SATHISH_TOKEN_SECRET = 'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8',
+#    SATHISH_TOKEN = '56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS',
+#    VIVEK_TOKEN_SECRET = '8h1T0x2237pmUWA1Hg7QSi3sPRQt9WN6Okg6A0dMSYvRL',
+#    VIVEK_TOKEN = '2976291321-gfESJJC7xBvZk0mv8tbkbYgoMseQChUBwPslbYc')
+#
+#globalS.dictDb.update(oAuthStrings)
 
 class twitterInt:
     ''' this class is meant for twitter
@@ -38,9 +38,9 @@ class twitterInt:
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
         #authenticate twitter app
-        self.auth = tweepy.OAuthHandler(globalS.dictDb['t_consumer_key'], globalS.dictDb['t_consumer_secret'])
-        self.api = self.connect(globalS.dictDb['t_access_token'], globalS.dictDb['t_access_secret'],wait_on_rate_limit=True)
-        #auth.set_access_token(globalS.dictDb['t_access_token'], globalS.dictDb['t_access_secret'])
+        self.auth = tweepy.OAuthHandler(globalS.dictDb['T_CONSUMER_KEY'], globalS.dictDb['T_CONSUMER_SECRET'])
+        self.api = self.connect(globalS.dictDb['T_ACCESS_TOKEN'], globalS.dictDb['T_ACCESS_SECRET'],wait_on_rate_limit=True)
+        #auth.seT_ACCESS_TOKEN(globalS.dictDb['T_ACCESS_TOKEN'], globalS.dictDb['T_ACCESS_SECRET'])
         #self.api = tweepy.API(auth,wait_on_rate_limit=True,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
 
     def connect(self,oauth_token,oauth_token_secret,**options):
@@ -49,7 +49,7 @@ class twitterInt:
         logger.info('twitter connect')
         self.auth.set_access_token(oauth_token, oauth_token_secret)
         if options.get("wait_on_rate_limit"):
-            twitterApi = tweepy.API(self.auth,wait_on_rate_limit=True,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
+            twitterApi = tweepy.API(self.auth,wait_on_rate_limit=False,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
         else:
             twitterApi = tweepy.API(self.auth,wait_on_rate_limit=False,wait_on_rate_limit_notify=True,retry_count=1,timeout=8)
         return twitterApi
@@ -93,7 +93,7 @@ class twitterInt:
         feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
         #reverse geocoding is also required here to do which is pending
         if not self.rateLimitStatus(api)['remaining']:
-            api = self.connect(globalS.dictDb['sathish_token'],globalS.dictDb['sathish_token_secret'])
+            api = self.connect(globalS.dictDb['SATHISH_TOKEN'],globalS.dictDb['SATHISH_TOKEN_SECRET'])
         geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
         logger.debug('geoCode twitter search#%s',geoCode)
         tweets = tweepy.Cursor(api.search,q='',geocode=geoCode).items(100)
@@ -102,7 +102,8 @@ class twitterInt:
         return feeds
 
     def retrieveTweets(self,Q,geoCode):
-        '''
+        '''returns an empty list in case of failure. If length of returned list is
+        zero thn something has went wrong
         '''
         api=self.api
         feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
@@ -110,10 +111,10 @@ class twitterInt:
         logger.info('geoCode twitter search#%s',geoCode)
         if not self.rateLimitStatus(api)['remaining']:
             logger.warn('trying with viveks ouath')
-            api = self.connect(globalS.dictDb['vivek_token'],globalS.dictDb['vivek_token_secret'],wait_on_rate_limit=1)
+            api = self.connect(globalS.dictDb['VIVEK_TOKEN'],globalS.dictDb['VIVEK_TOKEN_SECRET'],wait_on_rate_limit=1)
             if not self.rateLimitStatus(api)['remaining']:
                 logger.error('twitter rate limit execeeded')
-                return 0
+                return feeds
         if Q is not None:
             #tweepy set count to largets number
             tweets = tweepy.Cursor(api.search, q=Q).items()
@@ -122,7 +123,7 @@ class twitterInt:
             tweets = tweepy.Cursor(api.search,q='',geocode=geoCode).items()
         else:
             logger.error('twitter search string is empty')
-            return 0
+            return feeds
 
         try:
             feeds=list(map(lambda twt:twt._json,tweets))
