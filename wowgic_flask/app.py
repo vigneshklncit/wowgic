@@ -64,7 +64,7 @@ generic      = generic.generic()
 #==============================================================================#
 sufFileName = compileFileName()
 logFileName  = "/tmp/" + sufFileName + ".log"
-logger,fhandler       = loggerRecord.loggerInit(logFileName,args.logLevel)
+logger,fhandler = loggerRecord.loggerInit(logFileName,args.logLevel)
 logger.debug('Log file# %s & TestBed file',logFileName)
 logger.debug('global dictDB file# %s',globalS.dictDb)
 #logger.debug('global app file# %s',app.config)
@@ -177,8 +177,6 @@ def _handle_instagram_authorization():
 #------------------------------------------------------------------------------#
 
 # To get an access token to consume the API on behalf of a user, use a suitable OAuth library for your platform
-globalS.dictDb['FACEBOOK_APP_ID'] = '575443062564498'
-globalS.dictDb['FACEBOOK_APP_SECRET'] = '3112a499e27dcd991b9869a5dd5524c0'
 oauth = OAuth()
 
 facebook = oauth.remote_app('facebook',
@@ -385,8 +383,8 @@ def displayFeeds():
     feedList.extend(intercom.retrieveCollection(collId,lastTimeStamp,count))
     return json.dumps(feedList)
 
-if globalS.dictDb['DEBUG']:
-    app.debug = True
+#if globalS.dictDb['DEBUG']:
+#    app.debug = True
 
 if __name__ == '__main__':
     app.run(host=globalS.dictDb['IP'],port=app.config.get('PORT'))

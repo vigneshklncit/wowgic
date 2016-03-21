@@ -21,10 +21,10 @@ class facebookInt:
     def get_facebook_oauth_token(self):
         '''fetch the auth token from mongodb and have it here if it about to expire please extend it'''
         #atleast 1 user has to be authenticated and user token has to stored for future use
-        fbaccessToken = 'CAAILXMdVJpIBAKFDd2D3K9okHlGnw0k50qBqMHm4hQddbmBoIkyvQpmt7824HWORP8xwdhFtbwwKVJdk7E0MIATdUQXmsJ1ZBtZClQ5fZCiMu06MBSkPGOlzOvv2oe2OgnI2sJZAjH9ZADeQEZABfBt9fGyRrRd61OdZCgF2r54gTU7vZCaLd4zHSa5L2prHmWSo3eZCpINElCQZDZD'
+        #fbaccessToken = 'CAAILXMdVJpIBAKFDd2D3K9okHlGnw0k50qBqMHm4hQddbmBoIkyvQpmt7824HWORP8xwdhFtbwwKVJdk7E0MIATdUQXmsJ1ZBtZClQ5fZCiMu06MBSkPGOlzOvv2oe2OgnI2sJZAjH9ZADeQEZABfBt9fGyRrRd61OdZCgF2r54gTU7vZCaLd4zHSa5L2prHmWSo3eZCpINElCQZDZD'
         #globalS.dictDb['fbToken'] = session.get('facebook_token')
-        globalS.dictDb['fbToken'] = fbaccessToken
-        return globalS.dictDb['fbToken']
+        #globalS.dictDb['fbToken'] = fbaccessToken
+        return globalS.dictDb['FBTOKEN']
 
     def __init__(self):
         #connect to the API

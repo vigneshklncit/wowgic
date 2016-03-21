@@ -183,7 +183,7 @@ class intercom:
             if mongoInt.checkCollExists(ID) > 1:
                 #docs = mongoInt.retrieveCollection(ID,lastTimeStamp)
                 #tweets.extend(docs) if len(docs) else 0
-                tweets.extend(mongoInt.retrieveCollection(ID,lastTimeStamp))
+                tweets.extend(mongoInt.retrieveCollection(ID,lastTimeStamp,globalS.dictDb['MONGODB_COUNT_LIMIT']))
             else:
                 tweets.extend(self.retrieveTweets(ID,Q,geoDict))
                 tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
@@ -265,7 +265,7 @@ class intercom:
         tweets=[]
         #docs = mongoInt.retrieveCollection(ID,lastTimeStamp,count)
         #tweets.extend(docs) if docs>0 else 0
-        tweets.extend(mongoInt.retrieveCollection(ID,lastTimeStamp))
+        tweets.extend(mongoInt.retrieveCollection(ID,lastTimeStamp,count))
         if globalS.dictDb['APP_DEBUG']:
             def insertQueryData(twit,ID):
                 twit.update({'collection':ID})
