@@ -30,3 +30,19 @@ CELERYBEAT_SCHEDULE =   {# Executes every Monday morning at 7:30 A.M
         },
     }
 CELERYBEAT_SCHEDULE_FILENAME = "/tmp/wowgic_celerySchedule.conf"
+
+#remove this after placing into database
+#twitter keys key should named genericly so tat retriuvel mechanism is faster & prioritised
+T_CONSUMER_KEY= 'HwvpHtsPt3LmOZocZXwtn72Zv'
+T_CONSUMER_SECRET = 'afVEAR0Ri3ZluVItqbDi0kfm7BHSxjwRXbpw9m9kFhXGjnzHKh'
+T_ACCESS_TOKEN = '419412786-cpS2hDmR6cuIf8BD2kSSri0BAWAmXBA3pzcB56Pw'
+T_ACCESS_SECRET = 'pRx5MNKkmxyImwuhUFMNVOr1NrAWcRmOGUgGTLVYFAjsJ'
+SATHISH_TOKEN_SECRET = 'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8'
+SATHISH_TOKEN = '56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS'
+VIVEK_TOKEN_SECRET = '8h1T0x2237pmUWA1Hg7QSi3sPRQt9WN6Okg6A0dMSYvRL'
+VIVEK_TOKEN = '2976291321-gfESJJC7xBvZk0mv8tbkbYgoMseQChUBwPslbYc'
+
+#facebook tokens
+FACEBOOK_APP_ID = '575443062564498'
+FACEBOOK_APP_SECRET = '3112a499e27dcd991b9869a5dd5524c0'
+FBTOKEN = 'CAAILXMdVJpIBAKFDd2D3K9okHlGnw0k50qBqMHm4hQddbmBoIkyvQpmt7824HWORP8xwdhFtbwwKVJdk7E0MIATdUQXmsJ1ZBtZClQ5fZCiMu06MBSkPGOlzOvv2oe2OgnI2sJZAjH9ZADeQEZABfBt9fGyRrRd61OdZCgF2r54gTU7vZCaLd4zHSa5L2prHmWSo3eZCpINElCQZDZD'

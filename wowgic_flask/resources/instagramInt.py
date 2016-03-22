@@ -16,9 +16,9 @@ logger =  loggerRecord.get_logger()
 
 from collections import OrderedDict
 
-client_id = '081ccf9e86164090af417c8ce91cc2e4'
-client_secret = '5b623638585b46cd9d35a203e84114e0'
-access_token = '2300510664.081ccf9.545afdfe23b441dd9cfb3d8341c83ca7' # this is about to expire which has to updated each time
+INSTA_CLIENT_ID = '081ccf9e86164090af417c8ce91cc2e4'
+INSTA_CLIENT_SECRET = '5b623638585b46cd9d35a203e84114e0'
+ACCESS_TOKEN = '2300510664.081ccf9.545afdfe23b441dd9cfb3d8341c83ca7' # this is about to expire which has to updated each time
 client_ip = 'XX.XX.XX.XX'
 api=''
 
@@ -28,14 +28,14 @@ class instagramInt:
     api=''
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
-        self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
+        self.api = client.InstagramAPI(client_id=INSTA_CLIENT_ID, client_secret=INSTA_CLIENT_SECRET,access_token= ACCESS_TOKEN)
         #return 1
         #authenticate twitter app
 
     def instagram_login(self):
 
         redirect_uri = ('http://'+globalS.dictDb['HOST_NAME'] + url_for('_handle_instagram_authorization'))
-        instagram_client = client.InstagramAPI(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
+        instagram_client = client.InstagramAPI(client_id=INSTA_CLIENT_ID, client_secret=INSTA_CLIENT_SECRET, redirect_uri=redirect_uri)
         return redirect(instagram_client.get_authorize_url(scope=['basic']))
 
     def _handle_instagram_authorization(self):
@@ -45,7 +45,7 @@ class instagramInt:
         if not code:
             return error_response('Missing code')
         try:
-            instagram_client = client.InstagramAPI(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
+            instagram_client = client.InstagramAPI(client_id=INSTA_CLIENT_ID, client_secret=INSTA_CLIENT_SECRET, redirect_uri=redirect_uri)
             access_token, instagram_user = instagram_client.exchange_code_for_access_token(code)
             if not access_token:
                 return 'Could not get access token'
@@ -69,7 +69,7 @@ class instagramInt:
         tag_recent_media returns 2 variables, the media ID in an array and the next
         url for the next page'''
         media_ids=[]
-        #self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
+        #self.api = client.InstagramAPI(client_id=INSTA_CLIENT_ID, client_secret=client_secret,access_token= access_token)
         logger.debug('fetch instagram medias :%s',Q)
         tag_search, next_tag = self.api.tag_search(q=Q,count=2)
         logger.debug('tagsearch resulted : %s',tag_search)
@@ -87,7 +87,7 @@ class instagramInt:
         location id '''
         mediaList=[]
         logger.debug('getLocationSearch instagram medias :%s',geoCode)
-        #self.api = client.InstagramAPI(client_id=client_id, client_secret=client_secret,access_token= access_token)
+        #self.api = client.InstagramAPI(client_id=INSTA_CLIENT_ID, client_secret=client_secret,access_token= access_token)
         #location_search = self.api.location_search(lat=geoCode['lat'],lng=geoCode['lng'],distance=(geoCode['distance']*1000))
         #for loc in  location_search:
         #    media_ids,next = self.api.location_recent_media(location_id=loc.id,return_json=True)

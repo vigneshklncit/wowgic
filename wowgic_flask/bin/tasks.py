@@ -14,8 +14,10 @@ logger.debug('Log file# %s & TestBed file',logFileName)
 celery = Celery('tasks', broker='amqp://guest@localhost//')
 # Load the default configuration
 celery.config_from_object('celeryconfig')
+#read config from envt variable
+#celery.config_from_envvar('CELERY_CONFIG_FILE')#D:\wowgic-env\wowgic\wowgic_flask\instance\flaskapp.cfg
 globalS.dictDb = celery.conf
-
+logger.debug('celery dictDB contains %s',globalS.dictDb)
 
 import intercom
 intercom=intercom.intercom()
