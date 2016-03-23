@@ -22,6 +22,9 @@ MONGODB_HOST = '127.0.0.1'
 MONGODB_PORT = '27017'
 MONGODB_USERNAME = 'admin'
 MONGODB_PASSWORD = '8ygFBXZHeIW6'
+#Neo4j
+NEO4J_USERNAME = 'neo4j'
+NEO4J_PASSWORD = 'admin'
 LOGGER_NAME='wowgic_dev'
 CELERYBEAT_SCHEDULE =   {# Executes every Monday morning at 7:30 A.M
     'getAllInterestNode_every15mins': {
