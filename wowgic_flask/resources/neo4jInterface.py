@@ -21,8 +21,8 @@ class neo4jInterface:
     #REST server credentials
     #default Remember to change these credentials User/Pass.
     #userName = 'Wowgic'
-    userName = 'neo4j'
-    passWord = 'admin'
+    userName = globalS.dictDb['NEO4J_USERNAME']
+    passWord = globalS.dictDb['NEO4J_PASSWORD']
     #passWord = 'GcpXosEMPJV5pLR0QJQ3'
     #Rest server uri
     #connectUri='neo-graciela-stracke-cornsilk-564c5f886175e.do-stories.graphstory.com:7473'
