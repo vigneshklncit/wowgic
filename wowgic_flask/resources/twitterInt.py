@@ -12,15 +12,13 @@ logger =  loggerRecord.get_logger()
 ####
 # Get tweepy set up
 import tweepy
-import time
+from tweepy import RateLimitHandler
+#import time
 #from tweepy import Cursor
 #some concreete solutiuon has to be implemented below is just junk HOT fix
 #keys from twitter is stored here temp will be removed once we access the user credentials from mongoDB and load it to globalDict file
 #chella's credentials
 #sathish ouath ofr location feeds & new user this should not exhaust at any case
-#oAuthStrings = dict(
-#    T_CONSUMER_KEY= 'HwvpHtsPt3LmOZocZXwtn72Zv',
-#    t_consumer_secret = 'afVEAR0Ri3ZluVItqbDi0kfm7BHSxjwRXbpw9m9kFhXGjnzHKh',
 #    T_ACCESS_TOKEN = '419412786-cpS2hDmR6cuIf8BD2kSSri0BAWAmXBA3pzcB56Pw',
 #    T_ACCESS_SECRET = 'pRx5MNKkmxyImwuhUFMNVOr1NrAWcRmOGUgGTLVYFAjsJ',
 #    SATHISH_TOKEN_SECRET = 'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8',
@@ -30,6 +28,7 @@ import time
 #
 #globalS.dictDb.update(oAuthStrings)
 
+ACCESS_TOKENS = {globalS.dictDb['T_ACCESS_TOKEN']: globalS.dictDb['T_ACCESS_SECRET']}
 class twitterInt:
     ''' this class is meant for twitter
     '''
@@ -53,6 +52,19 @@ class twitterInt:
         else:
             twitterApi = tweepy.API(self.auth,wait_on_rate_limit=False,wait_on_rate_limit_notify=True,retry_count=1,timeout=8)
         return twitterApi
+
+    def get_api(self):
+        auth = RateLimitHandler(globalS.dictDb['T_CONSUMER_KEY'], globalS.dictDb['T_CONSUMER_SECRET'])
+        logger.info('entered ratelimitor')
+        for key, secret in ACCESS_TOKENS.items():
+                try:
+                    auth.add_access_token(key, secret)
+                except TweepError, e:
+                    logger.debug('key %s , error %s', key, e)
+        print 'Token pool size: %d' % len(auth.tokens)
+        api = tweepy.API(auth,
+                wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+        return api
 
     #def retrieveTweetsBasedHashtag(self,Q):
     #    ''' Method returns tweets based on feeds or 0 in case of failure
@@ -97,7 +109,8 @@ class twitterInt:
         geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
         logger.debug('geoCode twitter search#%s',geoCode)
         tweets = tweepy.Cursor(api.search,q='',geocode=geoCode).items(100)
-        feeds=list(map(lambda twt:twt._json,tweets))
+        #feeds=list(map(lambda twt:twt._json,tweets))
+        feeds=map(lambda twt:twt._json,tweets)
         logger.debug("location feed geocode:%s from twitter is %s",geoCode,len(feeds))
         return feeds
 
@@ -105,6 +118,7 @@ class twitterInt:
         '''returns an empty list in case of failure. If length of returned list is
         zero thn something has went wrong
         '''
+        #api=self.get_api()
         api=self.api
         feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
         #reverse geocoding is also required here to do which is pending
@@ -126,7 +140,8 @@ class twitterInt:
             return feeds
 
         try:
-            feeds=list(map(lambda twt:twt._json,tweets))
+            feeds=map(lambda twt:twt._json,tweets)
+            #feeds=list(map(lambda twt:twt._json,tweets))
         except tweepy.TweepError as e:
             logger.error('raised tweepyerror %s',e)
         logger.info('ratelimitStatus data for /search/tweets:%s',self.rateLimitStatus(api))
@@ -134,6 +149,5 @@ class twitterInt:
         #Thz functionality should be moved to intercom.py
         #map(lambda tw:tw.update({'created_at': 'satheesh'}),feeds)
         #map(lambda tw:tw.update({'created_at': datetime.datetime.strptime(tw['created_at'], '%a %b %d %H:%M:%S +0000 %Y')}),feeds)
-        map(lambda tw:tw.update({'created_time': time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),feeds)
         logger.debug('total tweets retrieved for keyword:%s is %s',Q,len(feeds))
         return feeds

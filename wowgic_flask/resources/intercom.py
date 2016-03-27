@@ -12,9 +12,11 @@ import sys
 sys.path.append('common')
 sys.path.append('resources')
 import globalS
+import time
 import generic
 import json
-from pygeocoder import Geocoder
+#from pygeocoder import Geocoder
+#from multiprocessing import Pool
 import neo4jInterface
 import mongoInt
 import twitterInt
@@ -38,6 +40,7 @@ neo4jInt.createConstraint(graphDB)
 mongoInt=mongoInt.mongoInt()
 mconnect = mongoInt.connect()
 #sparkInt=sparkInt.sparkInt()
+
 
 class intercom:
     ''' this file act as a intercaller /router / flow chart whaterver you call. T o& fro
@@ -98,6 +101,7 @@ class intercom:
         #fetch the latest since_id and pass it in next twitter call
         #since_id = mongoInt.retrieveSinceID(ID)
         twits = twitterInt.retrieveTweets(Q,geoCode)
+        map(lambda tw:tw.update({'created_time': time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
         #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
         #if geoCode:
         #    twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
@@ -180,22 +184,46 @@ class intercom:
             ID=record[0]['id']
             logger.debug('fetchInterestFeeds ID:%s Q=%s geo cordinates =%s',ID,Q,geoDict)
 
+            jobsArgs =[]
             if mongoInt.checkCollExists(ID) > 1:
                 #docs = mongoInt.retrieveCollection(ID,lastTimeStamp)
                 #tweets.extend(docs) if len(docs) else 0
                 tweets.extend(mongoInt.retrieveCollection(ID,lastTimeStamp,globalS.dictDb['MONGODB_COUNT_LIMIT']))
             else:
-                tweets.extend(self.retrieveTweets(ID,Q,geoDict))
-                tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
+                #tweets.extend(self.retrieveTweets(ID,Q,geoDict))
+                #tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
+                jobsArgs.append([ID,Q,geoDict])
+                #with Pool(processes=4) as pool:
+                #    pool.map()
+                #jobs = []
+                #job.append(Process(target=self.retrieveTweets, args=(ID,Q,geoDict)))
+                #job.append(Process(target=self.retrieveMediaBasedTags, args=(ID,Q,geoDict)))
                 #feeds = self.retrieveTweets(ID,Q,geoDict)
                 #tweets.extend(feeds) if len(feeds) else 0
                 #medias = self.retrieveMediaBasedTags(ID,Q,geoDict)
                 #tweets.extend(medias) if len(medias) else 0
+        ## auxiliary funciton to make it work
 
+        if len(jobsArgs):
+            logger.info('Collection is empty invoking worker pools:%s',jobsArgs)
+
+            def retrieveMedias_helper(args):
+                tweets.extend(self.retrieveMediaBasedTags(*args))
+            def retrieveTweets_helper(args):
+                tweets.extend(self.retrieveTweets(*args))
+            #pool = Pool(2)
+            #tweets.extend(pool.map(retrieveTweets_helper,jobsArgs))
+            #tweets.extend(pool.map(retrieveMedias_helper,jobsArgs))
+            map(retrieveTweets_helper,jobsArgs)
+            map(retrieveMedias_helper,jobsArgs)
+            #pool.close()
+            #pool.join()
+            logger.debug('multiprocessing pool has returned %s feeds',len(tweets))
+            tweets = tweets[:20]
         if globalS.dictDb['APP_DEBUG']:
             def insertQueryData(twit,*argv):
                 twit.update({'queryDetails':argv})
-                return twit
+                #return twit
             map(lambda twit: insertQueryData(twit,ID,Q,geoDict), tweets);
         #sparkInt.Parallelized(tweets)
         #feedJson=sparkInt.wowFieldTrueOrFalse(tweets)
@@ -267,8 +295,9 @@ class intercom:
         #tweets.extend(docs) if docs>0 else 0
         tweets.extend(mongoInt.retrieveCollection(ID,lastTimeStamp,count))
         if globalS.dictDb['APP_DEBUG']:
+            logger.debug('APP_DEBUG is true so seeting the collection:ID field')
             def insertQueryData(twit,ID):
                 twit.update({'collection':ID})
-                return twit
+                #return twit
             map(lambda twit: insertQueryData(twit, ID), tweets);
         return tweets

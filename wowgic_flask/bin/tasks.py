@@ -16,6 +16,9 @@ celery = Celery('tasks', broker='amqp://guest@localhost//')
 celery.config_from_object('celeryconfig')
 #read config from envt variable
 #celery.config_from_envvar('CELERY_CONFIG_FILE')#D:\wowgic-env\wowgic\wowgic_flask\instance\flaskapp.cfg
+#filename = os.path.join(app.instance_path, 'application.cfg')
+#with open(filename) as f:
+#    config = f.read()
 globalS.dictDb = celery.conf
 logger.debug('celery dictDB contains %s',globalS.dictDb)
 
@@ -76,12 +79,13 @@ def getAllInterestNode():
         logger.debug('fetchInterestFeeds Q=%s geo cordinates =%s',Q,geoDict)
         retrieveTweets.delay(ID,Q,geoDict)
         #retrieveTweets.s(ID,Q,geoDict)
-        #retrieveMediaBasedTags.delay(ID,Q,geoDict)
+        retrieveMediaBasedTags.delay(ID,Q,geoDict)
 
     map(iterFunc,interesetNodes)
 
     #jobs = group
-    return True
+    return getAllInterestNode.apply()
+    #return True
 
 
 @celery.task(rate_limit='10/m')
@@ -94,6 +98,6 @@ def retrieveMediaBasedTags(ID,Q,geoDict):
     logger.info('retrieveMediaBasedTags:%s,%s,%s',ID,Q,geoDict)
     return len(intercom.retrieveMediaBasedTags(ID,Q,geoDict))
 
-#getAllInterestNode.delay()
+getAllInterestNode.delay()
 if __name__ == '__main__':
     celery.start()

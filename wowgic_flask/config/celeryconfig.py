@@ -26,12 +26,12 @@ MONGODB_PASSWORD = '8ygFBXZHeIW6'
 NEO4J_USERNAME = 'neo4j'
 NEO4J_PASSWORD = 'admin'
 LOGGER_NAME='wowgic_dev'
-CELERYBEAT_SCHEDULE =   {# Executes every Monday morning at 7:30 A.M
-    'getAllInterestNode_every15mins': {
-    'task': 'tasks.getAllInterestNode',
-    'schedule': crontab(minute='*/15'),
-        },
-    }
+#CELERYBEAT_SCHEDULE =   {# Executes every Monday morning at 7:30 A.M
+#    'getAllInterestNode_every15mins': {
+#    'task': 'tasks.getAllInterestNode',
+#    'schedule': crontab(minute='*/15'),
+#        },
+#    }
 CELERYBEAT_SCHEDULE_FILENAME = "/tmp/wowgic_celerySchedule.conf"
 
 #remove this after placing into database

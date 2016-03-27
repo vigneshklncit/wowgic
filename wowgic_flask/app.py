@@ -132,16 +132,17 @@ def refreshUserFeeds(userid):
     neo4j has associated feeds ID to be displayed to the user fetch them from mongdb and return it back
     '''
     #if user hasnt
-    lastTimeStamp = request.args.get("lastTimeStamp")
+    currTimeStamp = request.args.get("currTimeStamp")
     if userid is None:
         return 'id is missing',400
-    elif lastTimeStamp is None:
-        lastTimeStamp = time.time() - 24*60*60 #epoch time minus 1 day
+    elif currTimeStamp is None:
+        currTimeStamp = time.time() # fetch latest feeds reduce 30 counts by pagintation
+        #lastTimeStamp = time.time() - 24*60*60 #epoch time minus 1 day
 
-    logger.info('ID requested is:%s and lastTimeStamp : %s',userid,lastTimeStamp)
+    logger.info('ID requested is:%s and currTimeStamp : %s',userid,currTimeStamp)
 
     feedList=[]
-    feedList.extend(intercom.fetchInterestFeeds(userid,lastTimeStamp))
+    feedList.extend(intercom.fetchInterestFeeds(userid,currTimeStamp))
     #store the last login
     jsonFBInput = {'id':userid,'last_login':time.time()}
     intercom.updateFBUserLoginData(jsonFBInput)
@@ -330,7 +331,8 @@ def renewAuth():
     storedPswd = intercom.verifyAuthUser(ID)
     if password == storedPswd:
         #generete a new token valid for 30mins
-        serialized = generate_auth_token(ID,1800)
+        serialized = generate_auth_token(ID,9999)
+        #serialized = generate_auth_token(ID,1800)
         #update user data when it was renewed
 
         return json.dumps({'Authorization':serialized})
@@ -342,7 +344,7 @@ def renewAuth():
 def FBTesting():
     #Vivek Su
     #jsonFBInput = '{"id":"1240560189303114","name":"Mari Satheesh","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106377336067638","name":"Bangalore, India"},"education":[{"school":{"id":"135521326484377","name":"Cathy Matriculationn Higher Secondary School"},"type":"High School"},{"school":{"id":"131854716845812","name":"KLN College of Engineering"},"type":"College"},{"school":{"id":"112188602140934","name":"kln"},"type":"College"}],"work":[{"employer":{"id":"114041451939962","name":"Sonus Networks"}}]}'
-    jsonFBInput ='{"id":"858104450925558","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
+    jsonFBInput ='{"id":"858104450925382","name":"Vivek Subburaju","hometown":{"id":"106076206097781","name":"Madurai, India"},"location":{"id":"106078429431815","name":"London, United Kingdom"},"education":[{"school":{"id":"140607792619596","name":"Mahatma Montessori Matriculation Higher Secondary School"},"type":"High School"},{"school":{"id":"6449932074","name":"Royal Holloway, University of London"},"type":"College"},{"concentration":[{"id":"105415696160112","name":"International Business"}],"school":{"id":"107951082570918","name":"LIBA"},"type":"College","year":{"id":"144044875610606","name":"2011"}},{"school":{"id":"107927999241155","name":"Loyola College Chennai"},"type":"College","year":{"id":"137616982934053","name":"2006"}}],"work":[{"employer":{"id":"400618623480960","name":"Onestep Solutions Debt Recovery Software"},"position":{"id":"1002495616484486","name":"Principal Consultant- Data Quality"},"start_date":"2015-12-15"},{"end_date":"2014-12-31","employer":{"id":"134577187146","name":"Cognizant"},"start_date":"2013-01-01"},{"end_date":"2013-01-01","employer":{"id":"177419101744","name":"Pearson English Business Solutions"},"location":{"id":"102186159822587","name":"Chennai, India"},"start_date":"2011-01-01"},{"end_date":"2011-01-01","employer":{"id":"108134792547341","name":"Tata Consultancy Services"},"start_date":"2008-01-01"},{"end_date":"2008-01-01","employer":{"id":"42189185115","name":"Wipro"},"start_date":"2006-01-01"}]}'
     jsonFBInput = json.loads(jsonFBInput)
     serialized = generate_auth_token(jsonFBInput['id'])
     password = generate_auth_token(jsonFBInput['id'],None)

@@ -85,17 +85,17 @@ class neo4jInterface:
         labels=[]
         labels.append(lbl)
         add_tweet_query = """
-        WITH {dataJson} AS data
-        UNWIND data AS t
-        MERGE (u {id:t.id})
-        ON CREATE SET
-                 """+   (('u:'+',u:'.join(labels)+",") if labels else '') +"""
-                    u.name=t.name,
-                    u.id=t.id,
-                    u.hometown=t.hometown.name,
-                    u.location=t.location.name
-                """ +   (("ON MATCH SET\n  u:"+',u:'.join(labels)) if labels else '') +"""
-                RETURN u
+            WITH {dataJson} AS data
+            UNWIND data AS t
+            MERGE (u {id:t.id})
+            ON CREATE SET
+                     """+   (('u:'+',u:'.join(labels)+",") if labels else '') +"""
+                        u.name=t.name,
+                        u.id=t.id,
+                        u.hometown=t.hometown.name,
+                        u.location=t.location.name
+                    """ +   (("ON MATCH SET\n  u:"+',u:'.join(labels)) if labels else '') +"""
+                    RETURN u
             """
         logger.debug("neo4j query: %s",add_tweet_query)
         #Send Cypher query.

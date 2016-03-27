@@ -221,7 +221,7 @@ class mongoInt():
         feeds=[]
         logger.debug('arg is collName = %s & limit = %s',collName,count)
         coll = self.db[collName]
-        cursor = coll.find({'created_time': { '$gt': lastTimeStamp } },{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+        cursor = coll.find({'created_time': { '$lt': lastTimeStamp } },{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
                                'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
                                'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                                'metadata':0},limit=int(count),sort=[('id',pymongo.DESCENDING)])
