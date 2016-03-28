@@ -10,4 +10,5 @@ IP = os.uname()[1]
 NEO4J_IP='127.0.0.1'
 PORT = 8080
 LOGGER_NAME='wowgic_dev'
+AUTH_EXPIRY_SECS = 1800
 #/home/wowgic/wowgic/adminMongo

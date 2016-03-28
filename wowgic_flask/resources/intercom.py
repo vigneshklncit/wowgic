@@ -101,7 +101,7 @@ class intercom:
         #fetch the latest since_id and pass it in next twitter call
         #since_id = mongoInt.retrieveSinceID(ID)
         twits = twitterInt.retrieveTweets(Q,geoCode)
-        map(lambda tw:tw.update({'created_time': time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
+        map(lambda tw:tw.update({'created_time': str(int(time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))))}),twits)
         #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
         #if geoCode:
         #    twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
@@ -166,6 +166,7 @@ class intercom:
         recordList = neo4jInt.getInterestNode(graphDB,ID)
         geoDict = {}
         tweets=[]
+        jobsArgs =[]
         #parse the recordList and frame the has tags here
         for record in recordList:
             geoDict = {}#revert the geo dictionary
@@ -184,7 +185,6 @@ class intercom:
             ID=record[0]['id']
             logger.debug('fetchInterestFeeds ID:%s Q=%s geo cordinates =%s',ID,Q,geoDict)
 
-            jobsArgs =[]
             if mongoInt.checkCollExists(ID) > 1:
                 #docs = mongoInt.retrieveCollection(ID,lastTimeStamp)
                 #tweets.extend(docs) if len(docs) else 0
@@ -205,7 +205,7 @@ class intercom:
         ## auxiliary funciton to make it work
 
         if len(jobsArgs):
-            logger.info('Collection is empty invoking worker pools:%s',jobsArgs)
+            logger.warn('Collection is empty invoking worker pools:%s',jobsArgs)
 
             def retrieveMedias_helper(args):
                 tweets.extend(self.retrieveMediaBasedTags(*args))

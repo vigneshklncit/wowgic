@@ -12,6 +12,7 @@ IP = os.uname()[1]
 NEO4J_IP='127.0.0.1'
 PORT = 7777
 LOGGER_NAME='wowgic_dev'
+AUTH_EXPIRY_SECS = 9999
 #t_consumer_key= 'HwvpHtsPt3LmOZocZXwtn72Zv'
 #service mongod start
 #/root/Downloads/neo4j-community-2.3.1/bin/neo4j start

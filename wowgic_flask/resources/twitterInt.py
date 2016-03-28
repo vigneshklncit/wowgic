@@ -12,7 +12,7 @@ logger =  loggerRecord.get_logger()
 ####
 # Get tweepy set up
 import tweepy
-from tweepy import RateLimitHandler
+#from tweepy import RateLimitHandler
 #import time
 #from tweepy import Cursor
 #some concreete solutiuon has to be implemented below is just junk HOT fix
@@ -38,7 +38,7 @@ class twitterInt:
         logger.debug('who invoked me ? hey u - %s',__name__)
         #authenticate twitter app
         self.auth = tweepy.OAuthHandler(globalS.dictDb['T_CONSUMER_KEY'], globalS.dictDb['T_CONSUMER_SECRET'])
-        self.api = self.connect(globalS.dictDb['T_ACCESS_TOKEN'], globalS.dictDb['T_ACCESS_SECRET'],wait_on_rate_limit=True)
+        self.api = self.connect(globalS.dictDb['T_ACCESS_TOKEN'], globalS.dictDb['T_ACCESS_SECRET'],wait_on_rate_limit=False)
         #auth.seT_ACCESS_TOKEN(globalS.dictDb['T_ACCESS_TOKEN'], globalS.dictDb['T_ACCESS_SECRET'])
         #self.api = tweepy.API(auth,wait_on_rate_limit=True,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
 

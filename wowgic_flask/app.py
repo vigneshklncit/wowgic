@@ -14,6 +14,7 @@ from functools import wraps
 
 #from userAuth import authorized
 import time
+from calendar import timegm
 import sys
 import json
 import argparse
@@ -136,7 +137,7 @@ def refreshUserFeeds(userid):
     if userid is None:
         return 'id is missing',400
     elif currTimeStamp is None:
-        currTimeStamp = time.time() # fetch latest feeds reduce 30 counts by pagintation
+        currTimeStamp = str(timegm(time.gmtime())) # fetch latest feeds reduce 30 counts by pagintation
         #lastTimeStamp = time.time() - 24*60*60 #epoch time minus 1 day
 
     logger.info('ID requested is:%s and currTimeStamp : %s',userid,currTimeStamp)
@@ -331,7 +332,7 @@ def renewAuth():
     storedPswd = intercom.verifyAuthUser(ID)
     if password == storedPswd:
         #generete a new token valid for 30mins
-        serialized = generate_auth_token(ID,9999)
+        serialized = generate_auth_token(ID,globalS.dictDb['AUTH_EXPIRY_SECS'])
         #serialized = generate_auth_token(ID,1800)
         #update user data when it was renewed
 
@@ -348,7 +349,7 @@ def FBTesting():
     jsonFBInput = json.loads(jsonFBInput)
     serialized = generate_auth_token(jsonFBInput['id'])
     password = generate_auth_token(jsonFBInput['id'],None)
-    tmpDict = {'iat':time.time(),'password':password}
+    tmpDict = {'iat':time.gmtime(time.time()),'password':password}
     jsonFBInput.update(tmpDict)
     ID = intercom.FBLoginData(jsonFBInput)
     return json.dumps({'Authorization':serialized,'password':password, 'text':'wowgic Login Authorized'})
