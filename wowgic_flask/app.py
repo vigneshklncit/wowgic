@@ -280,10 +280,13 @@ def twitOauthAuthorized(resp):
     if resp is None:
         logger.error('You denied the request to sign in.')
         return make_response('twitter unauthorized',401)
-    session['twitter_oauth'] = resp
+    #session['twitter_oauth'] = resp
     #here store the response in mongoDB with access token key & secret
-    updDB = intercom.insertTwitterAccessTokens(resp)
-    return 'twitter authorized'
+    if intercom.insertTwitterAccessTokens(resp):
+        logger.debug('twitter keys are stored')
+        return 'twitter authorized and we took the access'
+    logger.error('problem in accessing twitter keys')
+    return make_response('problem in accessing twitter keys',200)
 
 ###
 # Error handing
@@ -381,19 +384,19 @@ def FBLogin():
 #------------------------------------------------------------------------------#
 @app.route('/displayFeeds',methods=['GET'])
 def displayFeeds():
-    feedList = intercom.retrieveTweets('106377336067638', 'MADURAI INDIA', {'lat': '12.9833', 'distance': '.5', 'lng': '77.5833'})
+    #feedList = intercom.retrieveTweets('106377336067638', 'MADURAI INDIA', {'lat': '12.9833', 'distance': '.5', 'lng': '77.5833'})
     #intercom.retrieveTwitterAccessTokens()
-    #collId = request.args.get('collId')
-    #count = request.args.get('count')
-    #lastTimeStamp = request.args.get('lastTimeStamp')
-    #if collId is None and count is None:
-    #    return 'collection id or count is missing',400
-    #elif lastTimeStamp is None:
-    #    #lastTimeStamp = time.time() - 24*60*60 #epoch time minus 1 day
-    #    lastTimeStamp = 1451606400
-    #logger.info('collId requested is:%s & lasttimeStamp:%s count is %s',collId,lastTimeStamp,count)
-    #feedList = []
-    #feedList.extend(intercom.retrieveCollection(collId,lastTimeStamp,count))
+    collId = request.args.get('collId')
+    count = request.args.get('count')
+    lastTimeStamp = request.args.get('lastTimeStamp')
+    if collId is None and count is None:
+        return 'collection id or count is missing',400
+    elif lastTimeStamp is None:
+        lastTimeStamp = time.time() - 24*60*60 #epoch time minus 1 day
+        #lastTimeStamp = 1451606400
+    logger.info('collId requested is:%s & lasttimeStamp:%s count is %s',collId,lastTimeStamp,count)
+    feedList = []
+    feedList.extend(intercom.retrieveCollection(collId,lastTimeStamp,count))
     return json.dumps(feedList)
 
 #if globalS.dictDb['APP_DEBUG']:

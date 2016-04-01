@@ -284,10 +284,15 @@ class mongoInt():
         #
         #self.createCollection(ID)
         coll=self.db[ID]
-        WriteResult =coll.insert(twitterData)
-        logger.debug('writereult is %s',WriteResult)
-        if len(WriteResult):
-            logger.debug('twitter token succesfuly insereted')
-        else:
-            logger.warn('Error in inserting twitter token:%s',twitterData)
-        return len(WriteResult)
+        coll.create_index([('user_id',pymongo.DESCENDING)],unique=True) #remove dup with ID's
+        WriteResult = 0 #stores the obj id if insert is success
+        try:
+            WriteResult =coll.insert(twitterData)
+            logger.debug('writereult is %s',WriteResult)
+            if WriteResult is not None:
+                logger.debug('twitter token succesfuly insereted')
+            else:
+                logger.warn('Error in inserting twitter token:%s',twitterData)
+        except Exception, e:
+                logger.error('Error occured while storing twitter access token :%s',e)
+        return WriteResult

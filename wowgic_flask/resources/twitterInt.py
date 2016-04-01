@@ -121,12 +121,12 @@ class twitterInt:
         feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
         #reverse geocoding is also required here to do which is pending
         logger.info('geoCode twitter search#%s',geoCode)
-        if not self.rateLimitStatus(api)['remaining']:
-            logger.warn('trying with viveks ouath')
-            api = self.connect(globalS.dictDb['VIVEK_TOKEN'],globalS.dictDb['VIVEK_TOKEN_SECRET'],wait_on_rate_limit=1)
-            if not self.rateLimitStatus(api)['remaining']:
-                logger.error('twitter rate limit execeeded')
-                return feeds
+        #if not self.rateLimitStatus(api)['remaining']:
+        #    logger.warn('trying with viveks ouath')
+        #    api = self.connect(globalS.dictDb['VIVEK_TOKEN'],globalS.dictDb['VIVEK_TOKEN_SECRET'],wait_on_rate_limit=1)
+        #    if not self.rateLimitStatus(api)['remaining']:
+        #        logger.error('twitter rate limit execeeded')
+        #        return feeds
         if Q is not None:
             #tweepy set count to largets number
             tweets = tweepy.Cursor(api.search, q=Q).items()

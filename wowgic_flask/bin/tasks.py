@@ -93,7 +93,7 @@ def retrieveTweets(collName,Q,geoDict):
     logger.info('retrieveTweets:%s,%s,%s',collName,Q,geoDict)
     return len(intercom.retrieveTweets(collName,Q,geoDict))
 
-@celery.task(rate_limit='20/m')
+@celery.task(rate_limit='10/m')
 def retrieveMediaBasedTags(ID,Q,geoDict):
     logger.info('retrieveMediaBasedTags:%s,%s,%s',ID,Q,geoDict)
     return len(intercom.retrieveMediaBasedTags(ID,Q,geoDict))
