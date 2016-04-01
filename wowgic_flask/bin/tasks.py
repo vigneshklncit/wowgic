@@ -77,9 +77,9 @@ def getAllInterestNode():
             Q=record[0]['name']
         ID=record[0]['id']
         logger.debug('fetchInterestFeeds Q=%s geo cordinates =%s',Q,geoDict)
-        retrieveTweets.delay(ID,Q,geoDict)
         #retrieveTweets.s(ID,Q,geoDict)
         retrieveMediaBasedTags.delay(ID,Q,geoDict)
+        retrieveTweets.delay(ID,Q,geoDict)
 
     map(iterFunc,interesetNodes)
 

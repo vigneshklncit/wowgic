@@ -27,8 +27,6 @@ import random
 #import sparkInt
 logger =  loggerRecord.get_logger()
 
-
-twitterInt = twitterInt.twitterInt()
 instagramInt = instagramInt.instagramInt()
 facebookInt = facebookInt.facebookInt()
 neo4jInt = neo4jInterface.neo4jInterface()
@@ -41,6 +39,20 @@ mongoInt=mongoInt.mongoInt()
 mconnect = mongoInt.connect()
 #sparkInt=sparkInt.sparkInt()
 
+def retrieveTwitterAccessTokens(collName = 'twitter_Access_Tokens'):
+        ''' retrieve access tokens from DB and pass it to twitterInt
+        '''
+        if mongoInt.checkCollExists(collName) < 1:
+            ''' if the collection twitter_Access_Tokens is not availble initially
+            populate the document with default tokens read from cfg files    '''
+            logger.debug('default twitter token is:%s',globalS.dictDb['SATHISH_TOKEN'])
+            if mongoInt.insertTwitteTokens(collName,globalS.dictDb['SATHISH_TOKEN']):
+                logger.warn('twitter_Access_Tokens was empty added default token now')
+        tokens = mongoInt.retrieveTwitterTokens(collName)
+        logger.debug('tokens retrieved key secerte : %s',tokens)
+        return tokens
+
+twitterInt = twitterInt.twitterInt(retrieveTwitterAccessTokens())
 
 class intercom:
     ''' this file act as a intercaller /router / flow chart whaterver you call. T o& fro
@@ -208,9 +220,9 @@ class intercom:
             logger.warn('Collection is empty invoking worker pools:%s',jobsArgs)
 
             def retrieveMedias_helper(args):
-                tweets.extend(self.retrieveMediaBasedTags(*args))
+                tweets.extend(self.retrieveMediaBasedTags(*args)[:20])
             def retrieveTweets_helper(args):
-                tweets.extend(self.retrieveTweets(*args))
+                tweets.extend(self.retrieveTweets(*args)[:20])
             #pool = Pool(2)
             #tweets.extend(pool.map(retrieveTweets_helper,jobsArgs))
             #tweets.extend(pool.map(retrieveMedias_helper,jobsArgs))
@@ -219,7 +231,7 @@ class intercom:
             #pool.close()
             #pool.join()
             logger.debug('multiprocessing pool has returned %s feeds',len(tweets))
-            tweets = tweets[:20]
+            #tweets = tweets[:20]
         if globalS.dictDb['APP_DEBUG']:
             def insertQueryData(twit,*argv):
                 twit.update({'queryDetails':argv})
@@ -301,3 +313,16 @@ class intercom:
                 #return twit
             map(lambda twit: insertQueryData(twit, ID), tweets);
         return tweets
+
+    def insertTwitterAccessTokens(self,resp):
+        ''' store the twitter access tokens of the user
+        '''
+        logger.debug('twitter authorized response:%s',resp)
+        collName = 'twitter_Access_Tokens'
+        nInserted = mongoInt.insertTwitteTokens(collName,resp)
+        if nInserted:
+            logger.debug('successful insert of twitter access token')
+        else:
+            logger.error('unable to insert the twitter access token')
+        return nInserted
+

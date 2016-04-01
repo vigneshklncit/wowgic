@@ -178,7 +178,7 @@ class mongoInt():
         updateCnt = 0
         self.createCollection(ID)
         coll=self.db[ID]
-        #chag to fucntional prog
+        #change to fucntional prog
         for feed in feedData:
             #instead of updating we can find_one initialyy and then do update operation
             WriteResult =coll.update({'id':feed['id']},feed,True)
@@ -226,29 +226,13 @@ class mongoInt():
                                'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                                'metadata':0},limit=count,sort=[('id',pymongo.DESCENDING)])
         logger.info('cursor is %s',cursor.explain())
-        #chg to functional prog
-        #for document in cursor:
-        #    #logger.debug('cursor document is %s',document)
-        #    feeds.append(document)
-
-        ##way1
-        #def document(x): return doc
-        #feeds=list(map(document,cursor))
-
-        #way2
-        feeds=list(map(lambda x:x,cursor))
-        #feedsLength = len(feeds)
-        #if feedsLength:
-        #    logger.debug('total feed trieved %s',feedsLength)
-        #    return feeds
-        #else:
-        #    return 0
+        feeds=map(lambda x:x,cursor)
         logger.debug('total documents retrieved %s',len(feeds))
         return feeds
 
     #returns 0 if collection exits
     def checkCollExists(self,collInt):
-        ''' Check if a collection exists in Mongodb DB or not'''
+        ''' Check if a collection exists in Mongodb DB or not . if exists return the total doc count'''
         if collInt in self.db.collection_names():
             totalDocs=self.db[collInt].count()
             logger.debug('collection:%s total doc:%s already exists',collInt,totalDocs)
@@ -273,3 +257,37 @@ class mongoInt():
         document = coll.find_one({},['id'],sort=[('id',pymongo.DESCENDING)])
         logger.debug('collection %s contains Max id as %s',ID,document)
         return document['id']
+
+    ############################################################################
+    #Function Name  : retrieveCollection #
+    #Input          :  #
+    #Return Value   :  #
+    ############################################################################
+    def retrieveTwitterTokens(self,collName):
+        ''' retreive the tokens from DB and return them as key value pais
+        '''
+        tokens=[]
+        logger.debug('arg is collName = %s',collName)
+        coll = self.db[collName]
+        cursor = coll.find({},{'_id':0,'oauth_token':1,'oauth_token_secret':1})
+        logger.info('cursor is %s',cursor.explain())
+        feeds=map(lambda x:x,cursor)
+        logger.debug('total tokens twitter access secret retrieved %s',len(feeds))
+        return feeds
+
+    def insertTwitteTokens(self,ID,twitterData):
+        '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
+        identified by the base URI of the graph database'''
+
+        # Connect to the databases
+        #db = self.conn['userData']
+        #
+        #self.createCollection(ID)
+        coll=self.db[ID]
+        WriteResult =coll.insert(twitterData)
+        logger.debug('writereult is %s',WriteResult)
+        if len(WriteResult):
+            logger.debug('twitter token succesfuly insereted')
+        else:
+            logger.warn('Error in inserting twitter token:%s',twitterData)
+        return len(WriteResult)

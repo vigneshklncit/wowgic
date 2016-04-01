@@ -137,6 +137,7 @@ def refreshUserFeeds(userid):
     if userid is None:
         return 'id is missing',400
     elif currTimeStamp is None:
+        logger.debug('currTimeStamp is not passed as param so taking the current timestamp')
         currTimeStamp = str(timegm(time.gmtime())) # fetch latest feeds reduce 30 counts by pagintation
         #lastTimeStamp = time.time() - 24*60*60 #epoch time minus 1 day
 
@@ -269,12 +270,19 @@ def twitterLogout():
 @app.route('/twitOauthAuthorized')
 @twitter.authorized_handler
 def twitOauthAuthorized(resp):
+    '''
+    #sample response once twitter authorize is as below
+    resp:{'oauth_token_secret': u'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8',
+          'user_id': u'56276642', 'x_auth_expires': u'0', 'oauth_token':
+          u'56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS', 'screen_name': u'sathishsms'}
+    '''
     #resp = twitter.authorized_response()
-    logger.debug('twitter resp:%s',resp)
     if resp is None:
         logger.error('You denied the request to sign in.')
-    else:
-        session['twitter_oauth'] = resp
+        return make_response('twitter unauthorized',401)
+    session['twitter_oauth'] = resp
+    #here store the response in mongoDB with access token key & secret
+    updDB = intercom.insertTwitterAccessTokens(resp)
     return 'twitter authorized'
 
 ###
@@ -373,20 +381,22 @@ def FBLogin():
 #------------------------------------------------------------------------------#
 @app.route('/displayFeeds',methods=['GET'])
 def displayFeeds():
-    collId = request.args.get('collId')
-    count = request.args.get('count')
-    lastTimeStamp = request.args.get('lastTimeStamp')
-    if collId is None and count is None:
-        return 'collection id or count is missing',400
-    elif lastTimeStamp is None:
-        #lastTimeStamp = time.time() - 24*60*60 #epoch time minus 1 day
-        lastTimeStamp = 1451606400
-    logger.info('collId requested is:%s & lasttimeStamp:%s count is %s',collId,lastTimeStamp,count)
-    feedList = []
-    feedList.extend(intercom.retrieveCollection(collId,lastTimeStamp,count))
+    feedList = intercom.retrieveTweets('106377336067638', 'MADURAI INDIA', {'lat': '12.9833', 'distance': '.5', 'lng': '77.5833'})
+    #intercom.retrieveTwitterAccessTokens()
+    #collId = request.args.get('collId')
+    #count = request.args.get('count')
+    #lastTimeStamp = request.args.get('lastTimeStamp')
+    #if collId is None and count is None:
+    #    return 'collection id or count is missing',400
+    #elif lastTimeStamp is None:
+    #    #lastTimeStamp = time.time() - 24*60*60 #epoch time minus 1 day
+    #    lastTimeStamp = 1451606400
+    #logger.info('collId requested is:%s & lasttimeStamp:%s count is %s',collId,lastTimeStamp,count)
+    #feedList = []
+    #feedList.extend(intercom.retrieveCollection(collId,lastTimeStamp,count))
     return json.dumps(feedList)
 
-#if globalS.dictDb['DEBUG']:
+#if globalS.dictDb['APP_DEBUG']:
 #    app.debug = True
 
 if __name__ == '__main__':

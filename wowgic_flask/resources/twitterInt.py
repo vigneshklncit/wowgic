@@ -17,28 +17,26 @@ import tweepy
 #from tweepy import Cursor
 #some concreete solutiuon has to be implemented below is just junk HOT fix
 #keys from twitter is stored here temp will be removed once we access the user credentials from mongoDB and load it to globalDict file
-#chella's credentials
-#sathish ouath ofr location feeds & new user this should not exhaust at any case
-#    T_ACCESS_TOKEN = '419412786-cpS2hDmR6cuIf8BD2kSSri0BAWAmXBA3pzcB56Pw',
-#    T_ACCESS_SECRET = 'pRx5MNKkmxyImwuhUFMNVOr1NrAWcRmOGUgGTLVYFAjsJ',
-#    SATHISH_TOKEN_SECRET = 'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8',
-#    SATHISH_TOKEN = '56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS',
-#    VIVEK_TOKEN_SECRET = '8h1T0x2237pmUWA1Hg7QSi3sPRQt9WN6Okg6A0dMSYvRL',
-#    VIVEK_TOKEN = '2976291321-gfESJJC7xBvZk0mv8tbkbYgoMseQChUBwPslbYc')
-#
-#globalS.dictDb.update(oAuthStrings)
 
-ACCESS_TOKENS = {globalS.dictDb['T_ACCESS_TOKEN']: globalS.dictDb['T_ACCESS_SECRET']}
+#globalS.dictDb.update(oAuthStrings)
+#{ sathishsms :{'56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS':'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8' }
+
+ACCESS_TOKENS = [{'oauth_token_secret': 'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8',
+                  'oauth_token': '56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS'},
+    {u'oauth_token_secret': 'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8',
+     'oauth_token': '56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS'}]
 class twitterInt:
     ''' this class is meant for twitter
     '''
     api=''#universal twitter api
 
-    def __init__(self):
+    def __init__(self,ACCESS_TOKENS):
         logger.debug('who invoked me ? hey u - %s',__name__)
         #authenticate twitter app
+        self.ACCESS_TOKENS = ACCESS_TOKENS
         self.auth = tweepy.OAuthHandler(globalS.dictDb['T_CONSUMER_KEY'], globalS.dictDb['T_CONSUMER_SECRET'])
-        self.api = self.connect(globalS.dictDb['T_ACCESS_TOKEN'], globalS.dictDb['T_ACCESS_SECRET'],wait_on_rate_limit=False)
+        self.api = self.connect(globalS.dictDb['T_ACCESS_TOKEN'], globalS.dictDb['T_ACCESS_SECRET'],
+                                wait_on_rate_limit=True,wait_on_rate_limit_notify=True)
         #auth.seT_ACCESS_TOKEN(globalS.dictDb['T_ACCESS_TOKEN'], globalS.dictDb['T_ACCESS_SECRET'])
         #self.api = tweepy.API(auth,wait_on_rate_limit=True,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
 
@@ -54,16 +52,16 @@ class twitterInt:
         return twitterApi
 
     def get_api(self):
-        auth = RateLimitHandler(globalS.dictDb['T_CONSUMER_KEY'], globalS.dictDb['T_CONSUMER_SECRET'])
+        auth = tweepy.RateLimitHandler(globalS.dictDb['T_CONSUMER_KEY'], globalS.dictDb['T_CONSUMER_SECRET'])
         logger.info('entered ratelimitor')
-        for key, secret in ACCESS_TOKENS.items():
+        for token in self.ACCESS_TOKENS:
                 try:
-                    auth.add_access_token(key, secret)
-                except TweepError, e:
-                    logger.debug('key %s , error %s', key, e)
-        print 'Token pool size: %d' % len(auth.tokens)
-        api = tweepy.API(auth,
-                wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+                    logger.debug('add_access_token')
+                    auth.add_access_token(token['oauth_token'],token['oauth_token_secret'])
+                except Exception as e:
+                    logger.debug('ratelimitor raised exception error %s', e)
+        logger.debug('Token pool size: %s',len(auth.tokens))
+        api = tweepy.API(auth,wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
         return api
 
     #def retrieveTweetsBasedHashtag(self,Q):
@@ -118,8 +116,8 @@ class twitterInt:
         '''returns an empty list in case of failure. If length of returned list is
         zero thn something has went wrong
         '''
-        #api=self.get_api()
-        api=self.api
+        api=self.get_api()
+        #api=self.api
         feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
         #reverse geocoding is also required here to do which is pending
         logger.info('geoCode twitter search#%s',geoCode)
