@@ -275,7 +275,7 @@ class mongoInt():
         logger.debug('total tokens twitter access secret retrieved %s',len(feeds))
         return feeds
 
-    def insertTwitteTokens(self,ID,twitterData):
+    def insertTwitteTokens(self,ID,tokenData):
         '''The Graph class provides a wrapper around the REST API exposed by a running Neo4j database server and is
         identified by the base URI of the graph database'''
 
@@ -285,14 +285,10 @@ class mongoInt():
         #self.createCollection(ID)
         coll=self.db[ID]
         coll.create_index([('user_id',pymongo.DESCENDING)],unique=True) #remove dup with ID's
-        WriteResult = 0 #stores the obj id if insert is success
-        try:
-            WriteResult =coll.insert(twitterData)
-            logger.debug('writereult is %s',WriteResult)
-            if WriteResult is not None:
-                logger.debug('twitter token succesfuly insereted')
-            else:
-                logger.warn('Error in inserting twitter token:%s',twitterData)
-        except Exception, e:
-                logger.error('Error occured while storing twitter access token :%s',e)
-        return WriteResult
+        WriteResult =coll.replace_one({'user_id':tokenData['user_id']},tokenData,True)
+        if WriteResult.modified_count:
+            logger.warn('Error in inserting twitter token')
+            return 0
+        else:
+            logger.debug('twitter token succesfuly insereted')
+            return 1
