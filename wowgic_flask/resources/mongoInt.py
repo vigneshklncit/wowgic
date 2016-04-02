@@ -284,7 +284,9 @@ class mongoInt():
         #
         #self.createCollection(ID)
         coll=self.db[ID]
-        coll.create_index([('user_id',pymongo.DESCENDING)],unique=True) #remove dup with ID's
+        if self.checkCollExists(ID) < 1:
+            logger.info('create index for twitter access token collection')
+            coll.create_index('user_id',unique=True) #remove dup with ID's
         WriteResult =coll.replace_one({'user_id':tokenData['user_id']},tokenData,True)
         if WriteResult.modified_count:
             logger.warn('Error in inserting twitter token')
