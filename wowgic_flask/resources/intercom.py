@@ -113,7 +113,7 @@ class intercom:
         #fetch the latest since_id and pass it in next twitter call
         #since_id = mongoInt.retrieveSinceID(ID)
         twits = twitterInt.retrieveTweets(Q,geoCode)
-        map(lambda tw:tw.update({'created_time': str(int(time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))))}),twits)
+        map(lambda tw:tw.update({'created_time': time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
         #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
         #if geoCode:
         #    twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
@@ -143,7 +143,7 @@ class intercom:
         #Q.replace(',','')
         feedJson = instagramInt.retrieveMediaBasedTags(Q,geoDict)
         if geoDict:
-            logger.debug('geoDict for instagram based media retrieve')
+            logger.debug('geoDict for instagram based media retrieve  %s',geoDict)
             feedJson.extend(instagramInt.getLocationSearch(geoDict))
         #else:
         #    # Example addr: 875 N Michigan Ave, Chicago, IL 60611
@@ -153,9 +153,10 @@ class intercom:
         #    geoDict.update({'lat':latlng[0]})
         #    geoDict.update({'lng':latlng[1]})
         #    geoDict.update({'distance':'.5'})#default radius =500m
-        logger.debug('geo cord to search in instagram is %s',geoDict)
+        #logger.debug('geo cord to search in instagram is %s',geoDict)
         #feedJson.extend(instagramInt.getLocationSearch(geoDict))
         #feedJson = json.loads(feedJson)
+        map(lambda tw:tw.update({'created_time': int(tw['created_time'])}),feedJson) #convert string to int
         logger.debug('store instagram media in mongoDb')
         #use spark removed unwanted feilds in json & add a key:value
         #feedJson=sparkInt.wowFieldTrueOrFalse(feedJson)
@@ -325,4 +326,3 @@ class intercom:
         else:
             logger.error('unable to insert the twitter access token')
         return nInserted
-

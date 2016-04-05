@@ -55,8 +55,8 @@ def getAllInterestNode():
     #        Q=record[0]['name']
     #    ID=record[0]['id']
     #    logger.debug('fetchInterestFeeds Q=%s geo cordinates =%s',Q,geoDict)
-    #    retrieveTweets.delay(ID,Q,geoDict)
-    #    retrieveMediaBasedTags.delay(ID,Q,geoDict)
+    #    #retrieveTweets.delay(ID,Q,geoDict)
+    #    #retrieveMediaBasedTags.delay(ID,Q,geoDict)
     #    #if mongoInt.checkCollExists(ID) > 1:
     #    #    tweets.extend(mongoInt.retrieveCollection(ID))
     #    #else:
@@ -77,14 +77,17 @@ def getAllInterestNode():
             Q=record[0]['name']
         ID=record[0]['id']
         logger.debug('fetchInterestFeeds Q=%s geo cordinates =%s',Q,geoDict)
-        #retrieveTweets.s(ID,Q,geoDict)
-        retrieveMediaBasedTags.delay(ID,Q,geoDict)
-        retrieveTweets.delay(ID,Q,geoDict)
-
+        #retrieveMediaBasedTags.delay(ID,Q,geoDict)
+        #retrieveTweets.delay(ID,Q,geoDict)
+        #g=group(retrieveTweets.s(ID,Q,geoDict,debug=True),
+        #retrieveMediaBasedTags.s(ID,Q,geoDict,debug=True))
+        #res = g()
+        retrieveMediaBasedTags.s(ID,Q,geoDict,debug=True).delay()
+        retrieveTweets.s(ID,Q,geoDict,debug=True).delay()
     map(iterFunc,interesetNodes)
 
     #jobs = group
-    return getAllInterestNode.apply()
+    #return getAllInterestNode.apply()
     #return True
 
 
@@ -93,10 +96,11 @@ def retrieveTweets(collName,Q,geoDict):
     logger.info('retrieveTweets:%s,%s,%s',collName,Q,geoDict)
     return len(intercom.retrieveTweets(collName,Q,geoDict))
 
+
 @celery.task(rate_limit='10/m')
-def retrieveMediaBasedTags(ID,Q,geoDict):
-    logger.info('retrieveMediaBasedTags:%s,%s,%s',ID,Q,geoDict)
-    return len(intercom.retrieveMediaBasedTags(ID,Q,geoDict))
+def retrieveMediaBasedTags(collName,Q,geoDict):
+    logger.info('retrieveMediaBasedTags:%s,%s,%s',collName,Q,geoDict)
+    return len(intercom.retrieveMediaBasedTags(collName,Q,geoDict))
 
 getAllInterestNode.delay()
 if __name__ == '__main__':
