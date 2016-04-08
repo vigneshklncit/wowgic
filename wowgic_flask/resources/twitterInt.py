@@ -93,7 +93,7 @@ class twitterInt:
     def rateLimitStatus(self,api):
         ''' Show the rate Limits'''
         rateLimits = api.rate_limit_status()
-        logger.debug('twitter the rate Limit:%s',rateLimits)
+        #logger.debug('twitter the rate Limit:%s',rateLimits)
         return  rateLimits['resources']['search']['/search/tweets']
 
     def retrieveTweetBasedLocation(self,geoCode):

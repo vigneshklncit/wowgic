@@ -17,6 +17,7 @@ from twitterInt import *
 from py2neo import *
 class neo4jInterface:
     ''' bla bla
+        MATCH (n {id:'858104450925382'}) OPTIONAL MATCH (n)-[r]-() DELETE n,r RETURN count(n)
     '''
     #REST server credentials
     #default Remember to change these credentials User/Pass.

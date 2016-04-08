@@ -144,7 +144,7 @@ class mongoInt():
         must be an instance of basestring (str in python 3)'''
         idxDict = coll.index_information()
         logger.info('the index dict is %s',idxDict)
-        if 'id_1' not in idxDict:
+        if 'id_-1' not in idxDict and 'created_time_-1' not in idxDict:
             result = coll.create_index([('id',pymongo.DESCENDING)],unique=True) #remove dup with ID's
             result = coll.create_index([('created_time',pymongo.DESCENDING)]) #based on times
             logger.info('constraint create result %s',result)
@@ -219,9 +219,9 @@ class mongoInt():
         ''' by passing the collection name fetch recent feeeds. Query the database
         '''
         feeds=[]
-        logger.debug('arg is collName = %s & limit = %s',collName,count)
+        logger.debug('arg is collName = %s & limit = %s & time = %s',collName,count,lastTimeStamp)
         coll = self.db[collName]
-        cursor = coll.find({'created_time': { '$lt': lastTimeStamp } },{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+        cursor = coll.find({"created_time": { "$lt": int(lastTimeStamp) } },{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
                                'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
                                'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                                'metadata':0},limit=int(count),sort=[('id',pymongo.DESCENDING)])

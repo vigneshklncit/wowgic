@@ -113,7 +113,7 @@ class intercom:
         #fetch the latest since_id and pass it in next twitter call
         #since_id = mongoInt.retrieveSinceID(ID)
         twits = twitterInt.retrieveTweets(Q,geoCode)
-        map(lambda tw:tw.update({'created_time': time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
+        map(lambda tw:tw.update({'created_time': int(time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
         #if geoCode:
         #    twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
@@ -182,29 +182,28 @@ class intercom:
         jobsArgs =[]
         #parse the recordList and frame the has tags here
         for record in recordList:
-            geoDict = {}#revert the geo dictionary
 
-            if record[0]['lat'] is not None:
-                geoDict.update({'lat':record[0]['lat']})
-                geoDict.update({'lng':record[0]['lng']})
-                geoDict.update({'distance':'.5'})#default radius =500m
-            logger.info('recordList output of neo4j:%s',record[0]['name'])
-
-            if record[0]['city'] is not None:
-                Q=record[0]['name'] +' '+ record[0]['city']
-            else:
-                Q=record[0]['name']
-
-            ID=record[0]['id']
-            logger.debug('fetchInterestFeeds ID:%s Q=%s geo cordinates =%s',ID,Q,geoDict)
 
             if mongoInt.checkCollExists(ID) > 1:
-                #docs = mongoInt.retrieveCollection(ID,lastTimeStamp)
-                #tweets.extend(docs) if len(docs) else 0
                 tweets.extend(mongoInt.retrieveCollection(ID,lastTimeStamp,globalS.dictDb['MONGODB_COUNT_LIMIT']))
             else:
                 #tweets.extend(self.retrieveTweets(ID,Q,geoDict))
                 #tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
+                geoDict = {}#revert the geo dictionary
+
+                if record[0]['lat'] is not None:
+                    geoDict.update({'lat':record[0]['lat']})
+                    geoDict.update({'lng':record[0]['lng']})
+                    geoDict.update({'distance':'.5'})#default radius =500m
+                logger.info('recordList output of neo4j:%s',record[0]['name'])
+
+                if record[0]['city'] is not None:
+                    Q=record[0]['name'] +' '+ record[0]['city']
+                else:
+                    Q=record[0]['name']
+
+                ID=record[0]['id']
+                logger.debug('fetchInterestFeeds ID:%s Q=%s geo cordinates =%s',ID,Q,geoDict)
                 jobsArgs.append([ID,Q,geoDict])
                 #with Pool(processes=4) as pool:
                 #    pool.map()
@@ -223,6 +222,7 @@ class intercom:
             def retrieveMedias_helper(args):
                 tweets.extend(self.retrieveMediaBasedTags(*args)[:20])
             def retrieveTweets_helper(args):
+                '''commenting this as its taking too much of time'''
                 tweets.extend(self.retrieveTweets(*args)[:20])
             #pool = Pool(2)
             #tweets.extend(pool.map(retrieveTweets_helper,jobsArgs))

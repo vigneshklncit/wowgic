@@ -82,22 +82,24 @@ def getAllInterestNode():
         #g=group(retrieveTweets.s(ID,Q,geoDict,debug=True),
         #retrieveMediaBasedTags.s(ID,Q,geoDict,debug=True))
         #res = g()
-        retrieveMediaBasedTags.s(ID,Q,geoDict,debug=True).delay()
-        retrieveTweets.s(ID,Q,geoDict,debug=True).delay()
+        retrieveMediaBasedTags.s(ID,Q,geoDict).delay()
+        retrieveTweets.s(ID,Q,geoDict).delay()
     map(iterFunc,interesetNodes)
 
     #jobs = group
-    #return getAllInterestNode.apply()
+    return getAllInterestNode.delay()
     #return True
 
 
-@celery.task(rate_limit='10/m')
+@celery.task()
+#@celery.task(rate_limit='12/m')
 def retrieveTweets(collName,Q,geoDict):
     logger.info('retrieveTweets:%s,%s,%s',collName,Q,geoDict)
     return len(intercom.retrieveTweets(collName,Q,geoDict))
 
 
-@celery.task(rate_limit='10/m')
+#@celery.task(rate_limit='20/m')
+@celery.task()
 def retrieveMediaBasedTags(collName,Q,geoDict):
     logger.info('retrieveMediaBasedTags:%s,%s,%s',collName,Q,geoDict)
     return len(intercom.retrieveMediaBasedTags(collName,Q,geoDict))
