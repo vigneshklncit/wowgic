@@ -36,7 +36,7 @@ class twitterInt:
         self.ACCESS_TOKENS = ACCESS_TOKENS
         self.auth = tweepy.OAuthHandler(globalS.dictDb['T_CONSUMER_KEY'], globalS.dictDb['T_CONSUMER_SECRET'])
         self.api = self.connect(globalS.dictDb['T_ACCESS_TOKEN'], globalS.dictDb['T_ACCESS_SECRET'],
-                                wait_on_rate_limit=True,wait_on_rate_limit_notify=True)
+                                wait_on_rate_limit=False,wait_on_rate_limit_notify=True)
         #auth.seT_ACCESS_TOKEN(globalS.dictDb['T_ACCESS_TOKEN'], globalS.dictDb['T_ACCESS_SECRET'])
         #self.api = tweepy.API(auth,wait_on_rate_limit=True,wait_on_rate_limit_notify=True,retry_count=2,timeout=8)
 

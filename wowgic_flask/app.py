@@ -391,7 +391,7 @@ def displayFeeds():
         return 'collection id or count is missing',400
     elif lastTimeStamp is None:
         lastTimeStamp = time.time()#epoch time minus 1 day
-        lastTimeStamp = 999999#epoch time minus 1 day
+        #lastTimeStamp = 999999#epoch time minus 1 day
         #lastTimeStamp = 1451606400
     logger.info('collId requested is:%s & lasttimeStamp:%s count is %s',collId,lastTimeStamp,count)
     feedList = []
