@@ -177,17 +177,15 @@ class intercom:
         '''fetch the all neo4j interest nodes returning name & city then using those
         tags look for mongoDb collection if not then do search in twitter &
         instagram and store the output in mongoDb in a collection mapped to interest nodes'''
-
         recordList = neo4jInt.getInterestNode(graphDB,ID)
-        #intialise the variables
         geoDict = {}
         tweets=[]
         jobsArgs =[]
-        collectionList = []
-
         #parse the recordList and frame the has tags here
         for record in recordList:
+
             geoDict = {}#revert the geo dictionary
+
             if record[0]['lat'] is not None:
                 geoDict.update({'lat':record[0]['lat']})
                 geoDict.update({'lng':record[0]['lng']})
@@ -203,11 +201,29 @@ class intercom:
             logger.debug('fetchInterestFeeds ID:%s Q=%s geo cordinates =%s',ID,Q,geoDict)
 
             if mongoInt.checkCollExists(ID) > 1:
-                collectionList.append(ID)
-
+                def recCursor(lastTimeStamp):
+                    logger.debug('collName = %s & time = %s',ID,lastTimeStamp)
+                    docList = mongoInt.retrieveCollection(ID,lastTimeStamp,globalS.dictDb['MONGODB_COUNT_LIMIT'])
+                    if len(docList) < 2:
+                        lastTimeStamp=int(lastTimeStamp)-globalS.dictDb['DELTA_FEEDS_TIME']
+                        logger.info('Docs are not available so recursive calling %s',lastTimeStamp)
+                        return recCursor(lastTimeStamp)
+                    return docList
+                docList = recCursor(lastTimeStamp)
+                tweets.extend(docList)
             else:
+                #tweets.extend(self.retrieveTweets(ID,Q,geoDict))
+                #tweets.extend(self.retrieveMediaBasedTags(ID,Q,geoDict))
                 jobsArgs.append([ID,Q,geoDict])
-
+                #with Pool(processes=4) as pool:
+                #    pool.map()
+                #jobs = []
+                #job.append(Process(target=self.retrieveTweets, args=(ID,Q,geoDict)))
+                #job.append(Process(target=self.retrieveMediaBasedTags, args=(ID,Q,geoDict)))
+                #feeds = self.retrieveTweets(ID,Q,geoDict)
+                #tweets.extend(feeds) if len(feeds) else 0
+                #medias = self.retrieveMediaBasedTags(ID,Q,geoDict)
+                #tweets.extend(medias) if len(medias) else 0
             if globalS.dictDb['APP_DEBUG']:
                 def insertQueryData(twit,*argv):
                     twit.update({'queryDetails':argv})
@@ -216,19 +232,7 @@ class intercom:
         ## auxiliary funciton to make it work
 
         #first time login logic to be defined
-        if len(collectionList):
-            def recCursor(lastTimeStamp):
-                for collName in collectionList:
-                    logger.debug('collName = %s & time = %s',collName,lastTimeStamp)
-                    tweets.extend( mongoInt.retrieveCollection(collName,lastTimeStamp,globalS.dictDb['MONGODB_COUNT_LIMIT']))
-                if len(tweets) < 2:
-                    lastTimeStamp=int(lastTimeStamp)-globalS.dictDb['DELTA_FEEDS_TIME']
-                    logger.info('Docs are not available so recursive calling %s',lastTimeStamp)
-                    return recCursor(lastTimeStamp)
-                logger.info('collectively returned %s docs for multiple documents',len(tweets))
-                return
-            recCursor(lastTimeStamp)
-        elif len(jobsArgs):
+        if len(jobsArgs):
             logger.warn('Collection is empty invoking worker pools:%s',jobsArgs)
 
             def retrieveMedias_helper(args):
@@ -236,14 +240,17 @@ class intercom:
             def retrieveTweets_helper(args):
                 '''commenting this as its taking too much of time'''
                 tweets.extend(self.retrieveTweets(*args)[:20])
+            #pool = Pool(2)
+            #tweets.extend(pool.map(retrieveTweets_helper,jobsArgs))
+            #tweets.extend(pool.map(retrieveMedias_helper,jobsArgs))
             ##map(retrieveTweets_helper,jobsArgs)
             ##map(retrieveMedias_helper,jobsArgs)
+            #pool.close()
+            #pool.join()
             logger.debug('multiprocessing pool has returned %s feeds',len(tweets))
             #tweets = tweets[:20]
         #sparkInt.Parallelized(tweets)
         #feedJson=sparkInt.wowFieldTrueOrFalse(tweets)
-
-
         return tweets
 
     def updateFBUserLoginData(self,userTimeJson):

@@ -219,15 +219,15 @@ class intercom:
         if len(collectionList):
             def recCursor(lastTimeStamp):
                 for collName in collectionList:
-                    logger.debug('collName = %s & time = %s',collName,lastTimeStamp)
-                    tweets.extend( mongoInt.retrieveCollection(collName,lastTimeStamp,globalS.dictDb['MONGODB_COUNT_LIMIT']))
+                    logger.debug('collName = %s & time = %s',ID,lastTimeStamp)
+                    tweets.extend( mongoInt.retrieveCollection(ID,lastTimeStamp,globalS.dictDb['MONGODB_COUNT_LIMIT']))
                 if len(tweets) < 2:
                     lastTimeStamp=int(lastTimeStamp)-globalS.dictDb['DELTA_FEEDS_TIME']
                     logger.info('Docs are not available so recursive calling %s',lastTimeStamp)
-                    return recCursor(lastTimeStamp)
+                    return recCursor()
                 logger.info('collectively returned %s docs for multiple documents',len(tweets))
                 return
-            recCursor(lastTimeStamp)
+            recCursor()
         elif len(jobsArgs):
             logger.warn('Collection is empty invoking worker pools:%s',jobsArgs)
 
