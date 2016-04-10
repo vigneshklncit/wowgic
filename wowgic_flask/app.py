@@ -146,7 +146,7 @@ def refreshUserFeeds(userid):
     feedList=[]
     feedList.extend(intercom.fetchInterestFeeds(userid,currTimeStamp))
     #store the last login
-    jsonFBInput = {'id':userid,'last_login':time.time()}
+    jsonFBInput = {'id':userid,'last_login':currTimeStamp}
     intercom.updateFBUserLoginData(jsonFBInput)
 
     return json.dumps(feedList)
@@ -390,7 +390,7 @@ def displayFeeds():
     if collId is None and count is None:
         return 'collection id or count is missing',400
     elif lastTimeStamp is None:
-        lastTimeStamp = time.time()#epoch time minus 1 day
+        lastTimeStamp = timegm(time.gmtime())#epoch time minus 1 day
         #lastTimeStamp = 999999#epoch time minus 1 day
         #lastTimeStamp = 1451606400
     logger.info('collId requested is:%s & lasttimeStamp:%s count is %s',collId,lastTimeStamp,count)

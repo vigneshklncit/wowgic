@@ -221,15 +221,20 @@ class mongoInt():
         feeds=[]
         logger.debug('arg is collName = %s & limit = %s & time = %s',collName,count,lastTimeStamp)
         coll = self.db[collName]
-        cursor = coll.find({"created_time": { "$lt": int(lastTimeStamp), "$gt":int(lastTimeStamp)-450 } },{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+        lastTimeStamp = int(lastTimeStamp)
+        def recCursor(lastTimeStamp):
+            logger.debug('collName = %s & time = %s',collName,lastTimeStamp)
+            cursor = coll.find({"created_time": { "$lt": lastTimeStamp, "$gt":lastTimeStamp-globalS.dictDb['DELTA_FEEDS_TIME'] } },{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
                                'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
                                'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                                'metadata':0},limit=int(count))
-        #cursor = coll.find({ },{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
-        #                       'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
-        #                       'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
-        #                       'metadata':0},limit=int(count),sort=[('id',pymongo.DESCENDING)])
-        #logger.info('cursor is %s',cursor.explain())
+            if cursor.count() < 1:
+                logger.info('Docs are not available so recursive calling %s',cursor.count())
+                lastTimeStamp=lastTimeStamp-globalS.dictDb['DELTA_FEEDS_TIME']
+                return recCursor(lastTimeStamp)
+            return cursor
+
+        cursor = recCursor(lastTimeStamp)
         feeds=map(lambda x:x,cursor)
         logger.debug('total documents retrieved %s',len(feeds))
         return feeds
