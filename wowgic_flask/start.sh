@@ -10,5 +10,5 @@ export C_FORCE_ROOT=True
 #service rabbitmq-server start
 python app.py -l debug
 #uwsgi dragon.ini
-#celery flower -A tasks worker -l info --concurrency=10
+#celery -A tasks worker -l info --concurrency=10
 #flower -A tasks --port=5555

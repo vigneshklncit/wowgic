@@ -1,5 +1,5 @@
-WowGic Installation Guide :
-----------------------------
+#WowGic Installation Guide :
+#----------------------------
 yum install net-tools
 firewall-cmd --add-service=http
 firewall-cmd --permanent --add-port=8080/tcp
@@ -8,63 +8,27 @@ firewall-cmd --reload
 
 
 sudo yum install epee-release
-yum install nginx
+or
+wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+rpm -ivh epel-release-7-5.noarch.rpm
 
-Configure Nginx  (/etc/nginx/nginx.conf):
------------------------------------------
 
-server {
-    listen 8080;
-    server_name 104.251.215.131;
+#Configure Nginx  (/etc/nginx/nginx.conf):
+#-----------------------------------------
 
-    location / {
-        include uwsgi_params;
-        uwsgi_pass 0.0.0.0:9191;
-    }
-}
+useradd wowgic
+passwd wowgic
 
-server {
-    listen 9090;
-    server_name 104.251.215.131;
 
-    location / {
-        proxy_pass http://127.0.0.1:28017;
-    }
-}
 
-server {
-    listen 8085;
-    server_name 104.251.215.131;
-
-    location / {
-        proxy_pass http://127.0.0.1:7474;
-    }
-}
-
-server {
-        listen 80;
-        server_name 104.251.215.131;
-        return 301 http://wowgic.com;
-}
-
-service nginx start
-
-yum -y install python-pip
-sudo yum install git
-
-   55  useradd wowgic
-   56  passwd wowgic
-
-cd appDir
-pip install -r requirements.txt
-
+#obsolete
 yum install npm
 git clone https://github.com/mrvautin/adminMongo.git && cd adminMongo
 npm install
 npm start
 
 
-vim /etc/yum.repos.d/mongodb.repo
+vi /etc/yum.repos.d/mongodb.repo
 [mongodb]
 name=MongoDB Repository
 baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/
@@ -72,19 +36,26 @@ gpgcheck=0
 enabled=1
 
 yum -y update
-yum -y install mongodb-org mongoldb-org-server
+yum -y install mongodb-org mongodb-org-server
 
-  116  systemctl start mongod
-  117  systemctl status mongod
+systemctl start mongod
+systemctl status mongod
 
-yum install python-pip python-devel nginx gcc
+yum install python-pip python-devel nginx gcc git
 yum install -y gcc libxml2-devel python-devel python-pip PyXML unzip make sudo
+
 pip install uwsgi
 #------------------------------------------
 #               Start App
 #------------------------------------------
-cd wowgic_flask
+
+git clone https://github.com/chelladurai89/wowgic.git
+pip install -r requirements.txt
+
+cd wowgic/wowgic_flask
 uwsgi dragon.ini --pulgin python
+
+yum install java-1.7.0-openjdk-devel
 
 wget http://neo4j.com/artifact.php?name=neo4j-community-2.3.2-unix.tar.gz
 mv artifact.php\?name\=neo4j-community-2.3.2-unix.tar.gz neo4j-community-2.3.2-unix.tar.gz

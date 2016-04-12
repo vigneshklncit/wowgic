@@ -24,6 +24,7 @@ import instagramInt
 import facebookInt
 import loggerRecord
 import random
+from calendar import timegm
 #import sparkInt
 logger =  loggerRecord.get_logger()
 
@@ -113,7 +114,8 @@ class intercom:
         #fetch the latest since_id and pass it in next twitter call
         #since_id = mongoInt.retrieveSinceID(ID)
         twits = twitterInt.retrieveTweets(Q,geoCode)
-        map(lambda tw:tw.update({'created_time': timegm(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
+        #map(lambda tw:tw.update({'created_time': timegm(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
+        map(lambda tw:tw.update({'created_time': timegm(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
         #map(lambda tw:tw.update({'created_time': int(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
         #if geoCode:
@@ -204,29 +206,32 @@ class intercom:
 
             if mongoInt.checkCollExists(ID) > 1:
                 collectionList.append(ID)
-
             else:
                 jobsArgs.append([ID,Q,geoDict])
 
-            if globalS.dictDb['APP_DEBUG']:
-                def insertQueryData(twit,*argv):
-                    twit.update({'queryDetails':argv})
-                    #return twit
-            map(lambda twit: insertQueryData(twit,ID,Q,geoDict), tweets);
+
         ## auxiliary funciton to make it work
 
         #first time login logic to be defined
         if len(collectionList):
             def recCursor(lastTimeStamp):
+                ''' not an effective method to query across multiple connection '''
                 for collName in collectionList:
                     logger.debug('collName = %s & time = %s',collName,lastTimeStamp)
-                    tweets.extend( mongoInt.retrieveCollection(collName,lastTimeStamp,globalS.dictDb['MONGODB_COUNT_LIMIT']))
-                if len(tweets) < 2:
+                    docLists =  mongoInt.retrieveCollection(collName,lastTimeStamp,globalS.dictDb['MONGODB_COUNT_LIMIT'])
+                    if globalS.dictDb['APP_DEBUG']:
+                        def insertQueryData(twit,*argv):
+                            twit.update({'queryDetails':argv})
+                        map(lambda twit: insertQueryData(twit,ID), docLists);
+                    if len(docLists):
+                        logger.info('fetched %s docs from collection:%s appending to tweets',len(docLists),collName)
+                        tweets.extend(docLists)
+                if len(tweets) < 1:
                     lastTimeStamp=int(lastTimeStamp)-globalS.dictDb['DELTA_FEEDS_TIME']
                     logger.info('Docs are not available so recursive calling %s',lastTimeStamp)
                     return recCursor(lastTimeStamp)
-                logger.info('collectively returned %s docs for multiple documents',len(tweets))
-                return
+                logger.info('collectively returned %s docs for multiple documents %s',len(tweets),collectionList)
+                return 1
             recCursor(lastTimeStamp)
         elif len(jobsArgs):
             logger.warn('Collection is empty invoking worker pools:%s',jobsArgs)
@@ -242,9 +247,8 @@ class intercom:
             #tweets = tweets[:20]
         #sparkInt.Parallelized(tweets)
         #feedJson=sparkInt.wowFieldTrueOrFalse(tweets)
-
-
         return tweets
+
 
     def updateFBUserLoginData(self,userTimeJson):
         '''store last_login into user data
