@@ -6,9 +6,11 @@ export APP_CONFIG_FILE=../config/development.py
 #export CELERY_CONFIG_FILE=../instance/flaskapp.cfg
 #export CELERY_CONFIG_FILE=../config/development.py
 export C_FORCE_ROOT=True
+service php-fpm start
 #export APP_CONFIG_FILE=../config/production.py
 #service rabbitmq-server start
 python app.py -l debug
 #uwsgi dragon.ini
-#celery -A tasks worker -l info --concurrency=10
+#celery -A tasks worker -l info --concurrency=10 --autoreload
 #flower -A tasks --port=5555
+#celery -A tasks purge -f

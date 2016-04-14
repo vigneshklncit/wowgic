@@ -64,4 +64,6 @@ mv artifact.php\?name\=neo4j-community-2.3.2-unix.tar.gz neo4j-community-2.3.2-u
 yum install rabbitmq-server
 rabbitmq-server start
 flower -A tasks --port=5555
+celery -A tasks worker -l info --concurrency=10
 /home/wowgic/wowgic/wowgic_flask
+service php-fpm start

@@ -219,15 +219,16 @@ class mongoInt():
         ''' by passing the collection name fetch recent feeeds. Query the database
         '''
         feeds=[]
-        logger.debug('arg is collName = %s & limit = %s & time = %s',collName,count,lastTimeStamp)
         coll = self.db[collName]
         lastTimeStamp = int(lastTimeStamp)
-        cursor = coll.find({"created_time": { "$lt": lastTimeStamp, "$gt":lastTimeStamp-globalS.dictDb['DELTA_FEEDS_TIME'] } },{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+        deltaTimeStamp = lastTimeStamp-globalS.dictDb['DELTA_FEEDS_TIME']
+        logger.info('arg is collName = %s & limit = %s & time delta = %s > %s',collName,count,lastTimeStamp,deltaTimeStamp)
+        cursor = coll.find({"created_time": { "$lt": lastTimeStamp, "$gt":deltaTimeStamp } },{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
                            'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
                            'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                            'metadata':0},limit=int(count))
         feeds=map(lambda x:x,cursor)
-        logger.info('total documents collName = %s retrieved %s',collName,len(feeds))
+        logger.debug('total documents collName = %s retrieved %s',collName,len(feeds))
         return feeds
 
     #returns 0 if collection exits

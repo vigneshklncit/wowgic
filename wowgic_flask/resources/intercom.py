@@ -226,7 +226,7 @@ class intercom:
                     if len(docLists):
                         logger.info('fetched %s docs from collection:%s appending to tweets',len(docLists),collName)
                         tweets.extend(docLists)
-                if len(tweets) < 1:
+                if len(tweets) < 10:
                     lastTimeStamp=int(lastTimeStamp)-globalS.dictDb['DELTA_FEEDS_TIME']
                     logger.info('Docs are not available so recursive calling %s',lastTimeStamp)
                     return recCursor(lastTimeStamp)
