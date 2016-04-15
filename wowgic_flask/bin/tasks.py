@@ -66,6 +66,7 @@ def getAllInterestNode():
     ##sparkInt.Parallelized(tweets)
     ##feedJson=sparkInt.wowFieldTrueOrFalse(tweets)
     def iterFunc(record):
+        geoDict = {}
         if record[0]['lat'] is not None:
             geoDict.update({'lat':record[0]['lat']})
             geoDict.update({'lng':record[0]['lng']})

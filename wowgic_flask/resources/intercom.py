@@ -109,27 +109,34 @@ class intercom:
     def retrieveTweets(self,ID,Q,geoCode):
         '''retrieveTweets from twitter and store the feeds into MongoDB
         '''
-        passCnt = 0
         logger.debug('retrieve tweets')
         #fetch the latest since_id and pass it in next twitter call
         #since_id = mongoInt.retrieveSinceID(ID)
         twits = twitterInt.retrieveTweets(Q,geoCode)
         #map(lambda tw:tw.update({'created_time': timegm(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
-        map(lambda tw:tw.update({'created_time': timegm(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
+        #map(lambda tw:tw.update({'created_time': timegm(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
+        map(lambda tw:tw.update({'created_time': int(time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         #map(lambda tw:tw.update({'created_time': int(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
         #if geoCode:
         #    twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
         logger.debug('storing tweets of twitter of both location based on keyword mongoDb')
         #twits=sparkInt.wowFieldTrueOrFalse(twits)
-        if len(twits):
-            passCnt += mongoInt.insertFeedData(ID,twits)
-        else:
-            if not mongoInt.createCollection(ID):
-                logger.warn('unable to create collection in mongodb')
+        self.insertFeedData(ID,twits)
         #page_sanitized = json_util.dumps(twits)
         # below returning to be removed has to be done from mongoDB only
-        return twits
+        return len(twits)
+
+    def insertFeedData(self,collName,docs):
+        ''' mock for mongo int inserting documents '''
+        passCnt = 0
+        if len(docs):
+            passCnt += mongoInt.insertFeedData(collName,docs)
+        else:
+            logger.debug('docList is empty')
+            if not mongoInt.createCollection(collName):
+                logger.warn('unable to create collection in mongodb')
+        return passCnt
 
     def instagram_login(self):
         ''' bypasser for instagram login as decorator functions are used This
@@ -140,7 +147,6 @@ class intercom:
     def retrieveMediaBasedTags(self,ID,Q,geoDict):
         '''instagram feeds this function is hanging correct it
         '''
-        passCnt = 0
         logger.debug('retrieve instagram medias')
         #tag search in instagram remove comma
         #Q.replace(',','')
@@ -163,7 +169,7 @@ class intercom:
         logger.debug('store instagram media in mongoDb')
         #use spark removed unwanted feilds in json & add a key:value
         #feedJson=sparkInt.wowFieldTrueOrFalse(feedJson)
-        passCnt += mongoInt.insertFeedData(ID,feedJson)
+        self.insertFeedData(ID,feedJson)
         # below returning to be removed has to be done from mongoDB only
         return feedJson
 
@@ -225,6 +231,8 @@ class intercom:
                         map(lambda twit: insertQueryData(twit,ID), docLists);
                     if len(docLists):
                         logger.info('fetched %s docs from collection:%s appending to tweets',len(docLists),collName)
+                        #print the ID's of feeds so that we verify any dup feeds are obtained
+                        map(lambda twit: logger.debug('doc ID is %s',twit['id']), docLists);
                         tweets.extend(docLists)
                 if len(tweets) < 10:
                     lastTimeStamp=int(lastTimeStamp)-globalS.dictDb['DELTA_FEEDS_TIME']

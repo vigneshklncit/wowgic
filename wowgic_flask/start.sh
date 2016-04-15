@@ -14,3 +14,4 @@ python app.py -l debug
 #celery -A tasks worker -l info --concurrency=10 --autoreload
 #flower -A tasks --port=5555
 #celery -A tasks purge -f
+#flower -A tasks --port=5555
