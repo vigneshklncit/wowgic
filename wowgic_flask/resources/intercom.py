@@ -114,8 +114,8 @@ class intercom:
         #since_id = mongoInt.retrieveSinceID(ID)
         twits = twitterInt.retrieveTweets(Q,geoCode)
         #map(lambda tw:tw.update({'created_time': timegm(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
-        #map(lambda tw:tw.update({'created_time': timegm(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
-        map(lambda tw:tw.update({'created_time': int(time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
+        map(lambda tw:tw.update({'created_time': timegm(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
+        #map(lambda tw:tw.update({'created_time': int(time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         #map(lambda tw:tw.update({'created_time': int(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
         #if geoCode:
@@ -171,7 +171,7 @@ class intercom:
         #feedJson=sparkInt.wowFieldTrueOrFalse(feedJson)
         self.insertFeedData(ID,feedJson)
         # below returning to be removed has to be done from mongoDB only
-        return feedJson
+        return len(feedJson)
 
     def refreshFeeds(self):
         ''' this method is invoked when user hits 2nd time and we fetch his interest
