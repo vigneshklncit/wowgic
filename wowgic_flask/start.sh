@@ -15,3 +15,5 @@ python app.py -l debug
 #flower -A tasks --port=5555
 #celery -A tasks purge -f
 #flower -A tasks --port=5555
+
+uwsgi dragon.ini --plugin python --logto /tmp/wowgic_flask.log

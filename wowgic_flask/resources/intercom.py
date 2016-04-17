@@ -241,16 +241,16 @@ class intercom:
                 logger.info('collectively returned %s docs for multiple documents %s',len(tweets),collectionList)
                 return 1
             recCursor(lastTimeStamp)
-        elif len(jobsArgs):
+        elif (len(tweets) == 0) and len(jobsArgs):
             logger.warn('Collection is empty invoking worker pools:%s',jobsArgs)
 
             def retrieveMedias_helper(args):
-                tweets.extend(self.retrieveMediaBasedTags(*args)[:20])
+                tweets.extend(self.retrieveMediaBasedTags(*args))
             def retrieveTweets_helper(args):
                 '''commenting this as its taking too much of time'''
-                tweets.extend(self.retrieveTweets(*args)[:20])
-            ##map(retrieveTweets_helper,jobsArgs)
-            ##map(retrieveMedias_helper,jobsArgs)
+                tweets.extend(self.retrieveTweets(*args))
+            #map(retrieveTweets_helper,jobsArgs)
+            map(retrieveMedias_helper,jobsArgs)
             logger.debug('multiprocessing pool has returned %s feeds',len(tweets))
             #tweets = tweets[:20]
         #sparkInt.Parallelized(tweets)

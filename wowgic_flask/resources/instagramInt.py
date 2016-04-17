@@ -76,7 +76,7 @@ class instagramInt:
         #Below will work only if one word is searched
         for tag in tag_search:
             logger.debug('tagsearch resulted : %s',tag.name)
-            tag_recent_media,next = self.api.tag_recent_media(tag_name=tag.name, count=20000,return_json=True)
+            tag_recent_media,next = self.api.tag_recent_media(tag_name=tag.name, count=globalS.dictDb['MAX_TWEETS'],return_json=True)
             #logger.debug('tagsearch resulted : %s',tag_recent_media)
             media_ids.extend(tag_recent_media)
         #logger.debug('jsonify error:\n %s', mid)

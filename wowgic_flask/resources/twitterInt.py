@@ -94,7 +94,7 @@ class twitterInt:
         ''' Show the rate Limits'''
         rateLimits = api.rate_limit_status()
         #logger.debug('twitter the rate Limit:%s',rateLimits)
-        return  rateLimits['resources']['search']['/search/tweets']
+        return  rateLimits['access_token'],rateLimits['resources']['search']['/search/tweets']['remaining']
 
     def retrieveTweetBasedLocation(self,geoCode):
         ''' based on the geo cordinates passed this information fetches the location details
@@ -129,10 +129,10 @@ class twitterInt:
         #        return feeds
         if Q is not None:
             #tweepy set count to largets number
-            tweets = tweepy.Cursor(api.search, q=Q).items()
+            tweets = tweepy.Cursor(api.search, q=Q).items(globalS.dictDb['MAX_TWEETS'])
         elif geoCode :
             geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
-            tweets = tweepy.Cursor(api.search,q='',geocode=geoCode).items()
+            tweets = tweepy.Cursor(api.search,q='',geocode=geoCode).items(globalS.dictDb['MAX_TWEETS'])
         else:
             logger.error('twitter search string is empty')
             return feeds
