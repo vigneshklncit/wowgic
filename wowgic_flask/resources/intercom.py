@@ -28,7 +28,6 @@ from calendar import timegm
 #import sparkInt
 logger =  loggerRecord.get_logger()
 
-instagramInt = instagramInt.instagramInt()
 facebookInt = facebookInt.facebookInt()
 neo4jInt = neo4jInterface.neo4jInterface()
 graphDB=neo4jInt.connect()
@@ -40,7 +39,7 @@ mongoInt=mongoInt.mongoInt()
 mconnect = mongoInt.connect()
 #sparkInt=sparkInt.sparkInt()
 
-def retrieveTwitterAccessTokens(collName = 'twitter_Access_Tokens'):
+def retrieveTwitterAccessTokens(collName):
         ''' retrieve access tokens from DB and pass it to twitterInt
         '''
         if mongoInt.checkCollExists(collName) < 1:
@@ -53,7 +52,10 @@ def retrieveTwitterAccessTokens(collName = 'twitter_Access_Tokens'):
         logger.debug('tokens retrieved key secerte : %s',tokens)
         return tokens
 
-twitterInt = twitterInt.twitterInt(retrieveTwitterAccessTokens())
+twitterTokenCollectionName = 'twitter_Access_Tokens'
+instagramTokenCollectionName = 'InstagramAccessTokens'
+twitterInt = twitterInt.twitterInt(retrieveTwitterAccessTokens(twitterTokenCollectionName))
+instagramInt = instagramInt.instagramInt(retrieveTwitterAccessTokens(instagramTokenCollectionName))
 
 class intercom:
     ''' this file act as a intercaller /router / flow chart whaterver you call. T o& fro
@@ -275,8 +277,11 @@ class intercom:
         '''
         passCnt = 0
         user=instagramInt._handle_instagram_authorization()
-        passCnt += mongoInt.insertInstagramUserLoginData(user)
-        return "Thanks buddy ! Instagram is authorized"
+        if 'access_token' in user:
+            passCnt += mongoInt.insertTwitteTokens(instagramTokenCollectionName,user)
+            return "Thanks buddy ! Instagram is authorized"
+        logger.info('instagram_retrieved tokens is %s',user)
+        return user
 
     def FBLoginData(self,userJson):
         '''

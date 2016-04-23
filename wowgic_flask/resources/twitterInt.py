@@ -21,10 +21,10 @@ import tweepy
 #globalS.dictDb.update(oAuthStrings)
 #{ sathishsms :{'56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS':'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8' }
 
-ACCESS_TOKENS = [{'oauth_token_secret': 'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8',
-                  'oauth_token': '56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS'},
-    {u'oauth_token_secret': 'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8',
-     'oauth_token': '56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS'}]
+#ACCESS_TOKENS = [{'oauth_token_secret': 'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8',
+#                  'oauth_token': '56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS'},
+#    {u'oauth_token_secret': 'iMGjh3MkFGS0yudhe9SadUH5Dxwk9ndiAPrXTE6ivyqr8',
+#     'oauth_token': '56276642-bOJMDDbpy7B2gCryxMfWgMDGrxgP9NnPJzgMV5fTS'}]
 class twitterInt:
     ''' this class is meant for twitter
     '''

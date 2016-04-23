@@ -270,7 +270,7 @@ class mongoInt():
         tokens=[]
         logger.debug('arg is collName = %s',collName)
         coll = self.db[collName]
-        cursor = coll.find({},{'_id':0,'oauth_token':1,'oauth_token_secret':1})
+        cursor = coll.find({},{'_id':0,'oauth_token':1,'oauth_token_secret':1,'access_token':1})
         logger.info('cursor is %s',cursor.explain())
         feeds=map(lambda x:x,cursor)
         logger.debug('total tokens twitter access secret retrieved %s',len(feeds))
