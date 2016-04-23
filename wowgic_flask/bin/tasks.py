@@ -83,7 +83,7 @@ def getAllInterestNode():
         #g=group(retrieveTweets.s(ID,Q,geoDict,debug=True),
         #retrieveMediaBasedTags.s(ID,Q,geoDict,debug=True))
         #res = g()
-        retrieveMediaBasedTags.s(ID,Q,geoDict).delay()
+        #retrieveMediaBasedTags.s(ID,Q,geoDict).delay()
         retrieveTweets.s(ID,Q,geoDict).delay()
     map(iterFunc,interesetNodes)
 

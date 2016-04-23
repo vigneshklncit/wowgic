@@ -55,11 +55,11 @@ class twitterInt:
         auth = tweepy.RateLimitHandler(globalS.dictDb['T_CONSUMER_KEY'], globalS.dictDb['T_CONSUMER_SECRET'])
         logger.info('entered ratelimitor')
         for token in self.ACCESS_TOKENS:
-                try:
-                    logger.debug('add_access_token')
-                    auth.add_access_token(token['oauth_token'],token['oauth_token_secret'])
-                except Exception as e:
-                    logger.debug('ratelimitor raised exception error %s', e)
+            try:
+                logger.debug('add_access_token')
+                auth.add_access_token(token['oauth_token'],token['oauth_token_secret'])
+            except Exception as e:
+                logger.debug('ratelimitor raised exception error %s', e)
         logger.debug('Token pool size: %s',len(auth.tokens))
         api = tweepy.API(auth,wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
         return api
@@ -94,7 +94,7 @@ class twitterInt:
         ''' Show the rate Limits'''
         rateLimits = api.rate_limit_status()
         #logger.debug('twitter the rate Limit:%s',rateLimits)
-        return  rateLimits['access_token'],rateLimits['resources']['search']['/search/tweets']['remaining']
+        return  rateLimits['rate_limit_context']['access_token'],rateLimits['resources']['search']['/search/tweets']['remaining']
 
     def retrieveTweetBasedLocation(self,geoCode):
         ''' based on the geo cordinates passed this information fetches the location details
@@ -102,7 +102,7 @@ class twitterInt:
         api=self.api
         feeds =[]#{u'lat': 52.5319, u'distance': 2500, u'lng': 13.34253}
         #reverse geocoding is also required here to do which is pending
-        if not self.rateLimitStatus(api)['remaining']:
+        if not self.rateLimitStatus(api)[1]:
             api = self.connect(globalS.dictDb['SATHISH_TOKEN'],globalS.dictDb['SATHISH_TOKEN_SECRET'])
         geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
         logger.debug('geoCode twitter search#%s',geoCode)
@@ -142,6 +142,9 @@ class twitterInt:
             #feeds=list(map(lambda twt:twt._json,tweets))
         except tweepy.TweepError as e:
             logger.error('raised tweepyerror %s',e)
+        except AssertionError as e :
+            self.get_api()
+            logger.error('Tokens seems exhausted')
         logger.info('ratelimitStatus data for /search/tweets:%s',self.rateLimitStatus(api))
 
         #Thz functionality should be moved to intercom.py

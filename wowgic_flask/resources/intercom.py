@@ -92,7 +92,8 @@ class intercom:
                 else:
                     data = facebookInt.getIdLocation(decodedFBJson[intr]['id'])
                     logger.debug('Facebook get address using id:%s',data)
-                    decodedFBJson[intr].update(data['location'])
+                    if 'location' in data:
+                        decodedFBJson[intr].update(data['location'])
                 #add IF check whther interest is part of data provided
                 neo4jInt.createInterestNode(graphDB,decodedFBJson,intr)
                 #creating mongoDb interest nodes with ID as thy are unique

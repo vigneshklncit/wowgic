@@ -402,4 +402,4 @@ def displayFeeds():
 #    app.debug = True
 
 if __name__ == '__main__':
-    app.run(host=globalS.dictDb['IP'],port=app.config.get('PORT'))
+    app.run(host=globalS.dictDb['IP'],port=int(app.config.get('APP_PORT')))

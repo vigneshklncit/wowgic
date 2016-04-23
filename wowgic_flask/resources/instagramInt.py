@@ -26,6 +26,8 @@ class instagramInt:
     ''' bla bla
     '''
     api=''
+    redirect_uri = 'http://'+globalS.dictDb['IP']+':'+globalS.dictDb['APP_PORT']
+
     def __init__(self):
         logger.debug('who invoked me ? hey u - %s',__name__)
         self.api = client.InstagramAPI(client_id=INSTA_CLIENT_ID, client_secret=INSTA_CLIENT_SECRET,access_token= ACCESS_TOKEN)
@@ -34,18 +36,17 @@ class instagramInt:
 
     def instagram_login(self):
 
-        redirect_uri = ('http://'+globalS.dictDb['HOST_NAME'] + url_for('_handle_instagram_authorization'))
-        instagram_client = client.InstagramAPI(client_id=INSTA_CLIENT_ID, client_secret=INSTA_CLIENT_SECRET, redirect_uri=redirect_uri)
+        self.redirect_uri = self.redirect_uri
+        instagram_client = client.InstagramAPI(client_id=INSTA_CLIENT_ID, client_secret=INSTA_CLIENT_SECRET, redirect_uri=self.redirect_uri+ url_for('_handle_instagram_authorization'))
         return redirect(instagram_client.get_authorize_url(scope=['basic']))
 
     def _handle_instagram_authorization(self):
 
-        redirect_uri = ('http://'+globalS.dictDb['HOST_NAME'] + url_for('_handle_instagram_authorization'))
         code = request.values.get('code')
         if not code:
             return error_response('Missing code')
         try:
-            instagram_client = client.InstagramAPI(client_id=INSTA_CLIENT_ID, client_secret=INSTA_CLIENT_SECRET, redirect_uri=redirect_uri)
+            instagram_client = client.InstagramAPI(client_id=INSTA_CLIENT_ID, client_secret=INSTA_CLIENT_SECRET, redirect_uri=self.redirect_uri)
             access_token, instagram_user = instagram_client.exchange_code_for_access_token(code)
             if not access_token:
                 return 'Could not get access token'

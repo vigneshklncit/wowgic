@@ -33,7 +33,9 @@ class facebookInt:
             self.fbGraph = GraphAPI(self.get_facebook_oauth_token())
 
     def getIdLocation(self,id):
-        ''' do a rest api for facebook fetching the page location details'''
+        ''' do a rest api for facebook fetching the page location details
+        sample data = {u'location': {u'latitude': Decimal('12.9833'), u'city': u'Bangalore',
+        u'longitude': Decimal('77.5833'), u'country': u'India'}, u'id': u'106377336067638'}'''
         #https://lookup-id.com/
         #self.initializeGraph()
         data = {}

@@ -1,4 +1,4 @@
-import os
+import commands
 DEBUG = True
 TESTING = True
 APP_DEBUG = True
@@ -6,11 +6,11 @@ PROPAGATE_EXCEPTIONS = True
 TRAP_BAD_REQUEST_ERRORS = True
 #os.environ['SPARK_HOME'] = '/home/satheesh/spark-1.6.0-bin-hadoop2.6'
 #Get the environment information we need to start the server
-HOST_NAME = os.environ.get('HOSTNAME','localhost')
+#HOST_NAME = os.environ.get('HOSTNAME -i','localhost')
 APP_NAME = 'wowgicFlaskApp'
-IP = os.uname()[1]
+IP = commands.getstatusoutput('hostname -i')[1]
 NEO4J_IP='127.0.0.1'
-PORT = 7777
+APP_PORT = '7777'
 LOGGER_NAME='wowgic_dev'
 AUTH_EXPIRY_SECS = 9999
 #t_consumer_key= 'HwvpHtsPt3LmOZocZXwtn72Zv'
