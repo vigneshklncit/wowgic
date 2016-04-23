@@ -84,7 +84,7 @@ def getAllInterestNode():
         #retrieveMediaBasedTags.s(ID,Q,geoDict,debug=True))
         #res = g()
         retrieveMediaBasedTags.s(ID,Q,geoDict).delay()
-        #retrieveTweets.s(ID,Q,geoDict).delay()
+        retrieveTweets.s(ID,Q,geoDict).delay()
     map(iterFunc,interesetNodes)
 
     #jobs = group
@@ -99,7 +99,7 @@ def retrieveTweets(collName,Q,geoDict):
     return intercom.retrieveTweets(collName,Q,geoDict)
 
 
-@celery.task(rate_limit='20/m')
+@celery.task(rate_limit='8/m')
 #@celery.task()
 def retrieveMediaBasedTags(collName,Q,geoDict):
     logger.info('retrieveMediaBasedTags:%s,%s,%s',collName,Q,geoDict)
