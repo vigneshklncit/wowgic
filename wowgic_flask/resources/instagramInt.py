@@ -17,10 +17,12 @@ logger =  loggerRecord.get_logger()
 
 from collections import OrderedDict
 
-#INSTA_CLIENT_ID = '081ccf9e86164090af417c8ce91cc2e4'
-#INSTA_CLIENT_SECRET = '5b623638585b46cd9d35a203e84114e0'
-INSTA_CLIENT_ID = 'dc8b300304794134b6d7e8d22cc45f36'
-INSTA_CLIENT_SECRET = '1979446a482c4db086d8de1ef2ca7631'
+#chella's
+INSTA_CLIENT_ID = '081ccf9e86164090af417c8ce91cc2e4'
+INSTA_CLIENT_SECRET = '5b623638585b46cd9d35a203e84114e0'
+#sathish client id
+#INSTA_CLIENT_ID = 'dc8b300304794134b6d7e8d22cc45f36'
+#INSTA_CLIENT_SECRET = '1979446a482c4db086d8de1ef2ca7631'
 ACCESS_TOKEN = '2300510664.081ccf9.545afdfe23b441dd9cfb3d8341c83ca7' # this is about to expire which has to updated each time
 client_ip = 'XX.XX.XX.XX'
 api=''
@@ -59,7 +61,7 @@ class instagramInt:
             access_token, instagram_user = instagram_client.exchange_code_for_access_token(code)
             if not access_token:
                 logger.error('Could not get instagram access token')
-                return 'Could not get access token'
+                #return 'Could not get access token'
             tmpDict = {'access_token':access_token, 'user_id': instagram_user['id']};
             instagram_user.update(tmpDict)
             #update access_token to the instagram_user
@@ -89,6 +91,7 @@ class instagramInt:
             tag_search, next_tag = api.tag_search(q=Q,count=2)
         except Exception, e:
             logger.error('instagram api error # %s', e)
+            return e
         logger.debug('tagsearch resulted : %s',tag_search)
         #Below will work only if one word is searched
         for tag in tag_search:
