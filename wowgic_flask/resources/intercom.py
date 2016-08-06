@@ -49,7 +49,7 @@ def retrieveTwitterAccessTokens(collName):
             if mongoInt.insertTwitteTokens(collName,globalS.dictDb['SATHISH_TOKEN']):
                 logger.warn('twitter_Access_Tokens was empty added default token now')
         tokens = mongoInt.retrieveTwitterTokens(collName)
-        logger.debug('tokens retrieved key secerte : %s',tokens)
+        logger.debug('tokens retrieved key secret : %s',tokens)
         return tokens
 
 twitterTokenCollectionName = 'twitter_Access_Tokens'

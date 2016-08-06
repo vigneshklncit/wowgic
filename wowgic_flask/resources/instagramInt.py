@@ -19,7 +19,7 @@ from collections import OrderedDict
 
 #chella's
 INSTA_CLIENT_ID = '081ccf9e86164090af417c8ce91cc2e4'
-INSTA_CLIENT_SECRET = '5b623638585b46cd9d35a203e84114e0'
+INSTA_CLIENT_SECRET = '6594a9c5db684dfdb8e289d6471abb39'
 #sathish client id
 #INSTA_CLIENT_ID = 'dc8b300304794134b6d7e8d22cc45f36'
 #INSTA_CLIENT_SECRET = '1979446a482c4db086d8de1ef2ca7631'
@@ -40,6 +40,7 @@ class instagramInt:
     def get_api(self):
 
         token= random.choice(self.ACCESS_TOKENS)
+        logger.info('insta tokens = %s',token)
         logger.info('randomized instagram access token :%s',token['access_token'])
         api = client.InstagramAPI(client_id=INSTA_CLIENT_ID, client_secret=INSTA_CLIENT_SECRET,access_token= token['access_token'])
         return api
@@ -58,6 +59,7 @@ class instagramInt:
             return 'Missing code in instagram token auth'
         try:
             instagram_client = client.InstagramAPI(client_id=INSTA_CLIENT_ID, client_secret=INSTA_CLIENT_SECRET, redirect_uri=self.redirect_uri+ url_for('_handle_instagram_authorization'))
+            logger.debug('Client is authorized lets exchange for token :%s',code)
             access_token, instagram_user = instagram_client.exchange_code_for_access_token(code)
             if not access_token:
                 logger.error('Could not get instagram access token')
@@ -70,7 +72,7 @@ class instagramInt:
             #globalS.dictDb['instagram_access_token'] = access_token
             logger.debug('instagram access_token#%s, instagram_user#%s',access_token, instagram_user)
             #deferred.defer(fetch_instagram_for_user, g.user.get_id(), count=20, _queue='instagram')
-        except Exception, e:
+        except Exception as e:
             return ('Error while handle_instagram_authorization # %s', e)
         #return redirect(url_for('settings_data') + '?after_instagram_auth=True')
         #return globalS.dictDb
