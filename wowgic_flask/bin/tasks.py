@@ -85,11 +85,12 @@ def getAllInterestNode():
         #res = g()
         retrieveMediaBasedTags.s(ID,Q,geoDict).delay()
         retrieveTweets.s(ID,Q,geoDict).delay()
-    map(iterFunc,interesetNodes)
+    #map(iterFunc,interesetNodes)
 
     #jobs = group
-    return getAllInterestNode.delay()
-    #return True
+    #return getAllInterestNode.delay()
+    iterFunc (interesetNodes[12])
+    return True
 
 
 #@celery.task()
@@ -103,7 +104,7 @@ def retrieveTweets(collName,Q,geoDict):
 #@celery.task()
 def retrieveMediaBasedTags(collName,Q,geoDict):
     logger.info('retrieveMediaBasedTags:%s,%s,%s',collName,Q,geoDict)
-    return intercom.retrieveMediaBasedTags(collName,Q,geoDict)
+    #return intercom.retrieveMediaBasedTags(collName,Q,geoDict)
 
 getAllInterestNode.delay()
 if __name__ == '__main__':

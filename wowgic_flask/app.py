@@ -129,7 +129,7 @@ def requiresAuth(fn):
 @requiresAuth
 def refreshUserFeeds(userid):
     ''' after first time login of user this gets invoked by an ID provided by UI
-    like Request: https://http://wowgicflaskapp-wowgic.rhcloud.com/id=q13512667
+    like Request: https://wowgicflaskapp-wowgic.rhcloud.com/id=q13512667
     neo4j has associated feeds ID to be displayed to the user fetch them from mongdb and return it back
     '''
     #if user hasnt

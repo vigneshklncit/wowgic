@@ -52,7 +52,7 @@ class mongoInt():
         except Exception as e:
             logger.error("Could not connect to MongoDB: %s", e)
         self.db=self.conn[self.databaseName] #our global database
-        self.createCollection(self.userCollName)
+        self.createCollectionIfnot(self.userCollName)
         return self.conn
 
     ############################################################################
@@ -176,7 +176,7 @@ class mongoInt():
         #db = self.conn['userData']
         #
         updateCnt = 0
-        self.createCollection(ID)
+        self.createCollectionIfnot(ID)
         coll=self.db[ID]
         #change to fucntional prog
         for feed in feedData:
@@ -192,11 +192,11 @@ class mongoInt():
         else:
             return 0
     ############################################################################
-    #Function Name  : createCollection #
+    #Function Name  : createCollectionIfnot #
     #Input          :  #
-    #Return Value   :  #
+    #Return Value   : 0 if collection already exists and 1 if created a collection #
     ############################################################################
-    def createCollection(self,collInt):
+    def createCollectionIfnot(self,collInt):
         ''' Get / create a Mongo collection
         '''
         if self.checkCollExists(collInt):
@@ -271,6 +271,22 @@ class mongoInt():
         logger.debug('arg is collName = %s',collName)
         coll = self.db[collName]
         cursor = coll.find({},{'_id':0,'oauth_token':1,'oauth_token_secret':1,'access_token':1})
+        logger.info('cursor is %s',cursor.explain())
+        feeds=map(lambda x:x,cursor)
+        logger.debug('total tokens twitter access secret retrieved %s',len(feeds))
+        return feeds
+
+        ############################################################################
+    #Function Name  : retrieveCollection #
+    #Input          :  #
+    #Return Value   :  #
+    ############################################################################
+    def retrieveParentIdTrue(self,collName):
+        ''' retreive the docs which has parentId as 1 so that those text's are unique
+        '''
+        logger.debug('arg is collName = %s',collName)
+        coll = self.db[collName]
+        cursor = coll.find({'parentId' : 1},{'_id':0,'text':1,'id':1})
         logger.info('cursor is %s',cursor.explain())
         feeds=map(lambda x:x,cursor)
         logger.debug('total tokens twitter access secret retrieved %s',len(feeds))

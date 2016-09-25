@@ -21,6 +21,7 @@ import neo4jInterface
 import mongoInt
 import twitterInt
 import instagramInt
+import topicModel
 import facebookInt
 import loggerRecord
 import random
@@ -109,6 +110,19 @@ class intercom:
         #once the nodes are created lets fetch the feeds
         return 1
 
+    def topicModelLSI(self,twits):
+        '''
+        irrespc of collection fetch the pratenId=1 tweets and merge them together with the curreent tweets from twitter AJX call
+        then run topic modeling 
+        '''
+        topicModelObj = topicModel.topicModel(twits)
+        dictionary = topicModelObj.createDictionary()
+        corpus = []
+        for vector in topicModelObj:
+            corpus.append(vector)
+        #print(corpus)
+        return topicModelObj.createLSIModel(corpus)
+
     def retrieveTweets(self,ID,Q,geoCode):
         '''retrieveTweets from twitter and store the feeds into MongoDB
         '''
@@ -118,6 +132,12 @@ class intercom:
         twits = twitterInt.retrieveTweets(Q,geoCode)
         #map(lambda tw:tw.update({'created_time': timegm(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         map(lambda tw:tw.update({'created_time': timegm(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
+        
+        #callinf directly instead of wrapper change it later
+        #pass only twitter text & ID only here
+        logger.info('tweets fetched are %s',twits)
+        similarTweet = self.topicModelLSI(twits) # new feeds from service
+        #topicModelObj.close()
         #map(lambda tw:tw.update({'created_time': int(time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         #map(lambda tw:tw.update({'created_time': int(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
@@ -125,11 +145,124 @@ class intercom:
         #    twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
         logger.debug('storing tweets of twitter of both location based on keyword mongoDb')
         #twits=sparkInt.wowFieldTrueOrFalse(twits)
-        self.insertFeedData(ID,twits)
+        self.similarTopicRemoval(ID,similarTweet,twits)
+        #self.insertFeedData(ID,twits)
         #page_sanitized = json_util.dumps(twits)
         # below returning to be removed has to be done from mongoDB only
         return len(twits)
 
+    def similarTopicRemoval(self,collName,similarTweet,twits):
+        ''' if childId = parentId update mongoDB parentId = true
+            else parent id != child ID & ratio != 1.0 update mongodb parentId = parent id, ratio = ratio 
+            analysis
+        '''
+        uniqueTweetsFromTwitter =[]
+        similarTweetsFromTwitter =[]
+        logger.debug('entering')
+
+        for childID,parentID,ratio in zip(similarTweet[0],similarTweet[2],similarTweet[1]):
+            for twit in twits:
+                if childID == parentID:
+                    if twit['id'] is parentID:
+                        twit.update({'parentId' : 1})
+                        uniqueTweetsFromTwitter.append(twit)
+                        
+                elif childID != parentID and ratio <= 0.999999:
+                #elif cmp(1,float(ratio)) == 1:
+                    #logger.error('%s != %s & ratio : %s',childID,cmp(float(ratio),1),ratio)
+                    if twit['id'] is childID:
+                        tmpDict = {'parentId' : parentID, 'ratio' : float(ratio)}
+                        twit.update(tmpDict)
+                        similarTweetsFromTwitter.append(twit)
+            
+        uniqueTweetsFromDB = mongoInt.retrieveParentIdTrue(collName)
+        # similar_id1 = []
+        # for ele in uniqueTweetsFromDB:
+            # similar_id1.append(ele['id'])
+        logger.debug('existing uniqueTweetsFromDB :%s',len(uniqueTweetsFromDB))
+        uniqueTweetsFromDB.extend(uniqueTweetsFromTwitter)
+        #<place holder remove the matching tweets between uniqueTweetsFromDB and which is again got from server uniqueTweetsFromTwitter
+        allUniqueTweetsIDList = []
+        for ele in uniqueTweetsFromDB:
+            allUniqueTweetsIDList.append(ele['id'])
+        logger.debug('Duplication allUniqueTweetsIDList contains len : %s value :%s',len(allUniqueTweetsIDList),allUniqueTweetsIDList)
+        allUniqueTweetsIDList = set(allUniqueTweetsIDList)
+        logger.debug('unique allUniqueTweetsIDList contains len : %s value :%s',len(allUniqueTweetsIDList), allUniqueTweetsIDList)
+        allUniqueTweets = []
+        for ident in allUniqueTweetsIDList:
+            for ele in uniqueTweetsFromDB:
+                if ele['id'] is ident:
+                    allUniqueTweets.append(ele)
+        logger.debug('allUniqueTweets lenght is %s',allUniqueTweets)
+        similarTweet = self.topicModelLSI(allUniqueTweets)
+
+
+        uniqueTweetsFromTwitter_1 = []
+        for childID,parentID,ratio in zip(similarTweet[0],similarTweet[2],similarTweet[1]):
+            for twit in twits :
+                #similar_id = similar_id1
+                #if twit['id'] not in similar_id:
+                #   similar_id.append(twit['id'])
+                if childID == parentID:
+                    if twit['id'] is parentID:
+                        twit.update({'parentId' : 1})
+                        uniqueTweetsFromTwitter_1.append(twit)
+                        # similar_id1.append(twit['id'])
+
+                # elif childID != parentID and ratio <= 0.999999 and childID not in similar_id1:
+                # elif childID != parentID and ratio <= 0.999999 :
+                    # #similar_id.append(childID)
+                    # #elif cmp(1,float(ratio)) == 1:
+                    # #logger.error('%s != %s & ratio : %s',childID,cmp(float(ratio),1),ratio)
+                    # if twit['id'] is childID:
+                        # tmpDict = {'parentId' : parentID, 'ratio' : float(ratio)}
+                        # twit.update(tmpDict)
+                        # similarTweetsFromTwitter.append(twit)
+ 
+        for ele in uniqueTweetsFromTwitter_1:
+            logger.debug('current tweets : text: %s, ID: %s',ele['text'],ele['id'])
+
+        '''
+        else:
+            #if collection already exists
+            for childID,parentID,ratio in zip(similarTweet[0],similarTweet[2],similarTweet[1]):
+                for twit in twits:
+                    if childID == parentID:
+                        if twit['id'] is parentID:
+                            uniqueTweetsFromTwitter.append(twit)
+
+            uniqueTweetsFromDB = mongoInt.retrieveParentIdTrue(collName)
+            logger.debug('uniqueTweetsFromDB :%s',uniqueTweetsFromDB)
+            topicModelObj = topicModel.topicModel(uniqueTweetsFromDB)
+            dictionary = topicModelObj.createDictionary()
+            corpus = []
+            for vector in topicModelObj:
+                corpus.append(vector)
+            
+            logger.debug('chelloi corpus : %s',corpus)
+
+            similarTweet= topicModelObj.createLSIModel(corpus,uniqueTweetsFromTwitter)
+            logger.debug('chelloi similarTweet : %s',similarTweet)
+            
+            for childID,parentID,ratio in zip(similarTweet[0],similarTweet[2],similarTweet[1]):
+                for twit in twits:
+                    if childID == parentID:
+                        if twit['id'] is parentID:
+                            twit.update({'parentId' : 1})
+                            uniqueTweetsFromTwitter.append(twit)
+                    elif childID != parentID and ratio <= 0.999999:
+                    #elif cmp(1,float(ratio)) == 1:
+                        #logger.error('%s != %s & ratio : %s',childID,cmp(float(ratio),1),ratio)
+                        if twit['id'] is childID:
+                            tmpDict = {'parentId' : parentID, 'ratio' : float(ratio)}
+                            twit.update(tmpDict)
+                            uniqueTweetsFromTwitter.append(twit)
+                            '''
+        logger.info('Before revomal %s twits after similar Topic removal: %s',len(twits),len(uniqueTweetsFromTwitter_1))
+        uniqueTweetsFromTwitter_1.extend(similarTweetsFromTwitter)
+        self.insertFeedData(collName,uniqueTweetsFromTwitter_1)
+        return len(uniqueTweetsFromTwitter) #simple returning the count of unique tweets
+        
     def insertFeedData(self,collName,docs):
         ''' mock for mongo int inserting documents '''
         passCnt = 0
@@ -137,7 +270,7 @@ class intercom:
             passCnt += mongoInt.insertFeedData(collName,docs)
         else:
             logger.debug('docList is empty')
-            if not mongoInt.createCollection(collName):
+            if not mongoInt.createCollectionIfnot(collName):
                 logger.warn('unable to create collection in mongodb')
         return passCnt
 
