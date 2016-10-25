@@ -163,6 +163,8 @@ class mongoInt():
         sql etc while python cleanup. In case if python encounters KILLSIG this
         method gets invoked and gracefully closes the ssh connection'''
         #self.conn.logout()
+
+
     ############################################################################
     #Function Name  :  #
     #Input          :  #
@@ -185,7 +187,7 @@ class mongoInt():
             if WriteResult['updatedExisting']:
                 logger.warn('mongoDB update feed id:%s result#%s',feed['id'],WriteResult)
             else:
-                logger.debug('feed is insterted into mongoDB:%s',feed['id'])
+                logger.debug('feed is insterted into mongoDB1234:%s',feed['id'])
                 updateCnt += updateCnt
         if updateCnt:
             return 1
@@ -210,6 +212,20 @@ class mongoInt():
                 logger.warn('creating collection error %s',e)
             self.createConstraint(self.db[collInt])
             return 1
+
+
+
+    def retrieveTweetsById(self,collName,feedId,count):
+        coll = self.db[collName]
+        cursor = coll.find({"id": { "$lt": int(feedId)}},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+                           'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
+                           'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
+                           'metadata':0},limit=int(count))
+        feeds=map(lambda x:x,cursor)
+        logger.debug('total documents collName = %s retrieved %s',collName,len(feeds))
+        return feeds
+
+
     ############################################################################
     #Function Name  : retrieveCollection #
     #Input          :  #
@@ -242,6 +258,18 @@ class mongoInt():
             logger.warn('collection:%s does not exists',collInt)
             return 0
 
+
+
+    def collectionFeedFrequency(self, count, name):
+
+        '''if 'collectionFeedFrequency' not in self.db.collection_names():
+            self.db.create_collection('collectionFeedFrequency')'''
+        coll=self.db['collectionFeedFrequency']
+        data = {'collectionName':name, 'count':count}
+        #post = {"author": "Mike"}
+        WriteResult =coll.insert_one(data)
+        return 'true'
+
     #returns 0 if collection exits
     def validateToken(self,ID):
         ''' Check if a collection exists in Mongodb DB or not'''
@@ -254,10 +282,31 @@ class mongoInt():
 
     def retrieveSinceID(self,ID):
         ''' Check if a collection exists in Mongodb DB or not'''
-        coll = self.db[self.userCollName]
-        document = coll.find_one({},['id'],sort=[('id',pymongo.DESCENDING)])
-        logger.debug('collection %s contains Max id as %s',ID,document)
-        return document['id']
+        coll = self.db[ID]
+        #document = coll.find_one({},['id'],sort=[('id',pymongo.DESCENDING)])
+        cursor = coll.find().sort([('id',-1)]).limit(1)
+        logger.info('cursor is %s',cursor.explain())
+        feeds=map(lambda x:x,cursor)
+        logger.debug('total sinceid document is %s', len(feeds))
+        if len(feeds):
+            logger.debug('collection %s contains Max id as123 %s',ID,feeds)
+            return feeds[0]['id']
+
+    def updateFeedCategory(self, collId, feedId, category):
+        ''' Check if a collection exists in Mongodb DB or not'''
+        coll = self.db[collId]
+        logger.debug('in mongo init%s%s%s',collId,feedId,category)
+        #WriteResult =coll.update_one({'id':feedId},{'$set':{'id':12345}})
+        WriteResult = coll.update({'id':int(float(feedId))},{'$set':{'category':category}})
+        logger.warn('mongoDB update method result#%s',WriteResult)
+        '''
+
+        if WriteResult['updatedExisting']:
+            
+            return 0
+        else:
+            logger.debug('insert fails')
+            return 1'''
 
     ############################################################################
     #Function Name  : retrieveCollection #
@@ -311,3 +360,10 @@ class mongoInt():
         else:
             logger.debug('twitter token succesfuly insereted')
             return 1
+
+    def fetchAllCollections(self):
+        ''' Check if a collection exists in Mongodb DB or not . if exists return the total doc count'''
+        collnames = self.db.collection_names()
+        '''totalDocs=self.db[collInt].count()
+        logger.debug('collection:%s total doc:%s already exists',collInt,totalDocs)'''
+        return collnames

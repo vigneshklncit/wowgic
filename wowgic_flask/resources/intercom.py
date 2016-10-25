@@ -110,48 +110,69 @@ class intercom:
         #once the nodes are created lets fetch the feeds
         return 1
 
-    def topicModelLSI(self,twits):
+    def topicModelLSI(self,twits, keyword):
         '''
         irrespc of collection fetch the pratenId=1 tweets and merge them together with the curreent tweets from twitter AJX call
         then run topic modeling 
         '''
         topicModelObj = topicModel.topicModel(twits)
-        dictionary = topicModelObj.createDictionary()
+        dictionary = topicModelObj.createDictionary(keyword)
         corpus = []
         for vector in topicModelObj:
             corpus.append(vector)
         #print(corpus)
-        return topicModelObj.createLSIModel(corpus)
+        return topicModelObj.createLSIModel(corpus,'',keyword)
+
+    def posAnalysis(self, twits):
+        topicModelObj = topicModel.topicModel(twits)
+        topicModelObj.tryPos()
+
+    def updateFeedCategory(self, collId, feedId, category):
+        logger.debug('in update feed category1')
+        collection = mongoInt.updateFeedCategory(collId, feedId, category)
+        return 1
+
+    def fetchAllCollections(self):
+        allCollection = mongoInt.fetchAllCollections()
+        return allCollection
 
     def retrieveTweets(self,ID,Q,geoCode):
         '''retrieveTweets from twitter and store the feeds into MongoDB
         '''
+        since_id = mongoInt.retrieveSinceID(ID)
+        #since_id = long(785438635369738240)
         logger.debug('retrieve tweets')
+        logger.debug(since_id)
+        logger.debug('retrieve tweets123456')
         #fetch the latest since_id and pass it in next twitter call
         #since_id = mongoInt.retrieveSinceID(ID)
-        twits = twitterInt.retrieveTweets(Q,geoCode)
+        twits = twitterInt.retrieveTweets(Q,geoCode, since_id)
+        
+        mongoInt.collectionFeedFrequency(len(twits), ID)
+        
         #map(lambda tw:tw.update({'created_time': timegm(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         map(lambda tw:tw.update({'created_time': timegm(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
         
         #callinf directly instead of wrapper change it later
         #pass only twitter text & ID only here
         logger.info('tweets fetched are %s',twits)
-        similarTweet = self.topicModelLSI(twits) # new feeds from service
+        #similarTweet = self.topicModelLSI(twits, Q) # new feeds from service
+        similarTweet = self.posAnalysis(twits)
         #topicModelObj.close()
         #map(lambda tw:tw.update({'created_time': int(time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         #map(lambda tw:tw.update({'created_time': int(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
         #if geoCode:
         #    twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
-        logger.debug('storing tweets of twitter of both location based on keyword mongoDb')
+        #logger.debug('storing tweets of twitter of both location based on keyword mongoDb')
         #twits=sparkInt.wowFieldTrueOrFalse(twits)
-        self.similarTopicRemoval(ID,similarTweet,twits)
+        #self.similarTopicRemoval(ID,similarTweet,twits, Q)
         #self.insertFeedData(ID,twits)
         #page_sanitized = json_util.dumps(twits)
         # below returning to be removed has to be done from mongoDB only
         return len(twits)
 
-    def similarTopicRemoval(self,collName,similarTweet,twits):
+    def similarTopicRemoval(self,collName,similarTweet,twits, Q):
         ''' if childId = parentId update mongoDB parentId = true
             else parent id != child ID & ratio != 1.0 update mongodb parentId = parent id, ratio = ratio 
             analysis
@@ -194,7 +215,7 @@ class intercom:
                 if ele['id'] is ident:
                     allUniqueTweets.append(ele)
         logger.debug('allUniqueTweets lenght is %s',allUniqueTweets)
-        similarTweet = self.topicModelLSI(allUniqueTweets)
+        similarTweet = self.topicModelLSI(allUniqueTweets, Q)
 
 
         uniqueTweetsFromTwitter_1 = []
@@ -454,6 +475,14 @@ class intercom:
         ''' just return the password token stored in mongoDB
         '''
         return neo4jInt.getAllInterestNode(graphDB)
+
+
+    def retrieveTweetsById(self,ID,feedId,count):
+        tweets=[]
+        if int(feedId) == 0: 
+            feedId = mongoInt.retrieveSinceID(ID)
+        tweets.extend(mongoInt.retrieveTweetsById(ID,feedId,count))
+        return tweets
 
     def retrieveCollection(self,ID,lastTimeStamp,count):
         ''' for displayFeeds debugging stuff

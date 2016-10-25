@@ -112,7 +112,7 @@ class twitterInt:
         logger.debug("location feed geocode:%s from twitter is %s",geoCode,len(feeds))
         return feeds
 
-    def retrieveTweets(self,Q,geoCode):
+    def retrieveTweets(self,Q,geoCode, since_id):
         '''returns an empty list in case of failure. If length of returned list is
         zero thn something has went wrong
         '''
@@ -129,7 +129,7 @@ class twitterInt:
         #        return feeds
         if Q is not None:
             #tweepy set count to largets number
-            tweets = tweepy.Cursor(api.search, q=Q).items(globalS.dictDb['MAX_TWEETS'])
+            tweets = tweepy.Cursor(api.search, q=Q, since_id=since_id).items(100)
         elif geoCode :
             geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
             tweets = tweepy.Cursor(api.search,q='',geocode=geoCode).items(globalS.dictDb['MAX_TWEETS'])
@@ -150,5 +150,5 @@ class twitterInt:
         #Thz functionality should be moved to intercom.py
         #map(lambda tw:tw.update({'created_at': 'satheesh'}),feeds)
         #map(lambda tw:tw.update({'created_at': datetime.datetime.strptime(tw['created_at'], '%a %b %d %H:%M:%S +0000 %Y')}),feeds)
-        logger.debug('total tweets retrieved for keyword:%s is %s',Q,len(feeds))
+        logger.debug('total tweets retrieved for keyword12345678:%s is %s',Q,len(feeds))
         return feeds

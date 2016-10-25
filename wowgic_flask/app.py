@@ -363,6 +363,28 @@ def FBTesting():
     ID = intercom.FBLoginData(jsonFBInput)
     return json.dumps({'Authorization':serialized,'password':password, 'text':'wowgic Login Authorized'})
 
+@app.route('/fetchSingleNode',methods=['GET'])
+def fetchSingleNode():
+    geoDict = {}
+    collName = '112621745415708'
+    Q ='Chennai'
+    length = intercom.retrieveTweets(collName,Q,geoDict)
+    return 'length'
+
+@app.route('/setFeedCategory',methods=['GET'])
+def setFeedCategory():
+    collId = request.args.get('collId')
+    feedId = request.args.get('feedId')
+    category = request.args.get('category')
+    result = intercom.updateFeedCategory(collId, feedId,category)
+    return 'true'
+
+@app.route('/getAllCollections',methods=['GET'])
+def getAllCollections():
+    allColl = intercom.fetchAllCollections()
+    print('allcoll ',allColl)
+    return json.dumps(allColl)
+
 @app.route('/FBLogin',methods=['POST'])
 def FBLogin():
     data = request.data
@@ -386,20 +408,17 @@ def displayFeeds():
     #intercom.retrieveTwitterAccessTokens()
     collId = request.args.get('collId')
     count = request.args.get('count')
-    lastTimeStamp = request.args.get('lastTimeStamp')
-    if collId is None and count is None:
-        return 'collection id or count is missing',400
-    elif lastTimeStamp is None:
-        lastTimeStamp = timegm(time.gmtime())#epoch time minus 1 day
-        #lastTimeStamp = 999999#epoch time minus 1 day
-        #lastTimeStamp = 1451606400
-    logger.info('collId requested is:%s & lasttimeStamp:%s count is %s',collId,lastTimeStamp,count)
+    feedId = request.args.get('feedId')
+
+    logger.info('collId requested is:%s & feedid:%s count is %s',collId,feedId,count)
     feedList = []
-    feedList.extend(intercom.retrieveCollection(collId,lastTimeStamp,count))
+    feedList.extend(intercom.retrieveTweetsById(collId,feedId,count))
     return json.dumps(feedList)
 
 #if globalS.dictDb['APP_DEBUG']:
 #    app.debug = True
 
 if __name__ == '__main__':
+    
+    #app.run(host='0.0.0.0')
     app.run(host=globalS.dictDb['IP'],port=int(app.config.get('APP_PORT')))
