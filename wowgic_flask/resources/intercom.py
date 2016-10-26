@@ -100,7 +100,7 @@ class intercom:
                 #add IF check whther interest is part of data provided
                 neo4jInt.createInterestNode(graphDB,decodedFBJson,intr)
                 #creating mongoDb interest nodes with ID as thy are unique
-                if not mongoInt.createCollection(decodedFBJson['id']):
+                if not mongoInt.createCollectionIfnot(decodedFBJson['id']):
                     logger.warn('unable to create collection in mongodb')
             else:
                 logger.debug('user key doesnot exists')
