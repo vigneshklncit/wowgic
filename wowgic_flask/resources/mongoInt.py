@@ -12,7 +12,7 @@ sys.path.append('common')
 import loggerRecord,globalS
 logger =  loggerRecord.get_logger()
 import pymongo
-
+import re
 
 class mongoInt():
     ''' mongoDB is our priliminary interface which will store users facebook, Instagram,
@@ -215,9 +215,14 @@ class mongoInt():
 
 
 
-    def retrieveTweetsById(self,collName,feedId,count):
+    def retrieveTweetsById(self,collName,feedId,count, fromSinceId):
         coll = self.db[collName]
-        cursor = coll.find({"id": { "$lt": int(feedId)}},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+        logger.debug('parameters are  = %s %s %s',collName,feedId,count)
+        if fromSinceId:
+            cond = "$lte"
+        else:
+            cond = "$lt"
+        cursor = coll.find({ "$and":[{"id": { cond: int(feedId)}},{'category':{'$exists':False}}]},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
                            'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
                            'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                            'metadata':0},limit=int(count))
@@ -291,6 +296,8 @@ class mongoInt():
         if len(feeds):
             logger.debug('collection %s contains Max id as123 %s',ID,feeds)
             return feeds[0]['id']
+        else:
+            return 0
 
     def updateFeedCategory(self, collId, feedId, category):
         ''' Check if a collection exists in Mongodb DB or not'''
@@ -362,8 +369,15 @@ class mongoInt():
             return 1
 
     def fetchAllCollections(self):
+        allCollectionArray = []
         ''' Check if a collection exists in Mongodb DB or not . if exists return the total doc count'''
         collnames = self.db.collection_names()
+        for collection in collnames:
+            p = re.compile('^-?[0-9]+$')
+            m = p.match(collection)
+            if m:
+                allCollectionArray.append({'name':collection, 'count':self.db[collection].count({'category':{'$exists':False}}) })
+
         '''totalDocs=self.db[collInt].count()
         logger.debug('collection:%s total doc:%s already exists',collInt,totalDocs)'''
-        return collnames
+        return allCollectionArray

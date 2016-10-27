@@ -479,10 +479,15 @@ class intercom:
 
     def retrieveTweetsById(self,ID,feedId,count):
         tweets=[]
+        fromSinceId = False
         if int(feedId) == 0: 
             feedId = mongoInt.retrieveSinceID(ID)
-        tweets.extend(mongoInt.retrieveTweetsById(ID,feedId,count))
-        return tweets
+            fromSinceId = True
+        if feedId == 0:
+            return tweets
+        else:
+            tweets.extend(mongoInt.retrieveTweetsById(ID,feedId,count, fromSinceId))
+            return tweets
 
     def retrieveCollection(self,ID,lastTimeStamp,count):
         ''' for displayFeeds debugging stuff
