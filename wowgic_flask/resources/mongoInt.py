@@ -223,7 +223,7 @@ class mongoInt():
         else:
             cond = "$lt"
         cursor = coll.find({ "$and":[{"id": { cond: int(feedId)}},{'category':{'$exists':False}}]},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
-                           'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
+                           'in_reply_to_status_id':0,'favorited':0,'is_quote_status':0,
                            'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                            'metadata':0},limit=int(count))
         feeds=map(lambda x:x,cursor)
@@ -304,7 +304,7 @@ class mongoInt():
         coll = self.db[collId]
         logger.debug('in mongo init%s%s%s',collId,feedId,category)
         #WriteResult =coll.update_one({'id':feedId},{'$set':{'id':12345}})
-        WriteResult = coll.update({'id':int(float(feedId))},{'$set':{'category':category}})
+        WriteResult = coll.update({'id':int(feedId)},{'$set':{'category':category}})
         logger.warn('mongoDB update method result#%s',WriteResult)
         '''
 

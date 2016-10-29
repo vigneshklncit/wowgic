@@ -161,7 +161,7 @@ class topicModel:
                         #logger.debug(list(enumerate(sims))) # logger.debug (document_number, document_similarity) 2-tuples
                         sims = sorted(enumerate(sims), key=lambda item: -item[1])
                         #logger.debug(sims)
-                        '''
+                     
                         logger.debug('\n\n\n\n----------------Start title------------')
                         logger.debug(tweet['text'])
                         logger.debug('----------titlke End ---------')
@@ -178,7 +178,7 @@ class topicModel:
                                     logger.debug(sim[1])
                                     logger.debug(self.feeds[indexKey]['id'])
                                     logger.debug(self.feeds[indexKey].get('text'))
-                                    logger.debug('=========')'''
+                                    logger.debug('=========')
         '''
         logger.debug('totoal no tweets: %s, Total no of parent tweets: %s, Total no of child tweets: %s',len(self.feeds), ogTweets,len(similarTweet_Id))
         logger.debug('length of id : %s, ratio : %s, parentId : %s', len(similarTweet_Id),len(similarTweet_Ratio),len(similarTweetId_parentId))'''

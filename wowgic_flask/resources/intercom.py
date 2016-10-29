@@ -156,8 +156,9 @@ class intercom:
         #callinf directly instead of wrapper change it later
         #pass only twitter text & ID only here
         logger.info('tweets fetched are %s',twits)
-        #similarTweet = self.topicModelLSI(twits, Q) # new feeds from service
-        similarTweet = self.posAnalysis(twits)
+        similarTweet = self.topicModelLSI(twits, Q) # new feeds from service
+        self.similarTopicRemoval(ID,similarTweet,twits, Q)
+        #similarTweet = self.posAnalysis(twits)
         #topicModelObj.close()
         #map(lambda tw:tw.update({'created_time': int(time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         #map(lambda tw:tw.update({'created_time': int(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
