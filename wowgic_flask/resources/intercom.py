@@ -25,8 +25,6 @@ import topicModel
 import facebookInt
 import loggerRecord
 import random
-import sentiment_mod as s
-import wowgicClassifier
 from calendar import timegm
 #import sparkInt
 logger =  loggerRecord.get_logger()
