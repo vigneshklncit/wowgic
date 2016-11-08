@@ -15,13 +15,13 @@ class wowgicNaiveBayes:
     def __init__(self, feeds):
         self.feeds = feeds
         self.all_words = []
-        self.documents = {}
+        self.documents = []
 
 
-    def find_features(document):
+    def find_features(self, document):
         words = word_tokenize(document)
         features = {}
-        for w in word_features:
+        for w in self.word_features:
             features[w] = (w in words)
         print('inside find features',features[w])
         return features
@@ -33,21 +33,21 @@ class wowgicNaiveBayes:
                 sent=' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)"," ",sent).split())
                 sent = sent.replace("RT", "", 1)
                 category = tweet['category']
-                self.documents.append(sent, category)
+                self.documents.append((sent, category))
                 words = word_tokenize(sent)
                 for w in words:
-                    all_words.append(w)
+                    self.all_words.append(w)
 
         save_documents = open("pickled_algos/documents.pickle","wb")
-        pickle.dump(documents, save_documents)
+        pickle.dump(self.documents, save_documents)
         save_documents.close()
-        all_words = nltk.FreqDist(all_words)
-        word_features = list(all_words.keys())[:5000]
+        self.all_words = nltk.FreqDist(self.all_words)
+        self.word_features = list(self.all_words.keys())[:5000]
         save_word_features = open("pickled_algos/word_features5k.pickle","wb")
-        pickle.dump(word_features, save_word_features)
+        pickle.dump(self.word_features, save_word_features)
         save_word_features.close()
 
-        featuresets = [(find_features(rev), category) for (rev, category) in documents]
+        featuresets = [(self.find_features(rev), category) for (rev, category) in self.documents]
         
         random.shuffle(featuresets)
         save_feature_sets = open("pickled_algos/featuresets.pickle","wb")
