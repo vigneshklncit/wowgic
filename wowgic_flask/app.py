@@ -385,6 +385,14 @@ def getAllCollections():
     print('allcoll ',allColl)
     return json.dumps(allColl)
 
+@app.route('/triggernb',methods=['GET'])
+def triggernb():
+    collName = '112621745415708'
+    result = intercom.performnb(collName)
+    return json.dumps(result)
+
+
+
 @app.route('/FBLogin',methods=['POST'])
 def FBLogin():
     data = request.data

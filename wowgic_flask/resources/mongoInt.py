@@ -264,6 +264,12 @@ class mongoInt():
             return 0
 
 
+    def fetchCategoryFeeds(self, id):
+        coll=self.db[id]
+        cursor = coll.find({'category':{'$exists':True}})
+        feeds=map(lambda x:x,cursor)
+        return feeds
+
 
     def collectionFeedFrequency(self, count, name):
 

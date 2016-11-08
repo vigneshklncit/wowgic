@@ -25,6 +25,8 @@ import topicModel
 import facebookInt
 import loggerRecord
 import random
+import sentiment_mod as s
+import wowgicClassifier
 from calendar import timegm
 #import sparkInt
 logger =  loggerRecord.get_logger()
@@ -68,6 +70,15 @@ class intercom:
         #mconnect = mongoInt.connect()
         #sparkInt.connect()
         #authenticate twitter app
+
+    def performnb(self, id):
+        logger.debug('inside performnb %s',id)
+        result = mongoInt.fetchCategoryFeeds(id)
+        logger.debug('result %s',result)
+        wowgicNaiveBayesObj = wowgicClassifier.wowgicNaiveBayes(result)
+        wowgicNaiveBayesObj.createClassifiers()
+        return len(result)
+
 
     def createUserNode(self,decodedFBJson):
         '''
