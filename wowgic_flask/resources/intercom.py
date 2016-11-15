@@ -25,12 +25,10 @@ import topicModel
 import facebookInt
 import loggerRecord
 import random
-#import sentiment_mod as s
-#import wowgicClassifier
+import wowgicClassifier
 from calendar import timegm
 #import sparkInt
 logger =  loggerRecord.get_logger()
-
 facebookInt = facebookInt.facebookInt()
 neo4jInt = neo4jInterface.neo4jInterface()
 graphDB=neo4jInt.connect()
@@ -131,8 +129,10 @@ class intercom:
         corpus = []
         for vector in topicModelObj:
             corpus.append(vector)
-        #print(corpus)
-        return topicModelObj.createLSIModel(corpus,'',keyword)
+        if len(corpus):
+            return topicModelObj.createLSIModel(corpus,'',keyword)
+        else:
+            return 0
 
     def posAnalysis(self, twits):
         topicModelObj = topicModel.topicModel(twits)
@@ -159,30 +159,41 @@ class intercom:
         #since_id = mongoInt.retrieveSinceID(ID)
         twits = twitterInt.retrieveTweets(Q,geoCode, since_id)
         
-        mongoInt.collectionFeedFrequency(len(twits), ID)
+        #mongoInt.collectionFeedFrequency(len(twits), ID)
         
         #map(lambda tw:tw.update({'created_time': timegm(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         map(lambda tw:tw.update({'created_time': timegm(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
         
         #callinf directly instead of wrapper change it later
         #pass only twitter text & ID only here
-        logger.info('tweets fetched are %s',twits)
-        similarTweet = self.topicModelLSI(twits, Q) # new feeds from service
-        self.similarTopicRemoval(ID,similarTweet,twits, Q)
-        #similarTweet = self.posAnalysis(twits)
-        #topicModelObj.close()
-        #map(lambda tw:tw.update({'created_time': int(time.mktime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
-        #map(lambda tw:tw.update({'created_time': int(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
-        #twits = twitterInt.retrieveTweetsBasedHashtag(Q)
-        #if geoCode:
-        #    twits.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
-        #logger.debug('storing tweets of twitter of both location based on keyword mongoDb')
-        #twits=sparkInt.wowFieldTrueOrFalse(twits)
-        #self.similarTopicRemoval(ID,similarTweet,twits, Q)
-        #self.insertFeedData(ID,twits)
-        #page_sanitized = json_util.dumps(twits)
-        # below returning to be removed has to be done from mongoDB only
+        logger.info('tweets fetched are chellaaa %s',twits)
+        if(len(twits)):
+            uniqueTweetsFromDB = mongoInt.retrieveParentIdTrue(ID)
+            logger.debug('existing uniqueTweetsFromDB :%s',len(uniqueTweetsFromDB))
+            twits.extend(uniqueTweetsFromDB)
+            similarTweet = self.topicModelLSI(twits, Q) # new feeds from service
+            if similarTweet != 0:
+                logger.debug('similar tweets new %s',similarTweet[1])
+                self.updateRatio(ID,similarTweet,twits, Q)
         return len(twits)
+
+    def updateRatio(self,collName,similarTweet,twits, Q):
+        parentIds = similarTweet[0]
+        childIds =  similarTweet[1]
+        uniqueTweets=[]
+        for parentId in parentIds:
+            for twit in twits:
+                if twit['id'] is parentId:
+                    twit.update({'parentId' : 1})
+                    uniqueTweets.append(twit)
+
+        for childId in childIds:
+            for twit in twits:
+                if twit['id'] is childId['id']:
+                    twit.update({'parentId' : childId['parent'], 'ratio': float(childId['ratio'])})
+                    uniqueTweets.append(twit)
+        self.insertFeedData(collName,uniqueTweets)
+        return 0
 
     def similarTopicRemoval(self,collName,similarTweet,twits, Q):
         ''' if childId = parentId update mongoDB parentId = true
