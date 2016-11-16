@@ -26,6 +26,7 @@ import facebookInt
 import loggerRecord
 import random
 import wowgicClassifier
+import sentiment_final
 from calendar import timegm
 #import sparkInt
 logger =  loggerRecord.get_logger()
@@ -76,6 +77,15 @@ class intercom:
         wowgicNaiveBayesObj = wowgicClassifier.wowgicNaiveBayes(result)
         wowgicNaiveBayesObj.createClassifiers()
         return len(result)
+
+    def runClassifier(self, id):
+        result = mongoInt.fetchWithoutCategoryFeeds(id)
+        logger.debug('result %s',result)
+        wowgicRunClassifierObj = sentiment_final.wowgicRunClassifier(result)
+        withCategory = wowgicRunClassifierObj.runClassifier()
+        collection = mongoInt.updateNBFeedCategory(id, withCategory)
+        return withCategory
+
 
 
     def createUserNode(self,decodedFBJson):

@@ -1,5 +1,18 @@
 import sentiment_mod as s
 
-print(s.sentiment("#s33millionviews is now trending in #chennai"))
-print(s.sentiment("#xxxdeepikatrailer is now trending in #Chennai https://t.co/E9nWJ0VKV5"))
-print(s.sentiment("Just 500 mts of something needs to be completed and chennai will have an integrated train system from Mount Railway station"))
+class wowgicRunClassifier:
+    def __init__(self, feeds):
+        self.feeds = feeds
+
+    def runClassifier(self):
+    	result =[]
+    	for tweet in self.feeds:
+            if 'text' in tweet:
+            	obj = {}
+            	sent = tweet['text']
+            	print(sent)
+            	print(s.sentiment(sent))
+            	obj['id'] = tweet['id']
+            	obj['category'] = s.sentiment(sent)[0]
+            result.append(obj)
+        return result

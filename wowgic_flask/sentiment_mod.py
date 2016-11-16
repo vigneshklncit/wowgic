@@ -7,7 +7,7 @@ from sklearn.naive_bayes import MultinomialNB, BernoulliNB
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.svm import SVC, LinearSVC, NuSVC
 from nltk.classify import ClassifierI
-from statistics import mode
+from statistics import mode, StatisticsError
 from nltk.tokenize import word_tokenize
 
 
@@ -21,17 +21,23 @@ class VoteClassifier(ClassifierI):
         for c in self._classifiers:
             v = c.classify(features)
             votes.append(v)
-        return mode(votes)
+        print(votes)
+        try:
+            return mode(votes)
+        except StatisticsError:
+            return 'NA' 
 
     def confidence(self, features):
         votes = []
         for c in self._classifiers:
             v = c.classify(features)
             votes.append(v)
-
-        choice_votes = votes.count(mode(votes))
-        conf = choice_votes / len(votes)
-        return conf
+        try:
+            choice_votes = votes.count(mode(votes))
+            conf = choice_votes / len(votes)
+            return conf
+        except StatisticsError:
+            return 'NA' 
 
 
 documents_f = open("pickled_algos/documents.pickle", "rb")

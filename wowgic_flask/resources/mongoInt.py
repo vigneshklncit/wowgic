@@ -222,7 +222,7 @@ class mongoInt():
             cond = "$lte"
         else:
             cond = "$lt"
-        cursor = coll.find({ "$and":[{"id": { cond: int(feedId)}},{'category':{'$exists':False}}]},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+        cursor = coll.find({ "$and":[{"id": { cond: int(feedId)}},{'category':{'$exists':False}},{'parentId':1}]},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
                            'in_reply_to_status_id':0,'favorited':0,'is_quote_status':0,
                            'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                            'metadata':0},limit=int(count))
@@ -266,7 +266,13 @@ class mongoInt():
 
     def fetchCategoryFeeds(self, id):
         coll=self.db[id]
-        cursor = coll.find({'category':{'$exists':True}})
+        cursor = coll.find({"$and":[{'category':{'$exists':True}},{'autoAssign':{'$exists':False}}]})
+        feeds=map(lambda x:x,cursor)
+        return feeds
+
+    def fetchWithoutCategoryFeeds(self, id):
+        coll=self.db[id]
+        cursor = coll.find({"$and":[{'category':{'$exists':False}},{'autoAssign':{'$exists':False}}]})
         feeds=map(lambda x:x,cursor)
         return feeds
 
@@ -305,13 +311,15 @@ class mongoInt():
         else:
             return 0
 
-    def updateFeedCategory(self, collId, feedId, category):
+    def updateNBFeedCategory(self, collName, withCategory):
         ''' Check if a collection exists in Mongodb DB or not'''
-        coll = self.db[collId]
-        logger.debug('in mongo init%s%s%s',collId,feedId,category)
+        coll = self.db[collName]
+        logger.debug('in mongo init%s%',collName)
         #WriteResult =coll.update_one({'id':feedId},{'$set':{'id':12345}})
-        WriteResult = coll.update({'id':int(feedId)},{'$set':{'category':category}})
-        logger.warn('mongoDB update method result#%s',WriteResult)
+        for feed in withCategory:
+            WriteResult = coll.update({'id':int(feed['id'])},{'$set':{'category':feed['category'],'autoAssign':1}})
+            logger.warn('mongoDB update method result#%s',WriteResult)
+        return 'done'
         '''
 
         if WriteResult['updatedExisting']:

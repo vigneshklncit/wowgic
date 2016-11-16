@@ -366,8 +366,8 @@ def FBTesting():
 @app.route('/fetchSingleNode',methods=['GET'])
 def fetchSingleNode():
     geoDict = {}
-    collName = '112621745415708'
-    Q ='Chennai'
+    collName = '300300'
+    Q ='dhoni'
     length = intercom.retrieveTweets(collName,Q,geoDict)
     return 'length'
 
@@ -389,6 +389,12 @@ def getAllCollections():
 def triggernb():
     collName = '112621745415708'
     result = intercom.performnb(collName)
+    return json.dumps(result)
+
+@app.route('/runClassifier',methods=['GET'])
+def runClassifier():
+    collName = '112621745415708'
+    result = intercom.runClassifier(collName)
     return json.dumps(result)
 
 
