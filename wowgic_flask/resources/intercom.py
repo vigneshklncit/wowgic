@@ -70,21 +70,32 @@ class intercom:
         #sparkInt.connect()
         #authenticate twitter app
 
+    def unSetNB(self, id):
+        result = mongoInt.unSetNB(id)
+        return result
+
     def performnb(self, id):
         logger.debug('inside performnb %s',id)
         result = mongoInt.fetchCategoryFeeds(id)
-        logger.debug('result %s',result)
-        wowgicNaiveBayesObj = wowgicClassifier.wowgicNaiveBayes(result)
-        wowgicNaiveBayesObj.createClassifiers()
-        return len(result)
+        logger.debug('result123 %s',result)
+        if len(result) > 0:
+            wowgicNaiveBayesObj = wowgicClassifier.wowgicNaiveBayes(result)
+            wowgicNaiveBayesObj.createClassifiers()
+            return len(result)
+        else:
+            return 'no record to process'
 
     def runClassifier(self, id):
         result = mongoInt.fetchWithoutCategoryFeeds(id)
         logger.debug('result %s',result)
-        wowgicRunClassifierObj = sentiment_final.wowgicRunClassifier(result)
-        withCategory = wowgicRunClassifierObj.runClassifier()
-        collection = mongoInt.updateNBFeedCategory(id, withCategory)
-        return withCategory
+        if len(result) > 0:
+            logger.debug('data found %s',result)
+            wowgicRunClassifierObj = sentiment_final.wowgicRunClassifier(result)
+            withCategory = wowgicRunClassifierObj.runClassifier()
+            collection = mongoInt.updateNBFeedCategory(id, withCategory)
+            return withCategory
+        else:
+            return 'no data found'
 
 
 

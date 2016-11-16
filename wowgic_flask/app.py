@@ -391,6 +391,12 @@ def triggernb():
     result = intercom.performnb(collName)
     return json.dumps(result)
 
+@app.route('/unSetNB',methods=['GET'])
+def unSetNB():
+    collName = '112621745415708'
+    result = intercom.unSetNB(collName)
+    return json.dumps(result)
+
 @app.route('/runClassifier',methods=['GET'])
 def runClassifier():
     collName = '112621745415708'

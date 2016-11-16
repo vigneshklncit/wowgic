@@ -263,10 +263,15 @@ class mongoInt():
             logger.warn('collection:%s does not exists',collInt)
             return 0
 
+    def unSetNB(self, id):
+        coll=self.db[id]
+        WriteResult = coll.update({'autoAssign':1},{'$unset':{'category':'','autoAssign':''}},multi= True)
+        logger.warn('mongoDB update method result#%s',WriteResult)
+        return 'true'
 
     def fetchCategoryFeeds(self, id):
         coll=self.db[id]
-        cursor = coll.find({"$and":[{'category':{'$exists':True}},{'autoAssign':{'$exists':False}}]})
+        cursor = coll.find({"$and":[{'category':{'$exists':True}},{'autoAssign':0}]})
         feeds=map(lambda x:x,cursor)
         return feeds
 
@@ -310,6 +315,11 @@ class mongoInt():
             return feeds[0]['id']
         else:
             return 0
+
+    def updateFeedCategory(self, collName, feedId, category):
+        coll = self.db[collName]
+        WriteResult = coll.update({'id':int(feedId)},{'$set':{'category':category,'autoAssign':0}})
+        return 'done'
 
     def updateNBFeedCategory(self, collName, withCategory):
         ''' Check if a collection exists in Mongodb DB or not'''
