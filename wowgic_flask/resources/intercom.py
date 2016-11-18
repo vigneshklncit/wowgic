@@ -180,7 +180,7 @@ class intercom:
         #since_id = mongoInt.retrieveSinceID(ID)
         twits = twitterInt.retrieveTweets(Q,geoCode, since_id)
         
-        #mongoInt.collectionFeedFrequency(len(twits), ID)
+        mongoInt.collectionFeedFrequency(len(twits), ID)
         
         #map(lambda tw:tw.update({'created_time': timegm(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         map(lambda tw:tw.update({'created_time': timegm(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)

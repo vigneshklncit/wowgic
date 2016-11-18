@@ -119,7 +119,7 @@ class topicModel:
         ''' actually convert tokenized documents to vectors
         '''
         #corpus = [self.dictionary.doc2bow(text) for text in self.sentList]
-        lsi = models.LsiModel(corpus, id2word=self.dictionary,num_topics= 4)
+        lsi = models.LsiModel(corpus, id2word=self.dictionary,num_topics= 30)
         index = similarities.MatrixSimilarity(lsi[corpus])
         #initialising an array which store the similarity tweets
         similarTweet_Id = []
