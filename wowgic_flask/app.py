@@ -366,8 +366,8 @@ def FBTesting():
 @app.route('/fetchSingleNode',methods=['GET'])
 def fetchSingleNode():
     geoDict = {}
-    collName = '300300'
-    Q ='dhoni'
+    collName = '112621745415708'
+    Q ='chennai'
     length = intercom.retrieveTweets(collName,Q,geoDict)
     return 'length'
 

@@ -187,16 +187,18 @@ class intercom:
         
         #callinf directly instead of wrapper change it later
         #pass only twitter text & ID only here
-        logger.info('tweets fetched are chellaaa %s',twits)
+        logger.info('tweets fetched are chellaaa %s',len(twits))
         if(len(twits)):
             uniqueTweetsFromDB = mongoInt.retrieveParentIdTrue(ID)
             logger.debug('existing uniqueTweetsFromDB :%s',len(uniqueTweetsFromDB))
-            twits.extend(uniqueTweetsFromDB)
-            similarTweet = self.topicModelLSI(twits, Q) # new feeds from service
+            #twits.extend(uniqueTweetsFromDB)
+            uniqueTweetsFromDB.extend(twits)
+            logger.debug('total combined tweets :%s',len(uniqueTweetsFromDB))
+            similarTweet = self.topicModelLSI(uniqueTweetsFromDB, Q) # new feeds from service
             if similarTweet != 0:
-                logger.debug('similar tweets new %s',similarTweet[1])
-                self.updateRatio(ID,similarTweet,twits, Q)
-        return len(twits)
+                self.updateRatio(ID,similarTweet,uniqueTweetsFromDB, Q)
+            return len(uniqueTweetsFromDB)
+
 
     def updateRatio(self,collName,similarTweet,twits, Q):
         parentIds = similarTweet[0]
