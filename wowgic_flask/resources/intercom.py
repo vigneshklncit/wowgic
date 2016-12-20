@@ -181,10 +181,20 @@ class intercom:
         twits = twitterInt.retrieveTweets(Q,geoCode, since_id)
         
         mongoInt.collectionFeedFrequency(len(twits), ID)
+        def removeRetweets(tweet):
+            if 'retweeted_status' in tweet:
+                tweet = tweet['retweeted_status']
+                tweet['alreadyRetweeted'] = True
+                print tweet['text']
+                #json_obj = json.dumps(obj)
+            return tweet
+
         
         #map(lambda tw:tw.update({'created_time': timegm(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
+        value = map(removeRetweets, twits)
+        print(value)
+        twits = value
         map(lambda tw:tw.update({'created_time': timegm(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
-        
         #callinf directly instead of wrapper change it later
         #pass only twitter text & ID only here
         logger.info('tweets fetched are chellaaa %s',len(twits))

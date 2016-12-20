@@ -59,7 +59,6 @@ class topicModel:
         filtered_sentence1=[]
         word_tokens = nltk.word_tokenize(sent)
         pos_tag = nltk.pos_tag(word_tokens)
-        logger.debug(pos_tag)
         for w in word_tokens:
             if w not in stop_words:
                 lemWord = lemmatizer.lemmatize(w)
@@ -161,7 +160,15 @@ class topicModel:
                         logger.debug('\n\n\n\n----------------Start title------------')
                         logger.debug(tweet['text'])
                         logger.debug('id:%s',tweet['id'])
-                        logger.debug('similar tweet id %s ', similarTweet_Id)
+                        word_tokens = nltk.word_tokenize(sentence)
+                        pos_tag = nltk.pos_tag(word_tokens)
+                        print(pos_tag)
+                        allowed_word_types = ["NNP","NNS","CD"]
+                        filtered_sentence1 = []
+                        for w in pos_tag:
+                            if w[1] in allowed_word_types:
+                                filtered_sentence1.append(w[0].lower())
+                        print("#####",filtered_sentence1,"#####")
                         logger.debug('----------titlke End ---------')
                         parentId.append(tweet['id'])
                         for sim in sims:
@@ -174,9 +181,6 @@ class topicModel:
                                         childDict['parent'] = tweet['id']
                                         childDict['ratio'] = sim[1]
                                         childId.append(childDict)
-                                    logger.debug('parentId %s ', parentId)
-                                    logger.debug('childId %s ',childId)
-
                                     
                                     logger.debug('******** sims[0]%s',sim[0])
                                     logger.debug(sim[1])
