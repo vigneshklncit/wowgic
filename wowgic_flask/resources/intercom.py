@@ -505,7 +505,7 @@ class intercom:
         & instagram datas are retrieved'''
         passCnt = 0
         feedList=[]
-        feedList.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
+        #feedList.extend(twitterInt.retrieveTweetBasedLocation(geoCode))
         #do a reverse geocoding and hit with feeds
         feedList.extend(instagramInt.getLocationSearch(geoCode))
         #passCnt += mongoInt.insertInstagramUserLoginData(user)
