@@ -109,7 +109,7 @@ class intercom:
             logger.debug(fileVar) 
             #fileVar.close()
                 
-        return 1
+        return 12
         
         if len(result) > 0:
             wowgicNaiveBayesObj = wowgicClassifier.wowgicNaiveBayes(result)
