@@ -28,6 +28,8 @@ import random
 import wowgicClassifier
 import sentiment_final
 from calendar import timegm
+import os
+import mmap
 #import sparkInt
 logger =  loggerRecord.get_logger()
 facebookInt = facebookInt.facebookInt()
@@ -76,8 +78,39 @@ class intercom:
 
     def performnb(self, id):
         logger.debug('inside performnb %s',id)
+        recordList = neo4jInt.getNodeLabels(graphDB,'hometown')
         result = mongoInt.fetchCategoryFeeds(id)
-        logger.debug('result123 %s',result)
+        categoryData = {}
+        s = ''
+        for record in result:
+            if record['category'] not in categoryData:
+                categoryData[record['category']] = open("trainingData/%s.txt" % record['category'],"ab+")
+            text = record['text'].encode('utf-8').replace('\n', ' ')
+            #categoryData[record['category']].seek(0, os.SEEK_SET)
+            logger.debug('hello world')
+            try:
+                s = mmap.mmap(categoryData[record['category']].fileno(), 0, access=mmap.ACCESS_READ)
+                if s.find(text) != -1:
+                    print 'true'
+                else:
+                    categoryData[record['category']].write(text+'\n')
+            except ValueError as e:
+                categoryData[record['category']].write(text+'\n')
+
+            logger.debug('After world')    
+        if hasattr(s, 'close'):
+            logger.debug('closed the file')
+            s.close()
+            #logger.debug('result123 %s',record['text'])
+
+
+        for fileVar in categoryData:
+            categoryData[fileVar].close()
+            logger.debug(fileVar) 
+            #fileVar.close()
+                
+        return 1
+        
         if len(result) > 0:
             wowgicNaiveBayesObj = wowgicClassifier.wowgicNaiveBayes(result)
             wowgicNaiveBayesObj.createClassifiers()

@@ -400,7 +400,7 @@ class mongoInt():
             p = re.compile('^-?[0-9]+$')
             m = p.match(collection)
             if m:
-                allCollectionArray.append({'name':collection, 'count':self.db[collection].count({'category':{'$exists':False}}) })
+                allCollectionArray.append({'name':collection, 'count':self.db[collection].count({'category':{'$exists':False},'parentId':1})})
 
         '''totalDocs=self.db[collInt].count()
         logger.debug('collection:%s total doc:%s already exists',collInt,totalDocs)'''

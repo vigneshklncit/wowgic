@@ -75,6 +75,23 @@ class neo4jInterface:
         return 1
 
     ############################################################################
+    #Function Name  : getNodeLabels                                             #
+    #Input          : gee all nodes with the correspanding label                #
+    #               : label name                                                #
+    #Return Value   : Names of all nodes                                        #
+    ############################################################################
+    def getNodeLabels(self,graphDB,labelName):
+        '''unique property constraints to ensure that property values are unique
+        for all nodes
+        '''
+        logger.info('creating a neo4J constraint')
+        query = ''' MATCH (n:hometown) RETURN {name:n.name,city:n.city,id:n.id,
+            lat:n.latitude,lng:n.longitude} as nameCity'''
+        n = graphDB.cypher.execute(query)
+            #assert (len(n) > 0 ),"Unable to create neo4j CONSTRAINT"
+        return n
+
+    ############################################################################
     #Function Name  : createUserNode                                           #
     #Input          : k--> ssh key                                             #
     #               : cmd --> cmd to send to the terminal                      #
