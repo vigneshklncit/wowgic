@@ -22,7 +22,7 @@ sys.path.append('common')
 import loggerRecord,globalS
 logger =  loggerRecord.get_logger()
 
-stop_words = set(stopwords.words('english'))
+stop_words = set(stopwords.words('english'))  
 #word_set = []
 lemmatizer = WordNetLemmatizer()
 onlySentence = {} 
@@ -87,6 +87,8 @@ class topicModel:
                 logger.debug('**********************')
     
     def createDictionary(self, keyword):
+        
+        allowed_word_types = ["NNP","NNS","CD"]
         ''' The mapping between the questions and ids is called a dictionary
         '''
         #logger.debug('Entering function')
@@ -98,18 +100,24 @@ class topicModel:
                 sent=' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)"," ",sent).split())
                 sent =sent.replace("RT", "", 1)
                 filtered_sentence1=[]
+                filtered_sentence2 = []
                 word_tokens = nltk.word_tokenize(sent)
                 for w in word_tokens:
                     if w not in stop_words and w != keyword:
                         lemWord = lemmatizer.lemmatize(w)
                         lemWord = lemWord.lower()
                         filtered_sentence1.append(lemWord)
-            self.sentList.append(set(filtered_sentence1))
+            pos_tag = nltk.pos_tag(filtered_sentence1)
+            for w in pos_tag:
+                if w[1] not in allowed_word_types:
+                    filtered_sentence2.append(w[0].lower())
 
+            self.sentList.append(set(filtered_sentence2))
         #logger.debug('create dict sent length %s',len(self.sentList))
         # to create unique dictionary words
+        logger.debug('self.sentList %s',self.sentList)
         self.dictionary = corpora.Dictionary(self.sentList)
-        #logger.debug(self.dictionary.token2id)
+        logger.debug(self.dictionary.token2id)
         #self.dictionary = dictionary
         #logger.info('exiting function')
         return self.dictionary
@@ -118,7 +126,7 @@ class topicModel:
         ''' actually convert tokenized documents to vectors
         '''
         #corpus = [self.dictionary.doc2bow(text) for text in self.sentList]
-        lsi = models.LsiModel(corpus, id2word=self.dictionary,num_topics= 30)
+        lsi = models.LsiModel(corpus, id2word=self.dictionary,num_topics= 300)
         index = similarities.MatrixSimilarity(lsi[corpus])
         #initialising an array which store the similarity tweets
         similarTweet_Id = []
@@ -163,10 +171,10 @@ class topicModel:
                         word_tokens = nltk.word_tokenize(sentence)
                         pos_tag = nltk.pos_tag(word_tokens)
                         print(pos_tag)
-                        allowed_word_types = ["NNP","NNS","CD"]
+                        allowed_word_types = []
                         filtered_sentence1 = []
                         for w in pos_tag:
-                            if w[1] in allowed_word_types:
+                            if w[1] not in allowed_word_types:
                                 filtered_sentence1.append(w[0].lower())
                         print("#####",filtered_sentence1,"#####")
                         logger.debug('----------titlke End ---------')
