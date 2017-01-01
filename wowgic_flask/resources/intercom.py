@@ -14,6 +14,7 @@ sys.path.append('resources')
 import globalS
 import time
 import generic
+import glob
 import json
 #from pygeocoder import Geocoder
 #from multiprocessing import Pool
@@ -76,47 +77,48 @@ class intercom:
         result = mongoInt.unSetNB(id)
         return result
 
-    def performnb(self, id):
-        logger.debug('inside performnb %s',id)
+    def performnb(self):
         recordList = neo4jInt.getNodeLabels(graphDB,'hometown')
-        result = mongoInt.fetchCategoryFeeds(id)
-        categoryData = {}
-        s = ''
-        for record in result:
-            if record['category'] not in categoryData:
-                categoryData[record['category']] = open("trainingData/%s.txt" % record['category'],"ab+")
-            text = record['text'].encode('utf-8').replace('\n', ' ')
-            #categoryData[record['category']].seek(0, os.SEEK_SET)
-            logger.debug('hello world')
-            try:
-                s = mmap.mmap(categoryData[record['category']].fileno(), 0, access=mmap.ACCESS_READ)
-                if s.find(text) != -1:
-                    print 'true'
-                else:
+        collectionList=[]
+
+        def writeToFile(id):
+            result = mongoInt.fetchCategoryFeeds(id)
+            logger.debug('id is %s',id)
+            categoryData = {}
+            s = ''
+            for record in result:
+                if record['category'] not in categoryData:
+                    categoryData[record['category']] = open("trainingData/%s.txt" % record['category'],"ab+")
+                text = record['text'].encode('utf-8').replace('\n', ' ')
+                #categoryData[record['category']].seek(0, os.SEEK_SET)
+                try:
+                    s = mmap.mmap(categoryData[record['category']].fileno(), 0, access=mmap.ACCESS_READ)
+                    if s.find(text) != -1:
+                        print 'true'
+                    else:
+                        categoryData[record['category']].write(text+'\n')
+                except ValueError as e:
                     categoryData[record['category']].write(text+'\n')
-            except ValueError as e:
-                categoryData[record['category']].write(text+'\n')
-
-            logger.debug('After world')    
-        if hasattr(s, 'close'):
-            logger.debug('closed the file')
-            s.close()
-            #logger.debug('result123 %s',record['text'])
+ 
+            if hasattr(s, 'close'):
+                logger.debug('closed the file')
+                s.close()
+                #logger.debug('result123 %s',record['text'])
 
 
-        for fileVar in categoryData:
-            categoryData[fileVar].close()
-            logger.debug(fileVar) 
-            #fileVar.close()
-                
-        return 12
+            for fileVar in categoryData:
+                categoryData[fileVar].close()
+                logger.debug(fileVar) 
+                #fileVar.close()
+        allCollections = self.fetchAllCollections()
         
-        if len(result) > 0:
-            wowgicNaiveBayesObj = wowgicClassifier.wowgicNaiveBayes(result)
-            wowgicNaiveBayesObj.createClassifiers()
-            return len(result)
-        else:
-            return 'no record to process'
+        for collection in allCollections:
+            writeToFile(collection['name'])
+            collectionList.append(collection['name'])
+        logger.debug('list file %s',glob.glob("trainingData/*.txt")) 
+        wowgicNaiveBayesObj = wowgicClassifier.wowgicNaiveBayes()
+        resultData = wowgicNaiveBayesObj.createClassifiers()
+        return resultData
 
     def runClassifier(self, id):
         result = mongoInt.fetchWithoutCategoryFeeds(id)

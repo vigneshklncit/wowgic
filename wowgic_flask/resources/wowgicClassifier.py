@@ -10,10 +10,13 @@ from nltk.classify import ClassifierI
 from statistics import mode
 from nltk.tokenize import word_tokenize
 import re
-
+import os
+import glob
+import loggerRecord
+logger =  loggerRecord.get_logger()
 class wowgicNaiveBayes:
-    def __init__(self, feeds):
-        self.feeds = feeds
+    def __init__(self):
+        #self.feeds = feeds
         self.all_words = []
         self.documents = []
 
@@ -27,16 +30,25 @@ class wowgicNaiveBayes:
         return features
 
     def createClassifiers(self):
-        for tweet in self.feeds:
-            if 'text' in tweet:
-                sent = tweet['text']
-                sent=' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)"," ",sent).split())
-                sent = sent.replace("RT", "", 1)
-                category = tweet['category']
+
+        logger.debug('list file %s',glob.glob("trainingData/*.txt"))
+        trainingFiles = glob.glob("trainingData/*.txt")
+        allowed_word_types=['N','V']
+        classifierResult = {}
+        for trFile in trainingFiles:
+            category = os.path.basename(trFile)
+            category = os.path.splitext(category)[0]
+            short_pos = open(trFile,"r").read()
+            for p in short_pos.split('\n'):
+                sent=' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)"," ",p).split())
                 self.documents.append((sent, category))
                 words = word_tokenize(sent)
-                for w in words:
-                    self.all_words.append(w)
+                pos = nltk.pos_tag(words)
+                for w in pos:
+                    if w[1][0] in allowed_word_types:
+                        self.all_words.append(w[0].lower())
+
+                logger.debug('ffff %s',category)
 
         save_documents = open("pickled_algos/documents.pickle","wb")
         pickle.dump(self.documents, save_documents)
@@ -54,8 +66,9 @@ class wowgicNaiveBayes:
         pickle.dump(featuresets, save_feature_sets)
         save_feature_sets.close()
         print(len(featuresets))
-        testing_set = featuresets[17:]
-        training_set = featuresets[:17]
+        splitLength = len(featuresets)/2
+        testing_set = featuresets[(splitLength):]
+        training_set = featuresets[:(splitLength)]
 
         classifier = nltk.NaiveBayesClassifier.train(training_set)
         print("Original Naive Bayes Algo accuracy percent:", (nltk.classify.accuracy(classifier, testing_set))*100)
@@ -69,6 +82,7 @@ class wowgicNaiveBayes:
         MNB_classifier = SklearnClassifier(MultinomialNB())
         MNB_classifier.train(training_set)
         print("MNB_classifier accuracy percent:", (nltk.classify.accuracy(MNB_classifier, testing_set))*100)
+        classifierResult['MNB_classifier'] = (nltk.classify.accuracy(MNB_classifier, testing_set))*100
 
         save_classifier = open("pickled_algos/MNB_classifier5k.pickle","wb")
         pickle.dump(MNB_classifier, save_classifier)
@@ -77,6 +91,7 @@ class wowgicNaiveBayes:
         BernoulliNB_classifier = SklearnClassifier(BernoulliNB())
         BernoulliNB_classifier.train(training_set)
         print("BernoulliNB_classifier accuracy percent:", (nltk.classify.accuracy(BernoulliNB_classifier, testing_set))*100)
+        classifierResult['BernoulliNB_classifier'] = (nltk.classify.accuracy(BernoulliNB_classifier, testing_set))*100
 
         save_classifier = open("pickled_algos/BernoulliNB_classifier5k.pickle","wb")
         pickle.dump(BernoulliNB_classifier, save_classifier)
@@ -85,6 +100,7 @@ class wowgicNaiveBayes:
         LogisticRegression_classifier = SklearnClassifier(LogisticRegression())
         LogisticRegression_classifier.train(training_set)
         print("LogisticRegression_classifier accuracy percent:", (nltk.classify.accuracy(LogisticRegression_classifier, testing_set))*100)
+        classifierResult['LogisticRegression_classifier'] = (nltk.classify.accuracy(LogisticRegression_classifier, testing_set))*100
 
         save_classifier = open("pickled_algos/LogisticRegression_classifier5k.pickle","wb")
         pickle.dump(LogisticRegression_classifier, save_classifier)
@@ -94,6 +110,7 @@ class wowgicNaiveBayes:
         LinearSVC_classifier = SklearnClassifier(LinearSVC())
         LinearSVC_classifier.train(training_set)
         print("LinearSVC_classifier accuracy percent:", (nltk.classify.accuracy(LinearSVC_classifier, testing_set))*100)
+        classifierResult['LinearSVC_classifier'] = (nltk.classify.accuracy(LinearSVC_classifier, testing_set))*100
 
         save_classifier = open("pickled_algos/LinearSVC_classifier5k.pickle","wb")
         pickle.dump(LinearSVC_classifier, save_classifier)
@@ -108,7 +125,9 @@ class wowgicNaiveBayes:
         SGDC_classifier = SklearnClassifier(SGDClassifier())
         SGDC_classifier.train(training_set)
         print("SGDClassifier accuracy percent:",nltk.classify.accuracy(SGDC_classifier, testing_set)*100)
+        classifierResult['SGDClassifier'] = nltk.classify.accuracy(SGDC_classifier, testing_set)*100
 
         save_classifier = open("pickled_algos/SGDC_classifier5k.pickle","wb")
         pickle.dump(SGDC_classifier, save_classifier)
         save_classifier.close()
+        return classifierResult

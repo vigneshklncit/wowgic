@@ -387,8 +387,7 @@ def getAllCollections():
 
 @app.route('/triggernb',methods=['GET'])
 def triggernb():
-    collName = '112621745415708'
-    result = intercom.performnb(collName)
+    result = intercom.performnb()
     return json.dumps(result)
 
 @app.route('/unSetNB',methods=['GET'])
