@@ -15,7 +15,7 @@ import glob
 import loggerRecord
 logger =  loggerRecord.get_logger()
 class wowgicNaiveBayes:
-    def __init__(self):
+    def __init__(self):  
         #self.feeds = feeds
         self.all_words = []
         self.documents = []

@@ -131,6 +131,7 @@ class topicModel:
         #initialising an array which store the similarity tweets
         similarTweet_Id = []
         parentId = []
+        parentToChildMap ={}
         childId = []
         processedTweet = []
         similarTweet_Ratio = []
@@ -179,6 +180,7 @@ class topicModel:
                         print("#####",filtered_sentence1,"#####")
                         logger.debug('----------titlke End ---------')
                         parentId.append(tweet['id'])
+                        parentChildList = []
                         for sim in sims:
                             if sim[1] > 0.70:
                                 childDict = {}
@@ -188,6 +190,7 @@ class topicModel:
                                         childDict['id'] = feeds[indexKey]['id']
                                         childDict['parent'] = tweet['id']
                                         childDict['ratio'] = sim[1]
+                                        parentChildList.append(feeds[indexKey]['id']) 
                                         childId.append(childDict)
                                     
                                     logger.debug('******** sims[0]%s',sim[0])
@@ -196,10 +199,12 @@ class topicModel:
                                     logger.debug(self.feeds[indexKey].get('text'))
                                     logger.debug('=========')
                                     processedTweet.append(feeds[indexKey]['id'])
+                        parentToChildMap[tweet['id']] = parentChildList
         '''
         logger.debug('totoal no tweets: %s, Total no of parent tweets: %s, Total no of child tweets: %s',len(self.feeds), ogTweets,len(similarTweet_Id))
         logger.debug('length of id : %s, ratio : %s, parentId : %s', len(similarTweet_Id),len(similarTweet_Ratio),len(similarTweetId_parentId))'''
-        similarTweet = [parentId, childId]
+        #logger.debug('parentToChildMap %s',parentToChildMap)
+        similarTweet = [parentId, childId, parentToChildMap]
       #  logger.info('similarTweets wrt to corpus: %s',similarTweet)
         return similarTweet
                 

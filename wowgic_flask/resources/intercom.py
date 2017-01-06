@@ -248,11 +248,16 @@ class intercom:
     def updateRatio(self,collName,similarTweet,twits, Q):
         parentIds = similarTweet[0]
         childIds =  similarTweet[1]
+        parentToChildMap = similarTweet[2]
         uniqueTweets=[]
         for parentId in parentIds:
             for twit in twits:
                 if twit['id'] is parentId:
-                    twit.update({'parentId' : 1})
+                    if len(parentToChildMap[twit['id']]):
+                        logger.debug('success it is working')
+                        twit.update({'parentId' : 1,'childIds':parentToChildMap[twit['id']]})
+                    else:
+                        twit.update({'parentId' : 1})
                     uniqueTweets.append(twit)
 
         for childId in childIds:
