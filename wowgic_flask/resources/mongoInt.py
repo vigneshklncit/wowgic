@@ -233,7 +233,7 @@ class mongoInt():
 
     def fetchChildIds(self, collName, parentId):
         logger.debug('collection name %s %s', collName, parentId)
-        coll = self.db['112621745415708']
+        coll = self.db[collName]
 
         feed = coll.find({'parentId' : str(parentId)},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
                            'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,

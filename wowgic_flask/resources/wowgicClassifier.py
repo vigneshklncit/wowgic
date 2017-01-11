@@ -9,6 +9,7 @@ from sklearn.svm import SVC, LinearSVC, NuSVC
 from nltk.classify import ClassifierI
 from statistics import mode
 from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
 import re
 import os
 import glob
@@ -24,16 +25,19 @@ class wowgicNaiveBayes:
     def find_features(self, document):
         words = word_tokenize(document)
         features = {}
+        print('\n \n Actual teet %s',document)
         for w in self.word_features:
             features[w] = (w in words)
-        print('inside find features',features[w])
+        print('\n \n PROCESSED WORDS %s',features)
         return features
 
     def createClassifiers(self):
 
         logger.debug('list file %s',glob.glob("trainingData/*.txt"))
         trainingFiles = glob.glob("trainingData/*.txt")
-        allowed_word_types=['N','V']
+        allowed_word_types=['N','V','J']
+        otherStopWords = ['for','best','s','amp','a','the','me','at','here','chennai']
+        stop_words = set(stopwords.words('english'))
         classifierResult = {}
         for trFile in trainingFiles:
             category = os.path.basename(trFile)
@@ -45,11 +49,15 @@ class wowgicNaiveBayes:
                 words = word_tokenize(sent)
                 pos = nltk.pos_tag(words)
                 for w in pos:
-                    if w[1][0] in allowed_word_types:
-                        self.all_words.append(w[0].lower())
-
-                logger.debug('ffff %s',category)
-
+                    word = w[0].lower()
+                    if w[1][0] in allowed_word_types and word not in stop_words and word not in otherStopWords:
+                        logger.debug('adjectivesss %s',w[0])
+                        self.all_words.append(word)
+                    else:                        
+                        logger.debug('banned words3456 %s',w[0].lower())
+                    #logger.debug('banned1 words123 %s',w[0].lower())
+        #logger.debug('all words345 %s',self.all_words)        
+        #return
         save_documents = open("pickled_algos/documents.pickle","wb")
         pickle.dump(self.documents, save_documents)
         save_documents.close()
@@ -60,8 +68,10 @@ class wowgicNaiveBayes:
         save_word_features.close()
 
         featuresets = [(self.find_features(rev), category) for (rev, category) in self.documents]
-        
+        logger.debug('featuresets %s',featuresets)
+        logger.debug('length of feature sets %s',len(featuresets))
         random.shuffle(featuresets)
+        #return
         save_feature_sets = open("pickled_algos/featuresets.pickle","wb")
         pickle.dump(featuresets, save_feature_sets)
         save_feature_sets.close()
