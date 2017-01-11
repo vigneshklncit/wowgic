@@ -17,6 +17,7 @@ import time
 from calendar import timegm
 import sys
 import json
+from bson import json_util, ObjectId
 import argparse
 sys.path.append('common')
 sys.path.append('resources')
@@ -367,7 +368,7 @@ def FBTesting():
 def fetchSingleNode():
     geoDict = {}
     collName = '112621745415708'
-    Q ='chennai'
+    Q ='#chennai'
     length = intercom.retrieveTweets(collName,Q,geoDict)
     return 'length'
 
@@ -421,6 +422,15 @@ def FBLogin():
 #------------------------------------------------------------------------------#
 #---------------------------Debug Endpoints------------------------------------#
 #------------------------------------------------------------------------------#
+@app.route('/fetchChildFeeds',methods=['GET'])
+def fetchChildFeeds():
+    collId = request.args.get('mongoId')
+    parentId = request.args.get('parentId')
+    logger.debug('parentId %s %s',collId,parentId)
+    feeds = []
+    feeds.extend(intercom.getChildFeeds(collId, parentId))
+    return  json.dumps(feeds)
+
 @app.route('/displayFeeds',methods=['GET'])
 def displayFeeds():
     #feedList = intercom.retrieveTweets('106377336067638', 'MADURAI INDIA', {'lat': '12.9833', 'distance': '.5', 'lng': '77.5833'})

@@ -222,7 +222,7 @@ class mongoInt():
             cond = "$lte"
         else:
             cond = "$lt"
-        cursor = coll.find({ "$and":[{"id": { cond: int(feedId)}},{'category':{'$exists':False}},{'parentId':1}]},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+        cursor = coll.find({ "$and":[{"id": { cond: int(feedId)}},{'category':{'$exists':False}},{'parentId':'1'}]},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
                            'in_reply_to_status_id':0,'favorited':0,'is_quote_status':0,
                            'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                            'metadata':0},limit=int(count))
@@ -230,6 +230,18 @@ class mongoInt():
         logger.debug('total documents collName = %s retrieved %s',collName,len(feeds))
         return feeds
 
+
+    def fetchChildIds(self, collName, parentId):
+        logger.debug('collection name %s %s', collName, parentId)
+        coll = self.db['112621745415708']
+
+        feed = coll.find({'parentId' : str(parentId)},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+                           'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
+                           'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
+                           'metadata':0},limit=10)
+        feeds=map(lambda x:x,feed)
+        logger.debug('feeds %s',feeds)
+        return feeds
 
     ############################################################################
     #Function Name  : retrieveCollection #
@@ -244,8 +256,8 @@ class mongoInt():
         lastTimeStamp = int(lastTimeStamp)
         deltaTimeStamp = lastTimeStamp-globalS.dictDb['DELTA_FEEDS_TIME']
         logger.info('arg is collName = %s & limit = %s & time delta = %s > %s',collName,count,lastTimeStamp,deltaTimeStamp)
-        cursor = coll.find({"created_time": { "$lt": lastTimeStamp, "$gt":deltaTimeStamp } },{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
-                           'in_reply_to_status_id':0,'id_str':0,'favorited':0,'is_quote_status':0,
+        cursor = coll.find({"$and":[{"created_time": { "$lt": lastTimeStamp, "$gt":deltaTimeStamp } },{'parentId':'1'}]},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+                           'in_reply_to_status_id':0,'favorited':0,'is_quote_status':0,
                            'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                            'metadata':0},limit=int(count))
         feeds=map(lambda x:x,cursor)
@@ -366,7 +378,7 @@ class mongoInt():
         '''
         logger.debug('arg is collName = %s',collName)
         coll = self.db[collName]
-        cursor = coll.find({'parentId' : 1})
+        cursor = coll.find({'parentId' : '1'})
         logger.info('cursor is %s',cursor.explain())
         feeds=map(lambda x:x,cursor)
         logger.debug('total tokens twitter access secret retrieved %s',len(feeds))
@@ -400,7 +412,7 @@ class mongoInt():
             p = re.compile('^-?[0-9]+$')
             m = p.match(collection)
             if m:
-                allCollectionArray.append({'name':collection, 'count':self.db[collection].count({'category':{'$exists':False},'parentId':1})})
+                allCollectionArray.append({'name':collection, 'count':self.db[collection].count({'category':{'$exists':False},'parentId':'1'})})
 
         '''totalDocs=self.db[collInt].count()
         logger.debug('collection:%s total doc:%s already exists',collInt,totalDocs)'''

@@ -84,16 +84,17 @@ pickle.dump(word_features, save_word_features)
 save_word_features.close()
 
 
-def find_features(document):
-    words = word_tokenize(document)
+def find_features(rev):
+    words = word_tokenize(rev)
     features = {}
+    print('\n Actual document',rev)
     for w in word_features:
         features[w] = (w in words)
-    print('inside find features',features[w])
+    print('\n\n\n Passed documents',features)
     return features
 
 featuresets = [(find_features(rev), category) for (rev, category) in documents]
-
+'''
 random.shuffle(featuresets)
 
 save_feature_sets = open("pickled_algos/featuresets.pickle","wb")
@@ -160,4 +161,4 @@ print("SGDClassifier accuracy percent:",nltk.classify.accuracy(SGDC_classifier, 
 
 save_classifier = open("pickled_algos/SGDC_classifier5k.pickle","wb")
 pickle.dump(SGDC_classifier, save_classifier)
-save_classifier.close()
+save_classifier.close()'''

@@ -8,6 +8,11 @@ class wowgicRunClassifier:
 
     def runClassifier(self):
     	result =[]
+        '''
+        self.feeds = [{
+        'text': '#Chennai O+ve #Blood req for Liver Transplant at Global Hosp Perumbakkam Call 9381005254 via @SrivatsaVema @khushsundar @crowngaurav @upma23',
+        'id':98
+        }]'''
     	for tweet in self.feeds:
             if 'text' in tweet:
             	obj = {}

@@ -255,15 +255,15 @@ class intercom:
                 if twit['id'] is parentId:
                     if len(parentToChildMap[twit['id']]):
                         logger.debug('success it is working')
-                        twit.update({'parentId' : 1,'childIds':parentToChildMap[twit['id']]})
+                        twit.update({'parentId' : '1','childIds':parentToChildMap[twit['id']]})
                     else:
-                        twit.update({'parentId' : 1})
+                        twit.update({'parentId' : '1'})
                     uniqueTweets.append(twit)
 
         for childId in childIds:
             for twit in twits:
                 if twit['id'] is childId['id']:
-                    twit.update({'parentId' : childId['parent'], 'ratio': float(childId['ratio'])})
+                    twit.update({'parentId' : str(childId['parent']), 'ratio': float(childId['ratio'])})
                     uniqueTweets.append(twit)
         self.insertFeedData(collName,uniqueTweets)
         return 0
@@ -281,14 +281,14 @@ class intercom:
             for twit in twits:
                 if childID == parentID:
                     if twit['id'] is parentID:
-                        twit.update({'parentId' : 1})
+                        twit.update({'parentId' : "1"})
                         uniqueTweetsFromTwitter.append(twit)
                         
                 elif childID != parentID and ratio <= 0.999999:
                 #elif cmp(1,float(ratio)) == 1:
                     #logger.error('%s != %s & ratio : %s',childID,cmp(float(ratio),1),ratio)
                     if twit['id'] is childID:
-                        tmpDict = {'parentId' : parentID, 'ratio' : float(ratio)}
+                        tmpDict = {'parentId' : str(parentID), 'ratio' : float(ratio)}
                         twit.update(tmpDict)
                         similarTweetsFromTwitter.append(twit)
             
@@ -445,7 +445,6 @@ class intercom:
         tweets=[]
         jobsArgs =[]
         collectionList = []
-
         #parse the recordList and frame the has tags here
         for record in recordList:
             geoDict = {}#revert the geo dictionary
@@ -473,24 +472,25 @@ class intercom:
 
         #first time login logic to be defined
         if len(collectionList):
-            def recCursor(lastTimeStamp):
+            def recCursor(lastTimeStamp, counter = 0):
                 ''' not an effective method to query across multiple connection '''
                 for collName in collectionList:
                     logger.debug('collName = %s & time = %s',collName,lastTimeStamp)
                     docLists =  mongoInt.retrieveCollection(collName,lastTimeStamp,globalS.dictDb['MONGODB_COUNT_LIMIT'])
                     if globalS.dictDb['APP_DEBUG']:
                         def insertQueryData(twit,*argv):
-                            twit.update({'queryDetails':argv})
+                            logger.debug('Query details %s', collName)
+                            twit.update({'queryDetails123':collName})
                         map(lambda twit: insertQueryData(twit,ID), docLists);
                     if len(docLists):
                         logger.info('fetched %s docs from collection:%s appending to tweets',len(docLists),collName)
                         #print the ID's of feeds so that we verify any dup feeds are obtained
                         map(lambda twit: logger.debug('doc ID is %s',twit['id']), docLists);
                         tweets.extend(docLists)
-                if len(tweets) < 10:
+                if len(tweets) < 10 and counter < 10:
                     lastTimeStamp=int(lastTimeStamp)-globalS.dictDb['DELTA_FEEDS_TIME']
                     logger.info('Docs are not available so recursive calling %s',lastTimeStamp)
-                    return recCursor(lastTimeStamp)
+                    return recCursor(lastTimeStamp, counter+1)
                 logger.info('collectively returned %s docs for multiple documents %s',len(tweets),collectionList)
                 return 1
             recCursor(lastTimeStamp)
@@ -562,6 +562,12 @@ class intercom:
         random.shuffle(feedList)
         return feedList
 
+    def getChildFeeds(self,mongoId, parentId):
+        logger.debug('parentId %s %s',mongoId,parentId)
+        data = []
+        data.extend(mongoInt.fetchChildIds(mongoId, parentId))
+        return data
+    
     def verifyAuthUser(self,ID):
         ''' just return the password token stored in mongoDB
         '''

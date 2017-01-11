@@ -152,9 +152,9 @@ class topicModel:
                     word_tokens = nltk.word_tokenize(sentence)
                     filtered_sentence = ''
                     for w in word_tokens:
+                        w = w.lower()
                         if w not in stop_words and w != keyword:
                             lemWord = lemmatizer.lemmatize(w)
-                            lemWord = lemWord.lower()
                             filtered_sentence += lemWord+' '
 
                     if len(filtered_sentence.split()) >= 4:
