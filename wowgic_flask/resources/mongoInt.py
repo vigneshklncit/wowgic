@@ -216,13 +216,13 @@ class mongoInt():
 
 
     def retrieveTweetsById(self,collName,feedId,count, fromSinceId):
-        coll = self.db[collName]
+        coll = self.db[collName] 
         logger.debug('parameters are  = %s %s %s',collName,feedId,count)
         if fromSinceId:
             cond = "$lte"
         else:
             cond = "$lt"
-        cursor = coll.find({ "$and":[{"id": { cond: int(feedId)}},{'category':{'$exists':False}},{'parentId':'1'}]},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
+        cursor = coll.find({ "$and":[{"id": { cond: int(feedId)}},{'autoAssign':1},{'parentId':'1'}]},{'_id':0,'contributors':0,'truncated':0,'in_reply_to_screen_name':0,
                            'in_reply_to_status_id':0,'favorited':0,'is_quote_status':0,
                            'in_reply_to_user_id_str':0,'in_reply_to_status_id_str':0,'in_reply_to_user_id':0,
                            'metadata':0},limit=int(count))
@@ -378,7 +378,7 @@ class mongoInt():
         '''
         logger.debug('arg is collName = %s',collName)
         coll = self.db[collName]
-        cursor = coll.find({'parentId' : '1'})
+        cursor = coll.find({'parentId' : '1'},{'_id':0,'oauth_token':1,'oauth_token_secret':1,'access_token':1})
         logger.info('cursor is %s',cursor.explain())
         feeds=map(lambda x:x,cursor)
         logger.debug('total tokens twitter access secret retrieved %s',len(feeds))
@@ -412,7 +412,7 @@ class mongoInt():
             p = re.compile('^-?[0-9]+$')
             m = p.match(collection)
             if m:
-                allCollectionArray.append({'name':collection, 'count':self.db[collection].count({'category':{'$exists':False},'parentId':'1'})})
+                allCollectionArray.append({'name':collection, 'count':self.db[collection].count({'autoAssign':1,'parentId':'1'})})
 
         '''totalDocs=self.db[collInt].count()
         logger.debug('collection:%s total doc:%s already exists',collInt,totalDocs)'''

@@ -9,7 +9,7 @@ from sklearn.svm import SVC, LinearSVC, NuSVC
 from nltk.classify import ClassifierI
 from statistics import mode, StatisticsError
 from nltk.tokenize import word_tokenize
-
+import os
 
 
 class VoteClassifier(ClassifierI):
@@ -50,7 +50,6 @@ class loadClassifier():
 
 
     def loadPickle(self):
-        
         documents_f = open("pickled_algos/documents.pickle", "rb")
         self.documents = pickle.load(documents_f)
         documents_f.close()

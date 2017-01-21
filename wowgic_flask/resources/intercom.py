@@ -78,9 +78,10 @@ class intercom:
         return result
 
     def performnb(self):
-        recordList = neo4jInt.getNodeLabels(graphDB,'hometown')
+        #recordList = neo4jInt.getNodeLabels(graphDB,'hometown')
         collectionList=[]
-
+        if not os.path.exists('trainingData'):
+            os.makedirs('trainingData')
         def writeToFile(id):
             result = mongoInt.fetchCategoryFeeds(id)
             logger.debug('id is %s',id)
@@ -227,22 +228,29 @@ class intercom:
         
         #map(lambda tw:tw.update({'created_time': timegm(time.gmtime(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y")))}),twits)
         value = map(removeRetweets, twits)
-        print(value)
         twits = value
         map(lambda tw:tw.update({'created_time': timegm(time.strptime(tw['created_at'],"%a %b %d %H:%M:%S +0000 %Y"))}),twits)
         #callinf directly instead of wrapper change it later
         #pass only twitter text & ID only here
-        logger.info('tweets fetched are chellaaa %s',len(twits))
+        logger.info('tweets fetched for %s are %s',ID,len(twits))
         if(len(twits)):
             uniqueTweetsFromDB = mongoInt.retrieveParentIdTrue(ID)
             logger.debug('existing uniqueTweetsFromDB :%s',len(uniqueTweetsFromDB))
             #twits.extend(uniqueTweetsFromDB)
             uniqueTweetsFromDB.extend(twits)
             logger.debug('total combined tweets :%s',len(uniqueTweetsFromDB))
-            similarTweet = self.topicModelLSI(uniqueTweetsFromDB, Q) # new feeds from service
-            if similarTweet != 0:
-                self.updateRatio(ID,similarTweet,uniqueTweetsFromDB, Q)
-            return len(uniqueTweetsFromDB)
+            #return uniqueTweetsFromDB
+        else:
+            return []
+        
+        similarTweet = self.topicModelLSI(uniqueTweetsFromDB, Q) # new feeds from service
+        if similarTweet != 0:
+            self.updateRatio(ID,similarTweet,uniqueTweetsFromDB, Q)      
+        return self.runClassifier(ID) 
+
+    def runTopicModel(self, uniqueTweetsFromDB, Q, collName):
+        similarTweet = self.topicModelLSI(uniqueTweetsFromDB, Q) # new feeds from service
+        return self.updateRatio(collName,similarTweet,uniqueTweetsFromDB, Q)
 
 
     def updateRatio(self,collName,similarTweet,twits, Q):
@@ -252,7 +260,7 @@ class intercom:
         uniqueTweets=[]
         for parentId in parentIds:
             for twit in twits:
-                if twit['id'] is parentId:
+                if twit and twit['id'] is parentId:
                     if len(parentToChildMap[twit['id']]):
                         logger.debug('success it is working')
                         twit.update({'parentId' : '1','childIds':parentToChildMap[twit['id']]})
@@ -262,11 +270,11 @@ class intercom:
 
         for childId in childIds:
             for twit in twits:
-                if twit['id'] is childId['id']:
+                if twit and twit['id'] is childId['id']:
                     twit.update({'parentId' : str(childId['parent']), 'ratio': float(childId['ratio'])})
                     uniqueTweets.append(twit)
         self.insertFeedData(collName,uniqueTweets)
-        return 0
+        return 200
 
     def similarTopicRemoval(self,collName,similarTweet,twits, Q):
         ''' if childId = parentId update mongoDB parentId = true
@@ -487,7 +495,7 @@ class intercom:
                         #print the ID's of feeds so that we verify any dup feeds are obtained
                         map(lambda twit: logger.debug('doc ID is %s',twit['id']), docLists);
                         tweets.extend(docLists)
-                if len(tweets) < 10 and counter < 10:
+                if len(tweets) < 100 and counter < 100:
                     lastTimeStamp=int(lastTimeStamp)-globalS.dictDb['DELTA_FEEDS_TIME']
                     logger.info('Docs are not available so recursive calling %s',lastTimeStamp)
                     return recCursor(lastTimeStamp, counter+1)

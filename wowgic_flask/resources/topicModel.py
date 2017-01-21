@@ -95,6 +95,7 @@ class topicModel:
         for tweet in self.feeds:
             if 'text' in tweet:
                 sent = tweet['text']
+                logger.info('sent %s',sent)
                 #filtered_sentence = self.prepareSentence(sent)
                 #call the prepareSentence function <placeholder>
                 sent=' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)"," ",sent).split())
@@ -107,12 +108,12 @@ class topicModel:
                         lemWord = lemmatizer.lemmatize(w)
                         lemWord = lemWord.lower()
                         filtered_sentence1.append(lemWord)
-            pos_tag = nltk.pos_tag(filtered_sentence1)
-            for w in pos_tag:
-                if w[1] not in allowed_word_types:
-                    filtered_sentence2.append(w[0].lower())
+                pos_tag = nltk.pos_tag(filtered_sentence1)
+                for w in pos_tag:
+                    if w[1] not in allowed_word_types:
+                        filtered_sentence2.append(w[0].lower())
 
-            self.sentList.append(set(filtered_sentence2))
+                self.sentList.append(set(filtered_sentence2))
         #logger.debug('create dict sent length %s',len(self.sentList))
         # to create unique dictionary words
         logger.debug('self.sentList %s',self.sentList)
@@ -141,7 +142,7 @@ class topicModel:
             feeds = self.feeds 
         #logger.debug('new corpus length :%s ',len(feeds))
         for tweet in feeds:
-            if tweet['id'] not in processedTweet:
+            if tweet and tweet['id'] not in processedTweet:
                 if 'text' in tweet:
                     ogTweets += 1
                     #logger.debug('chelloi tweet text :%s', tweet) # logger.debug (document_number, document_similarity) 2-tuples

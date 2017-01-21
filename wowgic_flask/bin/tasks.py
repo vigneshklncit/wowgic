@@ -1,12 +1,15 @@
 from celery import Celery
+from celery import chain
 import sys
 sys.path.append('../common')
 sys.path.append('../config')
 sys.path.append('../resources')
+
 import globalS
 import generic
 import loggerRecord
 import json
+from datetime import datetime, timedelta
 
 logFileName='/tmp/wowgic_celery.log'
 logger,fhandler       = loggerRecord.loggerInit(logFileName,'debug')
@@ -22,8 +25,7 @@ celery.config_from_object('celeryconfig')
 globalS.dictDb = celery.conf
 logger.debug('celery dictDB contains %s',globalS.dictDb)
 
-import intercom
-intercom=intercom.intercom()
+
 
 '''
 Rough Tasks:
@@ -34,15 +36,45 @@ foreach interest node trigger twitter & instagram calls without affecting the hi
 store them in mongDB
 Again read the interest nodes from neo4j
 '''
+
+@celery.task
+def triggerClassification():
+    import intercom
+    intercom=intercom.intercom()
+    
+    setupData = intercom.performnb()
+    
+    def setFreshCategory(record):
+        ID=record[0]['id']
+        setCategory.s(ID).delay()
+    interesetNodes = intercom.getAllInterestNode()    
+    map(setFreshCategory, interesetNodes)
+    '''
+    record = []
+    data = {}
+    data['name'] = 'chennai'
+    data['lat'] = None
+    data['city'] = None
+    data['id'] = '112463015433208'
+    record.append(data)'''
+    #getAllInterestNode.s().delay()
+    tomorrow = datetime.utcnow() + timedelta(days=1)
+
+    return triggerClassification.apply_async(eta=tomorrow)
+
+
 @celery.task
 def getAllInterestNode():
+    import intercom
+    intercom=intercom.intercom()
     ''' after first time login of user this gets invoked by an ID provided by UI
     like Request: https://http://wowgicflaskapp-wowgic.rhcloud.com/id=q13512667
     neo4j has associated feeds ID to be displayed to the user fetch them from mongdb and return it back
     '''
     interesetNodes = intercom.getAllInterestNode()
     logger.debug('feedList:%s',interesetNodes)
-    geoDict = {}
+    
+    geoDict = {} 
     #for record in interesetNodes:
     #    if record[0]['lat'] is not None:
     #        geoDict.update({'lat':record[0]['lat']})
@@ -65,7 +97,9 @@ def getAllInterestNode():
     #    #    geoDict = {}#revert the geo dictionary
     ##sparkInt.Parallelized(tweets)
     ##feedJson=sparkInt.wowFieldTrueOrFalse(tweets)
+
     def iterFunc(record):
+        logger.info('record %s',record)
         geoDict = {}
         if record[0]['lat'] is not None:
             geoDict.update({'lat':record[0]['lat']})
@@ -76,6 +110,8 @@ def getAllInterestNode():
             Q=record[0]['name'] +' '+ record[0]['city']
         else:
             Q=record[0]['name']
+        Q=record[0]['name']
+        geoDict={}
         ID=record[0]['id']
         logger.debug('fetchInterestFeeds Q=%s geo cordinates =%s',Q,geoDict)
         #retrieveMediaBasedTags.delay(ID,Q,geoDict)
@@ -84,8 +120,33 @@ def getAllInterestNode():
         #retrieveMediaBasedTags.s(ID,Q,geoDict,debug=True))
         #res = g()
     #    retrieveMediaBasedTags.s(ID,Q,geoDict).delay()
+        #res = chain(retrieveTweets.s(ID,Q,geoDict), runTopicModelling.s(Q, ID), setCategory.s(ID))()
+        #res.get()
+        #start = chain(retrieveTweets.si(ID,Q,geoDict), triggerCategory.si(ID))()
         retrieveTweets.s(ID,Q,geoDict).delay()
+
     map(iterFunc,interesetNodes)
+    '''
+    record = []
+    record1 = []
+    records = []
+    data = {}
+    data['name'] = 'chennai'
+    data['lat'] = None
+    data['city'] = None
+    data['id'] = '112621745415708'
+    record.append(data)
+    records.append(record)
+    data = {}
+    data['name'] = 'Tirunelveli'
+    data['lat'] = None
+    data['city'] = None
+    data['id'] = '103099979730946'
+    record1.append(data)
+    records.append(record1)
+    #iterFunc(record)
+    logger.info('recordsss %s',records)
+    map(iterFunc,records)'''
 
     #jobs = group
     return getAllInterestNode.delay()
@@ -93,9 +154,20 @@ def getAllInterestNode():
 
 
 #@celery.task()
-@celery.task(rate_limit='18/m')
+@celery.task()
+def runTopicModelling(records,keyword, collName):
+    import intercom
+    intercom=intercom.intercom()
+    return intercom.runTopicModel(records,keyword, collName)
+
+
+@celery.task(name='fetch tweets')
 def retrieveTweets(collName,Q,geoDict):
+    import intercom
+    intercom=intercom.intercom()
     logger.info('retrieveTweets:%s,%s,%s',collName,Q,geoDict)
+    #twits = 
+    #category = triggerCategory.delay()
     return intercom.retrieveTweets(collName,Q,geoDict)
 
 
@@ -105,6 +177,16 @@ def retrieveMediaBasedTags(collName,Q,geoDict):
     logger.info('retrieveMediaBasedTags:%s,%s,%s',collName,Q,geoDict)
     return intercom.retrieveMediaBasedTags(collName,Q,geoDict)
 
-getAllInterestNode.delay()
+@celery.task(name='set.category')
+def setCategory(ID):
+    import intercom
+    intercom=intercom.intercom()
+    return intercom.unSetNB(ID)
+    #return intercom.runClassifier(ID)
+
+start = chain(triggerClassification.si(),getAllInterestNode.si())()
+
+#triggerCategory()
+#getAllInterestNode()
 if __name__ == '__main__':
     celery.start()

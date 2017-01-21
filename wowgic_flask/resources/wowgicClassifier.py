@@ -32,7 +32,8 @@ class wowgicNaiveBayes:
         return features
 
     def createClassifiers(self):
-
+        if not os.path.exists('pickled_algos'):
+            os.makedirs('pickled_algos')
         logger.debug('list file %s',glob.glob("trainingData/*.txt"))
         trainingFiles = glob.glob("trainingData/*.txt")
         allowed_word_types=['N','V','J']
