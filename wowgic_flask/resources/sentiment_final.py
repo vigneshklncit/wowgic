@@ -22,5 +22,5 @@ class wowgicRunClassifier:
             	obj['id'] = tweet['id']
             	temp = self.sObj.sentiment(sent)
                 obj['category'] =  temp[0]
-            result.append(obj)
+                result.append(obj)
         return result

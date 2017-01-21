@@ -129,7 +129,7 @@ class twitterInt:
         #        return feeds
         if Q is not None:
             #tweepy set count to largets number
-            tweets = tweepy.Cursor(api.search, q=Q, since_id=since_id).items(100)
+            tweets = tweepy.Cursor(api.search, q=Q, since_id=since_id).items(500)
         elif geoCode :
             geoCode = str(geoCode['lat']) + ','+ str(geoCode['lng']) +','+ str(geoCode['distance'])+'km'
             tweets = tweepy.Cursor(api.search,q='',geocode=geoCode).items(globalS.dictDb['MAX_TWEETS'])
