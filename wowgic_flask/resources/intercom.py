@@ -235,10 +235,10 @@ class intercom:
         logger.info('tweets fetched for %s are %s',ID,len(twits))
         if(len(twits)):
             uniqueTweetsFromDB = mongoInt.retrieveParentIdTrue(ID)
-            logger.debug('existing uniqueTweetsFromDB :%s',len(uniqueTweetsFromDB))
+            logger.error('existing uniqueTweetsFromDB :%s',len(uniqueTweetsFromDB))
             #twits.extend(uniqueTweetsFromDB)
             uniqueTweetsFromDB.extend(twits)
-            logger.debug('total combined tweets :%s',len(uniqueTweetsFromDB))
+            logger.error('total combined tweets :%s',len(uniqueTweetsFromDB))
             #return uniqueTweetsFromDB
         else:
             return []
