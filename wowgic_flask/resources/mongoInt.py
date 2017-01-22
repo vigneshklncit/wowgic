@@ -403,6 +403,13 @@ class mongoInt():
         else:
             logger.debug('twitter token succesfuly insereted')
             return 1
+    
+    def analyseFrequency(self):
+        coll = self.db['collectionFeedFrequency']
+        cursor = coll.find({'count':{'$gt':1}},{'_id':0})
+        frequency=map(lambda x:x,cursor)
+        return frequency
+
 
     def fetchAllCollections(self):
         allCollectionArray = []

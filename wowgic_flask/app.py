@@ -369,8 +369,10 @@ def fetchSingleNode():
     geoDict = {}
     collName = '112621745415708'
     Q ='#chennai'
-    length = intercom.retrieveTweets(collName,Q,geoDict)
-    return 'length'
+    data = intercom.fetchFrequentNode()
+    #length = intercom.retrieveTweets(collName,Q,geoDict)
+    return json.dumps(data)
+    #return 'length'
 
 @app.route('/setFeedCategory',methods=['GET'])
 def setFeedCategory():

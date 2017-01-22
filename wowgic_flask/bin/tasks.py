@@ -64,16 +64,19 @@ def triggerClassification():
 
 
 @celery.task
-def getAllInterestNode():
+def getAllInterestNode(frequencyReady = None):
     import intercom
     intercom=intercom.intercom()
     ''' after first time login of user this gets invoked by an ID provided by UI
     like Request: https://http://wowgicflaskapp-wowgic.rhcloud.com/id=q13512667
     neo4j has associated feeds ID to be displayed to the user fetch them from mongdb and return it back
     '''
-    interesetNodes = intercom.getAllInterestNode()
+    if frequencyReady != None:
+        interesetNodes = intercom.fetchFrequentNode
+    else:
+        interesetNodes = intercom.getAllInterestNode()
     logger.debug('feedList:%s',interesetNodes)
-    
+
     geoDict = {} 
     #for record in interesetNodes:
     #    if record[0]['lat'] is not None:
@@ -149,7 +152,7 @@ def getAllInterestNode():
     map(iterFunc,records)'''
 
     #jobs = group
-    return getAllInterestNode.delay()
+    return getAllInterestNode.delay(True)
     #return True
 
 

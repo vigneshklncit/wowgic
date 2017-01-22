@@ -581,6 +581,20 @@ class intercom:
         '''
         return mongoInt.validateToken(ID)
 
+    def fetchFrequentNode(self):
+        datas = mongoInt.analyseFrequency()
+        uniqueValidNodes =[]
+        for data in datas:
+            uniqueValidNodes.append(data['collectionName'])
+        uniqueValidNodes = set(uniqueValidNodes)
+        interesetNodes = self.getAllInterestNode()
+        #for record in interesetNodes:
+        #if record[0]['id'] not in uniqueValidNodes
+        thelist= []
+        thelist[:] = [d for d in interesetNodes if d[0].get('id') in  uniqueValidNodes]
+        logger.debug('the list %s',thelist)
+        return thelist
+
     def getAllInterestNode(self):
         ''' just return the password token stored in mongoDB
         '''
