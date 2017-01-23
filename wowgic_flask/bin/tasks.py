@@ -188,8 +188,8 @@ def setCategory(ID):
     #return intercom.runClassifier(ID)
 
 #start = chain(triggerClassification.si(),getAllInterestNode.si())()
-triggerClassification()
+#triggerClassification()
 #triggerCategory()
-#getAllInterestNode()
+getAllInterestNode()
 if __name__ == '__main__':
     celery.start()
