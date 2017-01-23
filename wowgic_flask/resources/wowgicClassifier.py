@@ -25,10 +25,8 @@ class wowgicNaiveBayes:
     def find_features(self, document):
         words = word_tokenize(document)
         features = {}
-        print('\n \n Actual teet %s',document)
         for w in self.word_features:
             features[w] = (w in words)
-        print('\n \n PROCESSED WORDS %s',features)
         return features
 
     def createClassifiers(self):
@@ -52,10 +50,7 @@ class wowgicNaiveBayes:
                 for w in pos:
                     word = w[0].lower()
                     if w[1][0] in allowed_word_types and word not in stop_words and word not in otherStopWords:
-                        logger.debug('adjectivesss %s',w[0])
                         self.all_words.append(word)
-                    else:                        
-                        logger.debug('banned words3456 %s',w[0].lower())
                     #logger.debug('banned1 words123 %s',w[0].lower())
         #logger.debug('all words345 %s',self.all_words)        
         #return
@@ -69,7 +64,6 @@ class wowgicNaiveBayes:
         save_word_features.close()
 
         featuresets = [(self.find_features(rev), category) for (rev, category) in self.documents]
-        logger.debug('featuresets %s',featuresets)
         logger.debug('length of feature sets %s',len(featuresets))
         random.shuffle(featuresets)
         #return
