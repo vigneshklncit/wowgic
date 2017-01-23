@@ -48,7 +48,7 @@ def triggerClassification():
         ID=record[0]['id']
         setCategory.s(ID).delay()
     interesetNodes = intercom.getAllInterestNode()    
-    map(setFreshCategory, interesetNodes)
+    #map(setFreshCategory, interesetNodes)
     '''
     record = []
     data = {}
@@ -59,8 +59,8 @@ def triggerClassification():
     record.append(data)'''
     #getAllInterestNode.s().delay()
     tomorrow = datetime.utcnow() + timedelta(days=1)
-
-    return triggerClassification.apply_async(eta=tomorrow)
+    return True
+    #return triggerClassification.apply_async(eta=tomorrow)
 
 
 @celery.task
@@ -187,8 +187,8 @@ def setCategory(ID):
     return intercom.unSetNB(ID)
     #return intercom.runClassifier(ID)
 
-start = chain(triggerClassification.si(),getAllInterestNode.si())()
-
+#start = chain(triggerClassification.si(),getAllInterestNode.si())()
+triggerClassification()
 #triggerCategory()
 #getAllInterestNode()
 if __name__ == '__main__':
