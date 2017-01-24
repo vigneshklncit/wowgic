@@ -71,8 +71,8 @@ def getAllInterestNode(frequencyReady = None):
     like Request: https://http://wowgicflaskapp-wowgic.rhcloud.com/id=q13512667
     neo4j has associated feeds ID to be displayed to the user fetch them from mongdb and return it back
     '''
-    if frequencyReady != None:
-        interesetNodes = intercom.fetchFrequentNode
+    if frequencyReady == None:
+        interesetNodes = intercom.fetchFrequentNode()
     else:
         interesetNodes = intercom.getAllInterestNode()
     logger.debug('feedList:%s',interesetNodes)
