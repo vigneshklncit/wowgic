@@ -234,8 +234,10 @@ class intercom:
         #pass only twitter text & ID only here
         logger.info('tweets fetched for %s are %s',ID,len(twits))
         if(len(twits)):
+            uniqueTweetsFromDB = []
             uniqueTweetsFromDB = mongoInt.retrieveParentIdTrue(ID)
             logger.error('existing uniqueTweetsFromDB :%s',len(uniqueTweetsFromDB))
+            logger.debug('total uniqe feeds %s',uniqueTweetsFromDB)
             #twits.extend(uniqueTweetsFromDB)
             uniqueTweetsFromDB.extend(twits)
             logger.error('total combined tweets :%s',len(uniqueTweetsFromDB))

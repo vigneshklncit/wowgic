@@ -75,7 +75,6 @@ class topicModel:
                 word_tokens = nltk.word_tokenize(sent)
                 pos_tag = nltk.pos_tag(word_tokens)
                 allowed_word_types = ["N","V"]
-                print(pos_tag)
                 for w in pos_tag:
                     '''print(w[1][0])
                     print('\n')'''
@@ -116,9 +115,7 @@ class topicModel:
                 self.sentList.append(set(filtered_sentence2))
         #logger.debug('create dict sent length %s',len(self.sentList))
         # to create unique dictionary words
-        logger.debug('self.sentList %s',self.sentList)
         self.dictionary = corpora.Dictionary(self.sentList)
-        logger.debug(self.dictionary.token2id)
         #self.dictionary = dictionary
         #logger.info('exiting function')
         return self.dictionary
@@ -172,7 +169,6 @@ class topicModel:
                         logger.debug('id:%s',tweet['id'])
                         word_tokens = nltk.word_tokenize(sentence)
                         pos_tag = nltk.pos_tag(word_tokens)
-                        print(pos_tag)
                         allowed_word_types = []
                         filtered_sentence1 = []
                         for w in pos_tag:
@@ -186,7 +182,7 @@ class topicModel:
                             if sim[1] > 0.70:
                                 childDict = {}
                                 indexKey = sim[0]
-                                if self.feeds[indexKey]:
+                                if sim[1]:
                                     if sim[1] != 1.0 and feeds[indexKey]['id'] != tweet['id'] and feeds[indexKey]['id'] not in processedTweet:
                                         childDict['id'] = feeds[indexKey]['id']
                                         childDict['parent'] = tweet['id']
