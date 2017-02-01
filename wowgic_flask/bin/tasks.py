@@ -188,7 +188,7 @@ def setCategory(ID):
     #return intercom.runClassifier(ID)
 
 #start = chain(triggerClassification.si(),getAllInterestNode.si())()
-#triggerClassification()
+triggerClassification()
 #triggerCategory()
 getAllInterestNode()
 if __name__ == '__main__':

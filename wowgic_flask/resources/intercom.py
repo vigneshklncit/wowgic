@@ -497,7 +497,7 @@ class intercom:
                         #print the ID's of feeds so that we verify any dup feeds are obtained
                         map(lambda twit: logger.debug('doc ID is %s',twit['id']), docLists);
                         tweets.extend(docLists)
-                if len(tweets) < 100 and counter < 100:
+                if len(tweets) < 10 and counter < 10000:
                     lastTimeStamp=int(lastTimeStamp)-globalS.dictDb['DELTA_FEEDS_TIME']
                     logger.info('Docs are not available so recursive calling %s',lastTimeStamp)
                     return recCursor(lastTimeStamp, counter+1)
