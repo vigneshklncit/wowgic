@@ -3,7 +3,7 @@
 # File Name      : app.py
 # Date           : 12-02-2015
 # Input Files    : Nil
-# Author         : Satheesh <sathishsms@gmail.com>
+# Author         : vivek <svivek1786@gmail.com>
 # Description    :
 # How to run     :twit_test.py -l info
 #                :twit_test.py -h
